@@ -1,18 +1,26 @@
 <!--
-模板：daily 日志（中文 · v0.1）
+模板：daily 日志（中文 · v0.2）
 用途：每日日志，由 quick-kb-daily 写入 outputs/daily/YYYY/MM/YYYY-MM-DD.md。
 特性：描述不足时 AI 反问补充（最多 2 轮）；自动识别已有笔记标题生成 wikilinks。
-真相源：references/frontmatter-v0.1.md · docs/DESIGN.md §6/§8 · docs/SKILLS_SPEC.md §8
+真相源：references/frontmatter-v0.2.md · docs/DESIGN.md §6/§8 · docs/SKILLS_SPEC.md §8
+注意：daily 属文档型笔记，无 maturity；但仍有 relations/value 结构。
 -->
 ---
 title: {{YYYY-MM-DD}} 日志             # required
-type: daily                            # required · 固定 daily
+type: daily                            # required
 created: {{date}}                      # required
 updated: {{date}}                      # required
 tags:                                  # required
   - daily
-status: active                         # required · inbox/draft/active/done
+status: active                         # required
 domain:                                # optional · 日志通常无领域
+relations:                             # required 结构 · 日志关联其他笔记
+  supports: []
+  contradicts: []
+  evolves: []
+  supersedes: []
+value:
+  reuse: 0
 ---
 
 # {{YYYY-MM-DD}}

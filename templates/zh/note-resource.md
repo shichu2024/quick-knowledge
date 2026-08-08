@@ -1,12 +1,12 @@
 <!--
-模板：resource 笔记（中文 · v0.1）
+模板：resource 笔记（中文 · v0.2）
 用途：外部资源摘要（文章、书、课程、开源项目等）。Ingest 后写入 resources/<category>/。
 区别：concept 是"我的理解"，resource 是"别人写的东西的摘要"。
-真相源：references/frontmatter-v0.1.md · docs/DESIGN.md §6/§8
+真相源：references/frontmatter-v0.2.md · docs/DESIGN.md §6/§8
 -->
 ---
 title: {{资源标题}}                     # required
-type: resource                         # required · 固定 resource
+type: resource                         # required
 created: {{date}}                      # required
 updated: {{date}}                      # required
 tags:                                  # required
@@ -14,6 +14,14 @@ tags:                                  # required
 status: active                         # required
 domain: {{domain}}                     # optional
 confidence: 40                         # optional · 单源默认 40；交叉验证后提升
+relations:                             # required 结构
+  supports: []                         #   本 resource 支撑了哪些 concept
+  contradicts: []                      #   与哪些 resource 冲突（如同主题不同结论）
+  evolves: []                          #   由早期版本演化而来
+  supersedes: []                       #   取代了过期的 resource
+context: {{适用情境 · 可选}}
+value:
+  reuse: 0
 source:                                # optional · 但 resource 强烈建议填
   - url: {{原始链接}}
   - author: "{{作者/出处}}"
