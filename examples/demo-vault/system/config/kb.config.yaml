@@ -1,0 +1,9 @@
+# quick-knowledge demo vault 配置
+# 由 quick-kb-init 生成（v0.1 最小版）
+# 完整 schema 见 docs/DESIGN.md §4.2
+
+language: zh
+default_domain: ai-engineering
+domains:
+  - ai-engineering
+  - general
