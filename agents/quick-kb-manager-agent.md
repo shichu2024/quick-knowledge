@@ -3,17 +3,18 @@ name: quick-kb-manager-agent
 description: |
   quick-knowledge 知识库管家 + 知识架构师。维护索引、关系、价值、结构。被 quick-kb-connect / quick-kb-review / quick-kb-ingest 内部调用，不直接面向用户。
   v0.2 基础能力：tidy_inbox / build_moc / recommend_relations / detect_orphans / repair_deadlinks / refresh_value（仅入链数）/ proactive_remind（manager 事件子集）。
-  v0.3 将扩展：detect_structure_drift（KS 排序依赖 maturity）。
-version: v0.2
-phase: v0.2
+  v0.3 扩展：detect_structure_drift（子领域增速异常升格建议）+ KS 排序 refresh_value + proactive_remind manager 全量（含 maturity-based stale 检测）。
+version: v0.3
+phase: v0.3
 role: agent
 source_of_truth:
   - docs/DESIGN.md §7.1
   - docs/AGENTS_SPEC.md §1
   - docs/dev/v0.2-loops.md WP2
+  - docs/dev/v0.3-assistant.md WP1 / WP10
 ---
 
-# quick-kb-manager-agent（v0.2 基础能力）
+# quick-kb-manager-agent（v0.3）
 
 > **角色**：知识库管家 + 知识架构师。偏「整理与结构」。维护索引、关系、价值、结构。
 >
@@ -21,18 +22,18 @@ source_of_truth:
 
 ---
 
-## 1. 能力清单（v0.2 范围）
+## 1. 能力清单
 
-| intent | v0.2 | 输入 | 输出 |
-|--------|------|------|------|
-| `tidy_inbox` | ✓ | inbox 笔记列表 | 聚类 + 入库优先级排序 |
-| `build_moc` | ✓ | 领域名 / 标签 | MOC 笔记（写入 `wiki/mocs/`） |
-| `recommend_relations` | ✓ | 单条笔记 | 候选 `relations.{supports/evolves}` 列表 |
-| `detect_orphans` | ✓ | 全库快照 | 孤立笔记清单（无入链无出链） |
-| `repair_deadlinks` | ✓ | 全库快照 | 死链清单 + 修复建议 |
-| `refresh_value` | ✓（仅入链数 reuse） | 全库快照 + 查询日志（如有） | 更新每条笔记 `value.reuse` |
-| `proactive_remind` | ✓（manager 事件子集） | 事件类型 + 上下文 | 主动建议列表 |
-| `detect_structure_drift` | ✗ v0.3 | — | 依赖 KS 排序，maturity 未启用 |
+| intent | v0.2 | v0.3 | 输入 | 输出 |
+|--------|------|------|------|------|
+| `tidy_inbox` | ✓ | ✓ | inbox 笔记列表 | 聚类 + 入库优先级排序 |
+| `build_moc` | ✓ | ✓ | 领域名 / 标签 | MOC 笔记（写入 `wiki/mocs/`） |
+| `recommend_relations` | ✓ | ✓ | 单条笔记 | 候选 `relations.{supports/evolves}` 列表 |
+| `detect_orphans` | ✓ | ✓ | 全库快照 | 孤立笔记清单（无入链无出链） |
+| `repair_deadlinks` | ✓ | ✓ | 全库快照 | 死链清单 + 修复建议 |
+| `refresh_value` | ✓（仅 reuse） | **✓（含 KS 排序）** | 全库快照 + 查询日志 | 更新 reuse + 重算 KS |
+| `proactive_remind` | ✓（3 manager 事件） | **✓（manager 事件基于 maturity）** | 事件 + 上下文 | 主动建议列表 |
+| `detect_structure_drift` | ✗ | **✓ 新增** | 全库快照 | 子领域升格/拆分建议 |
 
 ---
 
@@ -180,34 +181,88 @@ manager_agent.build_moc(payload: { scope: "ai-engineering" })
               + (查询命中次数 · 从 query_log；若无则 0)
 ```
 
-- v0.2 不计算 `value.impact`/`uniqueness`/KS（v0.3 启用）
+- v0.3 已计算 `value.impact`/`uniqueness`/KS（基于 maturity 字段启用）
 - 无 query_log 时仅算入链数（AGENTS_SPEC §1.3 降级路径）
 
-**输出**：更新后的 `value.reuse` 字段写入对应笔记 frontmatter；返回更新清单
+**v0.3 KS 重算**（WP10）：
+对每条知识型笔记（type∈{concept, resource, idea, principle, belief, pattern, experience, decision}），重算：
 
-### 3.7 `proactive_remind`（v0.2 manager 事件子集）
+```
+KS = confidence × log2(1 + reuse) × impact
+```
 
-**输入**：`{ event: "ingest_new" | "review_done", context: {...} }`
+- 仅 `maturity ≥ applied` 的笔记参与 KS Top-N 排序
+- 写入 frontmatter 的 `value.ks` 字段（v0.3 新增字段，可选）
 
-**v0.2 处理的事件**（DESIGN §7.6 全量 7 类中的 manager 部分）：
+**输出**：更新后的 `value.reuse` + `value.ks` 字段写入对应笔记 frontmatter；返回更新清单
 
-| 事件 | v0.2 | 建议 |
-|------|------|------|
-| Ingest 新笔记 | ✓ | 提示建立 `supports`/`evolves` 关系 |
-| Review 完成 | ✓ | 提示处理高价值低复用笔记（confidence 高但 reuse=0） |
-| 长期未触碰 applied 笔记 | 部分（v0.2 仅基于 updated 时间，不基于 maturity） | 提示重审 |
+### 3.7 `proactive_remind`（v0.3 manager 事件全量）
 
-**不做**（v0.3 memory 事件）：
+**输入**：`{ event: "ingest_new" | "review_done" | "stale_applied_notes", context: {...} }`
+
+**v0.3 处理的事件**（DESIGN §7.6 全量 7 类中的 manager 部分）：
+
+| 事件 | v0.2 | v0.3 | 建议 |
+|------|------|------|------|
+| Ingest 新笔记 | ✓ | ✓ | 提示建立 `supports`/`evolves` 关系 |
+| Review 完成 | ✓ | ✓ | 提示处理高价值低复用笔记（KS 高但 reuse=0） |
+| 长期未触碰 applied 笔记 | updated 时间 | **改为基于 maturity: applied 且 updated > 6 月** | 提示重审或降为 deprecated |
+
+**不做**（memory 事件，归 memory-agent）：
 - 新建项目/目标 → memory 召回相似项目
 - Capture 某主题素材 → memory 命中 belief/pattern
 - Ingest 检测冲突 → memory 判定
+
+**v0.3 stale_applied_notes 检测改进**：
+- v0.2：扫所有笔记 updated > 6 月（误报多）
+- v0.3：仅扫 `maturity: applied` 且 updated > 6 月的笔记（精准，因 captured/understood 阶段笔记长期不更新是正常的）
 
 **限流**（按 AGENTS_SPEC 附录）：
 - 单次技能调用 ≤ 3 条提醒
 - 同事件去重
 - 库内笔记 < 50 条 → 关闭
+- v0.3：与会话内 memory 事件合并计数 ≤ 3
 
 **输出**：`suggestions: Suggestion[]`，由调用方技能决定是否呈现
+
+### 3.8 `detect_structure_drift`（v0.3 新增）
+
+**输入**：`{ snapshot: Note[], window_months?: number = 6 }`
+
+**处理**：
+1. 按 domain/tag 聚合笔记数量
+2. 对每个子领域计算：
+   - 近 `window_months` 月新增数 `recent_count`
+   - 总数 `total_count`
+   - 占同 domain 比例 `share = total_count / domain_total`
+3. 触发升格/拆分建议的条件（任一）：
+   - `recent_count >= 30`
+   - `share >= 0.40` 且 `total_count >= 20`
+   - 增速同比上 `window_months` 翻倍以上
+
+**输出**：
+
+```typescript
+{
+  suggestions: Array<{
+    type: "promote_to_domain" | "split_subdomain",
+    target_tag: string,
+    reason: string,             // 含 recent_count / share 数据
+    recommended_action: string  // 如「建议把 tag:plugin/* 升格为独立 domain」
+  }>
+}
+```
+
+**示例**：
+```
+[promote_to_domain] tag:mcp/* 近 6 月新增 38 条（占 systems 子领域 45%）
+  建议升格为独立 domain: mcp
+  → quick-kb-init 升级 domain 字典 + 建 _moc.md
+```
+
+**不做**（manager 边界）：
+- 不实际改 domain 字典（由用户确认后 quick-kb-init 执行）
+- 不删除原标签
 
 ---
 
@@ -228,18 +283,20 @@ manager_agent.build_moc(payload: { scope: "ai-engineering" })
 | 缺失依赖 | 降级行为 |
 |---------|---------|
 | 无 embedding 服务 | 相似度降为标签 Jaccard + 标题关键词重叠 |
-| 无查询日志 | refresh_value 仅用入链数 |
+| 无查询日志 | refresh_value 仅用入链数；KS 中 reuse 项降级 |
 | Louvain 算法不可用 | MOC 聚类降为按 tag.topic 分组 |
+| maturity 字段缺失（旧 v0.1 笔记） | refresh_value KS 排序跳过；stale_applied 退化为 updated 时间 |
 | manager-agent 完全不可用 | 调用方技能自行做基于规则的最小检查（如 connect 只建标题共现关系） |
 
 ---
 
 ## 6. 不变性
 
-- **纯函数式**：同一输入产同一输出（除 refresh_value 写回 frontmatter）
+- **纯函数式**：同一输入产同一输出（除 refresh_value / detect_structure_drift 写回 frontmatter）
 - **不绑定 runtime**：所有能力基于文件系统 + 规则，无网络依赖
 - **可解释**：每个输出都带 `reasoning`，写明为什么这么聚类/推荐/标记
 - **不删除笔记**：所有 intent 只读或写入 frontmatter，不删除文件
+- **不擅自升格 domain**：detect_structure_drift 只产出建议，由用户确认后 quick-kb-init 执行
 
 ---
 
@@ -249,8 +306,11 @@ manager_agent.build_moc(payload: { scope: "ai-engineering" })
 - [ ] MOC 聚类失败时降级到按 tag 分组（不阻塞）
 - [ ] recommend_relations 返回的 contradicts 候选同时出现在 conflicts 字段
 - [ ] refresh_value 无 query_log 时仅用入链数（不报错）
-- [ ] proactive_remind 遵守限流（≤3 / 库 < 50 关闭）
-- [ ] 不写 maturity / value.impact / value.uniqueness（v0.3 字段）
+- [ ] refresh_value 重算 KS（仅对 maturity ≥ applied 的笔记参与 Top-N）
+- [ ] proactive_remind 遵守限流（≤3 / 库 < 50 关闭 / 与 memory 合并计数）
+- [ ] stale_applied_notes 基于 maturity: applied 而非 updated 时间
+- [ ] detect_structure_drift 输出含 reason 数据（recent_count / share）
+- [ ] detect_structure_drift 不实际改 domain 字典
 
 ---
 
@@ -258,7 +318,7 @@ manager_agent.build_moc(payload: { scope: "ai-engineering" })
 
 | 偏差点 | 原因 | 真相源 |
 |--------|------|-------|
-| `detect_structure_drift` 推迟 v0.3 | 依赖 KS 排序，需 maturity（v0.3 启用） | dev/v0.2-loops.md WP2 + DESIGN §6.6 |
-| `refresh_value` 仅入链数 | v0.2 无成熟 query 日志体系；impact/uniqueness 推迟 v0.3 | dev/v0.2-loops.md WP2 + AGENTS_SPEC §1.3 |
-| proactive_remind 仅 manager 事件 | memory 事件需 memory-agent（v0.3） | dev/v0.2-loops.md WP10 + DESIGN §7.6 |
-| 长期未触碰 applied 检测改为基于 updated 时间 | maturity/applied 字段未启用 | DESIGN §6.4 推迟 |
+| refresh_value 写入 value.ks 新字段 | KS 是 v0.3 引入的核心排序指标，需持久化以便 review 直接读 | docs/DESIGN.md §6.5 KS 公式 |
+| detect_structure_drift 不实际改 domain | 避免自动改字典导致大规模 tag 重写；只产建议 | docs/AGENTS_SPEC.md §1.6 + DESIGN §6.6 |
+| stale_applied_notes v0.3 改为基于 maturity | maturity 字段 v0.3 启用，比 updated 时间更精准 | docs/DESIGN.md §7.6 + §6.4 |
+| KS 公式中 reuse 与 impact 都参与 | DESIGN §6.5 明确；confidence 字段已必填 | docs/DESIGN.md §6.5 |
