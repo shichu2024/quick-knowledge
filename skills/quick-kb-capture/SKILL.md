@@ -1,46 +1,45 @@
 ---
 name: quick-kb-capture
 description: |
-  低摩擦采集：把用户的想法、网页 URL、对话片段快速写入 inbox。v0.1 仅支持纯文本和 URL（PDF/会议/AI 对话推迟到 v0.2）。
-  触发词（中文）：记一下 / 快记 / 收藏这个 / 抓这个网页 / 保存这段 / 记个想法
-  Triggers (EN): capture this / save this / clip this page / quick note
-version: v0.1
-phase: v0.1
+  低摩擦采集：把用户的想法、网页 URL、PDF、会议转写、AI 对话、阅读笔记快速写入 inbox。v0.2 接入 defuddle 抓取干净正文；新增 PDF/会议/AI 对话/阅读四类源；主动提醒（memory 事件）推迟 v0.3。
+  触发词（中文）：记一下 / 快记 / 收藏这个 / 抓这个网页 / 保存这段 / 记个想法 / 抓 PDF / 保存对话
+  Triggers (EN): capture this / save this / clip this page / quick note / capture pdf
+version: v0.2
+phase: v0.2
 applies_to: inbox/
 source_of_truth:
-  - docs/DESIGN.md §6.9（inbox 最小 frontmatter）
+  - docs/DESIGN.md §6.9（inbox 最小 frontmatter）· §9.2（obsidian-skills 依赖）
   - docs/SKILLS_SPEC.md §2
-  - docs/dev/v0.1-mvp.md WP3
-  - references/frontmatter-v0.1.md §3
+  - docs/dev/v0.2-loops.md WP9
+  - references/frontmatter-v0.2.md §7
 ---
 
-# quick-kb-capture（v0.1 · 简化版）
+# quick-kb-capture（v0.2）
 
-> 把现在脑子里的东西快速落进 inbox。**采集即廉价**：只写最小 frontmatter，分类与提炼留给 ingest。
+> 把现在脑子里的东西 / 看到的页面 / 拿到的素材快速落进 inbox。**采集即廉价**：只写最小 frontmatter，分类与提炼留给 ingest。
+>
+> **v0.2 升级**：接 defuddle 抓干净正文；新增 PDF/会议/AI 对话/阅读四类源；capture 路径不再用基础 HTML→MD（缺失时降级）。
 
 ---
 
 ## 1. 何时调用
 
-- 用户说"记一下 …"、"快记 …"、「抓这个网页 …」
-- 用户提供一个 URL，希望保存内容
-- daily 日志中识别到「值得入库」时，由 daily 技能建议调用本技能
+- 用户说"记一下 …"、"快记 …"、「抓这个网页 …」、「保存这段对话」、「抓这个 PDF」
+- daily 日志识别到「值得入库」时，由 daily 技能建议调用
+- review 提示「capture 候选」时
 
-## 2. v0.1 范围
+## 2. v0.2 支持的源类型
 
-| 源类型 | v0.1 支持 | 说明 |
-|--------|----------|------|
-| 纯文本想法 | ✓ | → `inbox/ideas/` |
-| URL（网页） | ✓ 基础 | → `inbox/clips/`，原始 HTML 存 `inbox/clips/_raw/` |
-| PDF / 文件 | ✗ | v0.2（接 defuddle） |
-| 会议转写 | ✗ | v0.2 |
-| AI 对话 | ✗ | v0.2 |
+| 源类型 | v0.1 | v0.2 | 流向 |
+|--------|------|------|------|
+| 纯文本想法 | ✓ | ✓ | `inbox/ideas/` |
+| URL（网页） | ✓ 基础 | ✓ defuddle | `inbox/clips/` + `_raw/` |
+| PDF / 文件 | ✗ | ✓ | `inbox/reading/` |
+| 会议转写 | ✗ | ✓ | `inbox/meetings/` |
+| AI 对话 | ✗ | ✓ | `inbox/ai-dialogs/` |
+| 阅读笔记 | ✗ | ✓ | `inbox/reading/` |
 
-**v0.1 不做**：
-
-- 主动提醒（DESIGN §7.6 memory 事件）→ v0.2+
-- defuddle 集成 → v0.2（v0.1 用基础 HTML→Markdown）
-- embedding 去重 → v0.1 用标题相似度
+**v0.2 仍不做**：主动提醒（memory 事件，DESIGN §7.6）→ v0.3
 
 ---
 
@@ -48,180 +47,167 @@ source_of_truth:
 
 | 参数 | 必填 | 形态 | 说明 |
 |------|------|------|------|
-| `content` | 二选一 | string | 纯文本想法 |
+| `content` | 二选一 | string | 纯文本/转写文本 |
 | `url` | 二选一 | string | 网页链接 |
-| `source_hint` | 否 | string | 用户标注来源（如「同事 X 说的」「某本书第 3 章」） |
+| `file_path` | 二选一 | string | PDF/文件路径 |
+| `source_type` | 否 | enum | 强制指定 `idea`/`web-clip`/`pdf`/`meeting`/`ai-dialog`/`reading`；未给则自动判定 |
+| `source_hint` | 否 | string | 用户标注来源（「同事 X 说的」「某书第 3 章」） |
 | `suggested_tags` | 否 | string[] | 用户主动给的候选标签；未给则 AI 推断 |
 
-> 至少要有 `content` 或 `url` 之一。两者都给则按 URL 主线处理，`content` 作为用户的附注并入。
+> `content` / `url` / `file_path` 至少一个。组合给出时按主导源处理，其他作为附注。
 
 ---
 
-## 4. 工作流
+## 4. 工作流（通用）
 
 ### 步骤 1 · 识别源类型
 
 | 判定 | 流向 |
 |------|------|
-| 输入匹配 URL 正则 | → `web-clip` 流程 |
-| 其他（文本） | → `idea` 流程 |
+| URL 正则匹配 | → web-clip |
+| `.pdf` / `.epub` 后缀 | → pdf |
+| 含「会议」「参会」「主持人」等会议关键词 | → meeting（若 source_type=meeting 强制） |
+| 含「AI 说」「Claude 答」「GPT」等对话关键词 | → ai-dialog（若 source_type=ai-dialog 强制） |
+| 其他（文本） | → idea 或 reading（用户选） |
 
-### 步骤 2a · `idea` 流程（纯文本）
+### 步骤 2 · 抓取与清洗（按源类型）
 
-1. **生成标题**：从 `content` 抽取前 20-30 字符或核心名词作为 `title`。
-2. **生成文件名**：`inbox/ideas/YYYYMMDD-HHMM-<slug>.md`（`<slug>` kebab-case，从标题归一化，限 40 字符）。
-3. **去重检测**：扫描 `inbox/ideas/` 近 7 天文件，标题字符相似度 > 0.85（基于 token Jaccard 或 Levenshtein 归一化）时，提示：
+#### 2a · idea（纯文本）
 
-   ```
-   ⚠ 疑似重复：inbox/ideas/20260809-1015-<existing>.md（相似度 0.92）
-     - [合并] 追加本次内容到已有笔记
-     - [新建] 仍创建新笔记
-     - [取消] 丢弃本次输入
-   ```
+- 标题：从 content 抽取前 20-30 字符或核心名词
+- 不做改写
 
-4. **写入文件**：使用 [`templates/zh/note-idea.md`](../../templates/zh/note-idea.md) 模板，填充：
-   - `title`、`captured_at`（当前 ISO 8601 含时间）
-   - `capture_type: idea`
-   - `suggested_tags`（用户给的优先；否则 AI 从内容推 1-3 个，**不写正式 tags**）
-   - `source`（如有 `source_hint`）
-5. **正文**：用户原文逐字保留，不做改写。
+#### 2b · web-clip（URL）
 
-### 步骤 2b · `web-clip` 流程（URL）
+1. **优先调 defuddle**（obsidian-skills/defuddle）抓干净正文
+2. **保留原始**：HTML 写入 `inbox/clips/_raw/YYYYMMDD-HHMM-<slug>.html`
+3. **降级**：defuddle 不可用 → 基础 HTML→MD（去 `<script>/<style>/<nav>/<footer>/<aside>`，保留 `<article>/<main>/<section>`）
+4. **失败**：抓取失败（404/付费墙/超时）→ 仍写笔记，`partial: true`
 
-1. **抓取页面**：
-   - 调用 runtime 的 web fetch 工具
-   - **保留原始**：将原始 HTML 写入 `inbox/clips/_raw/YYYYMMDD-HHMM-<slug>.html`
-   - **正文清洗**（v0.1 基础版）：
-     - 移除 `<script>`/`<style>`/`<nav>`/`<footer>`/`<aside>`
-     - 保留 `<article>`/`<main>`/`<section>` 主体
-     - HTML→Markdown：标题、段落、列表、代码块、图片 alt
-     - **失败降级**：若抓取失败（404/付费墙/超时），仍写入笔记，标 `partial: true`，正文写「抓取失败原因 + 用户附注」
+#### 2c · pdf
 
-2. **生成标题**：优先用 `<title>` 或 `<h1>`，否则取 URL slug。
+1. 调 runtime 的 PDF 文本提取（如 pdfplumber / pdftotext）
+2. 失败 → 标 `partial: true`，提示用户提供纯文本
+3. 原始 PDF 路径写入 `source.raw`
 
-3. **生成文件名**：`inbox/clips/YYYYMMDD-HHMM-<slug>.md`。
+#### 2d · meeting
 
-4. **去重检测**：URL 完全相同 → 直接提示「此 URL 已采集过：[文件名]」，默认拒绝；URL 不同但标题相似度 > 0.85 → 同 `idea` 流程的去重提示。
+1. 接受转写文本（v0.2 不接录音；录音转写由用户事先完成）
+2. 不做结构化（留给 ingest）；capture 仅保留全文 + 元信息（时间/与会者，若用户提供）
 
-5. **写入文件**：基于 `templates/zh/note-idea.md` 变体（`capture_type: web-clip`）：
+#### 2e · ai-dialog
 
-   ```yaml
-   ---
-   title: {{页面标题}}
-   captured_at: 2026-08-09T14:30
-   capture_type: web-clip
-   source:
-     - url: {{原始 URL}}
-     - raw: inbox/clips/_raw/20260809-1430-<slug>.html
-     - fetched_at: {{抓取时间}}
-   suggested_tags:
-     - {{domain}}/{{topic}}
-   partial: false                  # 抓取不全时改 true
-   ---
-   ```
+1. 接受对话文本（用户粘贴或 runtime 提供）
+2. 保留角色标识（user/assistant），不做摘要
+3. 可选：识别「值得记」的关键发言段，标 `highlight: [段落索引]`（hint 给 ingest）
 
-6. **正文**：干净 Markdown 正文，顶部加一行 `> 来源：[{{域名}}]({{url}}) · 抓取于 {{date}}`。
+#### 2f · reading
 
-### 步骤 3 · 反馈输出
+1. 用户阅读时的笔记片段
+2. 与 idea 区分：reading 通常带书本/课程出处，idea 是原创灵感
+
+### 步骤 3 · 去重检测
+
+- web-clip：URL 完全相同 → 直接拒绝（提示已存在）；标题相似度 > 0.85 → 同 idea 流程提示
+- 其他源：标题相似度 > 0.85（与近 7 天同子目录文件比对）→ 提示
 
 ```
-✓ 已采集（idea · inbox/ideas/20260809-1430-<slug>.md）
-  标题：{{生成的标题}}
-  候选标签：{{suggested_tags}}
-  下一步：
-    → quick-kb-ingest inbox/ideas/20260809-1430-<slug>.md
+⚠ 疑似重复：inbox/clips/20260809-1000-<existing>.md（相似度 0.92）
+  - [合并] / [新建] / [取消]
 ```
 
-或：
+### 步骤 4 · 生成文件名
 
-```
-✓ 已采集（web-clip · inbox/clips/20260809-1430-<slug>.md）
-  来源：https://example.com/article
-  原始：inbox/clips/_raw/20260809-1430-<slug>.html
-  标题：{{页面标题}}
-  下一步：
-    → quick-kb-ingest inbox/clips/20260809-1430-<slug>.md
-```
+`inbox/<source-dir>/YYYYMMDD-HHMM-<slug>.md`
 
-### 步骤 4 · 提示下一步（非阻塞）
+| source_type | 子目录 |
+|-------------|--------|
+| idea | `inbox/ideas/` |
+| web-clip | `inbox/clips/` |
+| pdf / reading | `inbox/reading/` |
+| meeting | `inbox/meetings/` |
+| ai-dialog | `inbox/ai-dialogs/` |
 
-写入后追加一行（不打断用户当前思路）：
+`<slug>` kebab-case，限 40 字符。重名追加 `-2`/`-3`。
 
-> 💡 有空时运行 `quick-kb-ingest inbox/` 把它正式入库。本提示不强制。
+### 步骤 5 · 写入文件（frontmatter）
 
----
-
-## 5. 输出契约
-
-### 5.1 文件路径
-
-- idea：`inbox/ideas/YYYYMMDD-HHMM-<slug>.md`
-- web-clip：`inbox/clips/YYYYMMDD-HHMM-<slug>.md` + `inbox/clips/_raw/...html`
-
-### 5.2 frontmatter 严格遵循 DESIGN §6.9 + `references/frontmatter-v0.1.md §3`
-
-inbox 最小集：
+所有源统一走 inbox 最小集（[`frontmatter-v0.2.md` §7](../../references/frontmatter-v0.2.md)）：
 
 ```yaml
 ---
-title:
-captured_at:
+title: {{自动生成的简短标题}}
+captured_at: {{YYYY-MM-DDTHH:MM}}
+capture_type: {{idea | web-clip | pdf | meeting | ai-dialog | reading}}
+source:
+  - url: {{原始 URL，若有}}
+  - raw: {{原始资料路径，若有}}
+  - person: {{来源人，若有}}
+  - fetched_at: {{抓取时间，若有}}
+suggested_tags:            # AI 预标注候选；ingest 时转正为 tags
+  - {{domain}}/{{topic}}
+partial: false             # 抓取/解析不全时改 true
 ---
 ```
 
-扩展字段（capture 用）：`capture_type` / `source.{url,raw,fetched_at,person}` / `suggested_tags` / `partial`。
+**严禁**在 inbox 阶段写入：`type` / `status` / `maturity` / `relations` / `context` / `value` / `confidence`。这些由 ingest 阶段补全。
 
-**严禁**在 inbox 阶段写入：`type`/`status`/`maturity`/`relations`/`context`/`value`/`confidence`。这些由 ingest 阶段补全。
+### 步骤 6 · 反馈输出
 
-### 5.3 反馈格式
-
-对齐 SKILLS_SPEC §通用约定 §"输出反馈格式"，但 v0.1 简化版省略 `类型/成熟度/关联`（这些字段在 inbox 不存在）。
+```
+✓ 已采集（{{source_type}} · inbox/{{dir}}/20260809-1430-<slug>.md）
+  标题：{{生成的标题}}
+  候选标签：{{suggested_tags}}
+  partial: {{true|false}}
+  下一步：
+    → quick-kb-ingest inbox/{{dir}}/20260809-1430-<slug>.md
+```
 
 ---
 
-## 6. 边界
+## 5. 边界
 
-- **不改正文** —— 用户原文 / 抓取正文逐字保留。
-- **不做分类决策** —— `suggested_tags` 是 hint，不强制为 `tags`。
-- **不删除原始** —— `_raw/` 永久保留。
-- **不主动提醒** —— v0.1 不调 memory-agent。
-- **不抓付费墙内容** —— 检测到登录墙时标 `partial: true`，写入「需要登录才能访问」。
+- **不改正文** —— 用户原文 / 抓取正文逐字保留
+- **不做分类决策** —— `suggested_tags` 是 hint
+- **不删除原始** —— `_raw/` 与 `source.raw` 永久保留
+- **不主动提醒** —— v0.2 不调 memory-agent
+- **不抓付费墙内容** —— 标 `partial: true`
 
-## 7. 降级路径
+## 6. 降级路径
 
 | 场景 | 降级行为 |
 |------|---------|
-| 无网络（URL 抓取失败） | 写入笔记，`partial: true`，正文写「抓取失败：{{原因}}」+ 用户附注 |
-| 无 web fetch 工具可用 | 退化为「只存 URL 不抓正文」，正文写「> runtime 未提供 web fetch；正文待手动补」 |
-| HTML 解析异常 | 保留纯文本提取版，标 `partial: true` |
-| 标题无法推断 | 用时间戳作标题（`无标题-20260809-1430`） |
-| 文件名冲突 | 追加 `-2`/`-3` 后缀 |
-| suggested_tags 推断失败 | 留空数组，不强制 |
+| 无 defuddle | 退为基础 HTML→MD（去 script/style/nav） |
+| 无 web fetch 工具 | 仅存 URL 不抓正文，正文写「> runtime 未提供 web fetch」 |
+| PDF 解析失败 | `partial: true` + 提示用户给纯文本 |
+| 无网络 | `partial: true` + 写入失败原因 |
+| 标题推断失败 | 时间戳作标题 |
+| suggested_tags 推断失败 | 留空数组 |
+| 文件名冲突 | `-2`/`-3` 后缀 |
 
-## 8. 幂等保证
+## 7. 幂等保证
 
-- **URL 完全相同** → 不重复写入，提示已存在路径
-- **内容相同（标题相似度 > 0.85）** → 提示去重，由用户决定
-- **重新运行**：永远不覆盖既有文件；如需更新，先 rename 旧文件
+- URL 完全相同 → 拒绝重复
+- 标题相似度 > 0.85 → 提示去重
+- 永远不覆盖既有文件
 
 ---
 
-## 9. 自检清单（执行后）
+## 8. 自检清单
 
-- [ ] 文件已写入正确路径（`inbox/ideas/` 或 `inbox/clips/`）
+- [ ] 文件路径正确（按 source_type 进入对应子目录）
 - [ ] frontmatter 含 `title` + `captured_at`
-- [ ] web-clip 同时写入 `_raw/` 原始
+- [ ] web-clip/pdf 写入 `_raw/` 或 `source.raw`
 - [ ] 用户原文/抓取正文未被改写
 - [ ] 反馈输出含「下一步 → ingest」提示
-- [ ] 无 v0.2+ 字段被提前写入
+- [ ] 无 v0.2 正式字段被提前写入（maturity/relations/context/value 等）
 
 ---
 
-## 10. 与设计文档的偏差说明
+## 9. 与设计文档的偏差说明
 
-| 偏差点 | 原因 | 真相源依据 |
-|--------|------|-----------|
-| 仅支持 idea / web-clip 两类源 | v0.1 范围（dev WP3 明确） | dev/v0.1-mvp.md WP3 |
-| 不调 defuddle，用基础 HTML→MD | v0.2 才集成 obsidian-skills | dev/v0.1-mvp.md WP3 关键点 |
-| 标题相似度去重而非 embedding | 无 embedding，v0.1 简化 | dev/v0.1-mvp.md WP3 关键点 |
-| inbox frontmatter 加入扩展字段（capture_type/suggested_tags） | DESIGN §6.9 允许 inbox 自由扩展；SKILLS_SPEC §2 输出格式如此 | docs/SKILLS_SPEC.md §2 输出示例 |
+| 偏差点 | 原因 | 真相源 |
+|--------|------|-------|
+| 不调 memory-agent 主动提醒 | memory-agent 在 v0.3 | dev/v0.2-loops.md WP10 |
+| meeting 不接录音 | v0.2 仅文本转写；录音转写由用户事先完成 | 实现简化，不偏离设计 |
+| ai-dialog 可选 highlight hint | ingest 时帮助识别关键段，不强制 | 不冲突 SKILLS_SPEC §2 |
