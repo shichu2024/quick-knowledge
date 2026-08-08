@@ -1,0 +1,13 @@
+# 此目录存放历史版本归档
+#
+# 按 VERSIONING.md §4 工作流：
+# 升版本时，把当前主文档复制到 archive/V<n>/，<n> 为被替换的旧版本号。
+# 每个子目录是一个完整历史快照，例如：
+#
+# archive/
+# ├── V1/
+# │   ├── DESIGN.md
+# │   └── SKILLS_SPEC.md
+# └── V2/
+#     ├── DESIGN.md
+#     └── SKILLS_SPEC.md

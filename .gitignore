@@ -1,0 +1,20 @@
+# Obsidian 本地状态（应用自动生成；未来按需选择性入库推荐配置）
+.obsidian/
+
+# 操作系统
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE / 编辑器
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 临时与日志
+*.log
+*.tmp
+
+# 本地敏感配置（覆盖默认时不入库）
+system/config/kb.config.local.yaml
