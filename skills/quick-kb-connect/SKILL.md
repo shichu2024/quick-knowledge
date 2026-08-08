@@ -1,0 +1,230 @@
+---
+name: quick-kb-connect
+description: |
+  建立双链、生成 MOC、绘制知识地图（canvas）。调用 manager-agent 的 recommend_relations/build_moc；写入类型化 relations（不再写扁平 related）；生成 wiki/mocs/<domain>-moc.md；接 json-canvas 生成 .canvas（Obsidian 缺失跳过）。
+  触发词（中文）：连一下 / 建个 MOC / 给这领域建索引 / 画个知识地图 / 连接笔记
+  Triggers (EN): connect these / build moc / map this domain / link notes
+version: v0.2
+phase: v0.2
+applies_to: wiki/ + 各笔记 frontmatter.relations
+source_of_truth:
+  - docs/DESIGN.md §6.7（关系类型化）· §9.2（obsidian-skills）
+  - docs/SKILLS_SPEC.md §4
+  - docs/AGENTS_SPEC.md §1.1（manager build_moc/recommend_relations）
+  - docs/dev/v0.2-loops.md WP4
+  - references/frontmatter-v0.2.md §3
+---
+
+# quick-kb-connect（v0.2）
+
+> Connect 闭环：建立双链、生成 MOC、绘制知识地图。被 ingest 之后的「整理」步骤。
+
+---
+
+## 1. 何时调用
+
+- 用户说「连一下这几条」「给 ai-engineering 建个 MOC」「画个知识地图」
+- ingest 后用户想整理关系
+- review 提示「孤立笔记 / 重复嫌疑」时
+
+## 2. v0.2 范围
+
+### 做
+
+- 调 manager-agent.recommend_relations 推荐类型化关系
+- 写入 `relations`（supports/contradicts/evolves/supersedes），不再写扁平 `related`
+- 调 manager-agent.build_moc 生成 `wiki/mocs/<domain>-moc.md`
+- 接 json-canvas 生成 `wiki/maps/<domain>.canvas`（Obsidian 缺失跳过）
+- 更新 `wiki/_index.md` 全局导航
+
+### 不做
+
+- ❌ 不改正文（只改 frontmatter.relations + 新建 MOC/canvas）
+- ❌ 不写 `related`（仅作 V1 兼容回退保留）
+
+---
+
+## 3. 输入
+
+| 参数 | 必填 | 默认 | 说明 |
+|------|------|------|------|
+| `scope` | ✓ | — | 领域名 / 某条笔记 / 某标签 |
+| `action` | 否 | `all` | `moc` / `links` / `canvas` / `all` |
+| `interactive` | 否 | `true` | 是否每条关系推荐都需要用户确认；`false` 时相似度 > 0.85 自动写入 |
+
+---
+
+## 4. 工作流
+
+### 步骤 1 · 扫描范围
+
+解析 `scope`：
+
+- 领域名（如 `ai-engineering`）→ 扫描 `areas/<scope>/` 全部笔记
+- 某条笔记路径 → 扫描该笔记 + 同 domain 的候选池
+- 某标签 → 扫描全库含该标签的笔记
+
+输出候选清单：
+
+```
+范围：areas/ai-engineering/（12 条笔记）
+action：all
+开始处理…
+```
+
+### 步骤 2 · 双链补全（action=links 或 all）
+
+对每条笔记，调：
+
+```
+manager_agent.recommend_relations(
+  payload: { note: {{当前笔记}}, candidate_pool: {{范围内其他笔记}} }
+) → {
+  found: [
+    { target: "[[Vector Database]]", type: "supports", similarity: 0.72 },
+    { target: "[[模块化单体]]", type: "contradicts", similarity: 0.78 },
+    { target: "[[RAG 基础概念]]", type: "evolves", similarity: 0.88 }
+  ]
+}
+```
+
+#### 2.1 写入策略
+
+| 关系 | 相似度 | interactive=true | interactive=false |
+|------|--------|-----------------|------------------|
+| supports | > 0.6 | 提示用户确认 | 自动写入 |
+| evolves | > 0.85 | **必须确认**（演化关系强） | 自动写入 + 报告 |
+| supersedes | 候选 status=deprecated | 提示用户确认 | 自动写入 |
+| contradicts | 对立语义 + 高相似度 | **必须确认** + 提示声明 context | 自动写入 + 警告 |
+
+#### 2.2 V1 兼容
+
+- 既有笔记的扁平 `related` 不删除
+- 若 `related` 中的笔记同时被推荐为 `supports` → 写入 `relations.supports`，保留 `related`
+- 批量迁移由 v0.4 normalize 完成
+
+#### 2.3 双向关系
+
+- supports/contradicts（对称）→ 在双方 frontmatter 都写入
+- evolves/supersedes（有向）→ 仅在源笔记写入（B→A 时只在 A 写 `evolves: [B]`）
+
+### 步骤 3 · MOC 生成（action=moc 或 all）
+
+```
+manager_agent.build_moc(
+  payload: { scope: "{{domain}}" }
+) → {
+  found: [{ path: "wiki/mocs/<domain>-moc.md", action: "created" | "updated" }]
+}
+```
+
+#### 3.1 模板
+
+基于 [`templates/zh/moc.md`](../../templates/zh/moc.md)。
+
+#### 3.2 已存在 MOC 的处理（diff merge）
+
+- 保留人工修订章节（如含 `<!-- manual -->` 标记的段落）
+- 仅刷新自动生成区（聚类清单）
+- 写入 frontmatter `updated` 为今天
+
+### 步骤 4 · 知识地图（action=canvas 或 all）
+
+1. 探测 json-canvas 技能是否可用
+2. 可用 → 调用生成 `wiki/maps/<domain>.canvas`，节点 = 笔记、边 = relations（按类型着色）
+3. 不可用 → 跳过，报告「Obsidian-skills 缺失，仅产出 MOC；安装后运行 connect action=canvas 补全」
+
+### 步骤 5 · 更新全局导航
+
+更新 `wiki/_index.md`：
+
+- 主题 MOC 段加入新 MOC wikilink
+- 最近段可选更新
+
+### 步骤 6 · 反馈输出
+
+```
+✓ Connect 完成（scope: ai-engineering）
+
+  双链：
+    ✓ 写入 relations × N 条
+      - supports × A（自动 × X / 确认 × Y）
+      - contradicts × B（已建立双向，请补充 context）
+      - evolves × C
+      - supersedes × D
+    ⏭ 跳过（相似度 < 阈值）× M
+
+  MOC：
+    ✓ wiki/mocs/ai-engineering-moc.md（新建 / 更新）
+    聚类：RAG (4) · Agent (3) · 工具调用 (2) · 待补充 (1)
+
+  Canvas：
+    ✓ wiki/maps/ai-engineering.canvas
+    （或：⏭ Obsidian 缺失，跳过）
+
+  下一步：
+    → quick-kb-review focus=knowledge  # 检查本次 connect 是否引入冲突
+    → 手动补充 contradicts 笔记的 context
+```
+
+---
+
+## 5. 输出契约
+
+### 5.1 frontmatter.relations
+
+严格按 [`frontmatter-v0.2.md` §3](../../references/frontmatter-v0.2.md)。
+
+### 5.2 MOC 路径
+
+`wiki/mocs/<domain>-moc.md`
+
+### 5.3 Canvas 路径
+
+`wiki/maps/<domain>.canvas`（Obsidian 缺失时不创建）
+
+---
+
+## 6. 边界
+
+- **不改正文** —— 只改 frontmatter.relations + 新建 MOC/canvas
+- **不擅自选边** —— contradicts 双方同时建立 + 提示声明 context
+- **不删除 related** —— V1 兼容字段保留
+
+## 7. 降级路径
+
+| 场景 | 降级行为 |
+|------|---------|
+| 无 embedding 服务 | manager-agent 降为标签 Jaccard + 标题关键词 |
+| manager-agent 不可用 | connect 退为「只扫标题共现」，标 `needs_review: true` |
+| 无 json-canvas | 跳过 .canvas 生成 |
+| MOC 聚类失败 | 按 tag.topic 简单分组 |
+| 范围内笔记 < 3 条 | 不生成 MOC，提示「笔记太少，建议先 ingest」 |
+
+## 8. 幂等保证
+
+- 同一对笔记的同一类型关系 → 不重复写入
+- MOC 二次运行 → diff merge，保留人工修订
+- Canvas 二次运行 → 覆盖（canvas 是衍生品，可重建）
+
+---
+
+## 9. 自检清单
+
+- [ ] 所有写入的关系都是 `relations`（不再写扁平 `related`）
+- [ ] 对称关系（supports/contradicts）在双方都写入
+- [ ] contradicts 候选已提示用户声明 context
+- [ ] MOC 模板对齐 `templates/zh/moc.md`
+- [ ] 既有 MOC 的人工修订段被保留
+- [ ] Canvas 在 Obsidian 缺失时正确跳过
+- [ ] 全局导航 `wiki/_index.md` 已更新
+
+---
+
+## 10. 与设计文档的偏差说明
+
+| 偏差点 | 原因 | 真相源 |
+|--------|------|-------|
+| SKILLS_SPEC §4 step 2 表述「找 related 字段」，v0.2 实现改为优先读 relations | V2 升级 relations，related 仅作 V1 兼容回退 | DESIGN §6.7 + 偏差检查报告 §3.1 |
+| interactive 模式默认 true | 避免自动写入错误的 evolves/contradicts | 风险控制，不偏离设计 |
+| Canvas 边按 relations 类型着色 | 区分 supports/contradicts/evolves/supersedes | 增强 ADR-011 冲突可视化 |
