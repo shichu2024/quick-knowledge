@@ -1,0 +1,63 @@
+{
+  "name": "quick-knowledge",
+  "version": "1.0.0",
+  "description": "Personal Knowledge Base × AI Skill Framework — distill fragmented information into reusable personal assets.",
+  "publisher": "shichu2024",
+  "homepage": "https://github.com/shichu2024/quick-knowledge",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shichu2024/quick-knowledge.git"
+  },
+  "license": "MIT",
+  "tags": [
+    "knowledge-management",
+    "agent-skills",
+    "personal-knowledge-base",
+    "claude-code",
+    "obsidian",
+    "zettelkasten"
+  ],
+  "runtimes": [
+    "claude-code",
+    "codex",
+    "cursor",
+    "opencode"
+  ],
+  "skills": [
+    { "name": "quick-kb-init", "path": "skills/quick-kb-init/" },
+    { "name": "quick-kb-capture", "path": "skills/quick-kb-capture/" },
+    { "name": "quick-kb-ingest", "path": "skills/quick-kb-ingest/" },
+    { "name": "quick-kb-daily", "path": "skills/quick-kb-daily/" },
+    { "name": "quick-kb-connect", "path": "skills/quick-kb-connect/" },
+    { "name": "quick-kb-query", "path": "skills/quick-kb-query/" },
+    { "name": "quick-kb-review", "path": "skills/quick-kb-review/" },
+    { "name": "quick-kb-advisor", "path": "skills/quick-kb-advisor/" },
+    { "name": "quick-kb-project", "path": "skills/quick-kb-project/" },
+    { "name": "quick-kb-goal", "path": "skills/quick-kb-goal/" },
+    { "name": "quick-kb-normalize", "path": "skills/quick-kb-normalize/" },
+    { "name": "quick-kb-archive", "path": "skills/quick-kb-archive/" },
+    { "name": "quick-kb-stats", "path": "skills/quick-kb-stats/" },
+    { "name": "quick-kb-import", "path": "skills/quick-kb-import/" }
+  ],
+  "agents": [
+    { "name": "quick-kb-manager-agent", "path": "agents/quick-kb-manager-agent.md" },
+    { "name": "quick-kb-research-agent", "path": "agents/quick-kb-research-agent.md" },
+    { "name": "quick-kb-memory-agent", "path": "agents/quick-kb-memory-agent.md" }
+  ],
+  "phases": {
+    "v0.1": { "codename": "mvp", "status": "released" },
+    "v0.2": { "codename": "loops", "status": "released" },
+    "v0.3": { "codename": "assistant", "status": "released" },
+    "v0.4": { "codename": "extensions", "status": "released" },
+    "v1.0": { "codename": "release", "status": "released" }
+  },
+  "install": {
+    "one_liner": "npx skills add shichu2024/quick-knowledge",
+    "manual_paths": {
+      "claude-code": "~/.claude/skills/quick-knowledge/",
+      "codex": "~/.codex/skills/quick-knowledge/",
+      "cursor": "~/.cursor/skills/quick-knowledge/",
+      "opencode": "~/.opencode/skills/quick-knowledge/"
+    }
+  }
+}

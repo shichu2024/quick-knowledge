@@ -1,0 +1,56 @@
+{
+  "name": "quick-knowledge",
+  "version": "1.0.0",
+  "description": "Personal Knowledge Base × AI Skill Framework — distill fragmented information into reusable personal assets. Six closed loops (Capture / Ingest / Normalize / Connect / Query / Review) + 3 agents (manager / research / memory).",
+  "publisher": {
+    "name": "shichu2024",
+    "url": "https://github.com/shichu2024"
+  },
+  "homepage": "https://github.com/shichu2024/quick-knowledge",
+  "repository": "https://github.com/shichu2024/quick-knowledge",
+  "license": "MIT",
+  "type": "skill-pack",
+  "categories": [
+    "productivity",
+    "knowledge-management",
+    "ai-skills"
+  ],
+  "keywords": [
+    "knowledge-base",
+    "obsidian",
+    "zettelkasten",
+    "agent-skills",
+    "claude-code",
+    "memory"
+  ],
+  "capabilities": {
+    "skills_count": 14,
+    "agents_count": 3,
+    "languages": ["zh", "en"],
+    "templates_count": 26,
+    "closed_loops": 6
+  },
+  "minimal_runtime": {
+    "claude-code": ">=1.0",
+    "codex": ">=0.5",
+    "cursor": ">=0.40",
+    "opencode": ">=0.30"
+  },
+  "dependencies": {
+    "optional": [
+      {
+        "name": "Obsidian",
+        "purpose": "Bases / Canvas / Defuddle 集成",
+        "degradation": "无 Obsidian 仍可用，仅缺失可视化"
+      }
+    ]
+  },
+  "entrypoints": {
+    "default": "skills/quick-kb-init/SKILL.md",
+    "triggers": [
+      "初始化我的知识库", "Initialize my knowledge base",
+      "抓", "capture", "入库", "ingest",
+      "KB 查", "kb query", "我笔记里", "advisor"
+    ]
+  }
+}

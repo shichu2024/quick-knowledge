@@ -4,6 +4,155 @@
 
 ---
 
+## v1.0 · 2026-08-09 · release（公开发布）
+
+**摘要**：对外发布到 GitHub + skills marketplace。无新功能，全是发布打磨。
+
+### 新增交付
+
+- **治理文档**：`CONTRIBUTING.md` / `COMMUNITY.md` / `CODE_OF_CONDUCT.md`
+- **LICENSE**：MIT
+- **GitHub 模板**：`.github/ISSUE_TEMPLATE/{bug,feature,config}.yml` + `PULL_REQUEST_TEMPLATE.md`
+- **CI 基础检查**：`.github/workflows/ci.yml` + `scripts/check-frontmatter.mjs` + `scripts/check-links.mjs`
+  - 4 个 job：frontmatter / wikilink / placeholder / demo-vault 结构
+- **demo-vault 完善**（覆盖 v0.1-v0.4）：
+  - 7 条认知资产笔记（principle/belief/pattern×2/experience×3）
+  - Decision Ledger（含 expected/actual/lesson 完整闭环 + derived_to）
+  - 项目 README（plugin-system）+ 目标 README（learn-plugin-design）
+  - MOC（含冲突对照段）+ 周复盘（含 KS Top 3 + 结构演化）
+- **skills marketplace 配置**：`.claude-plugin/marketplace.json` + `plugin.json`
+- **用户文档体系**：`docs/quick-start.md`（v0.4 已有，打磨）+ `docs/user-guide.md`（新增进阶指南）
+
+### 不包含
+
+- 录屏 / 发布社交材料（推后到发布周内补完）
+- CONTRIBUTING 实战示例（社区首贡献后补）
+
+---
+
+## v0.4 · 2026-08-09 · extensions（扩展与多语言）
+
+**摘要**：补齐运维性技能与国际化。无结构性新概念。
+
+### 新增技能（4 个）
+
+- `quick-kb-normalize` —— 批量规整（related→relations 迁移 / dry-run / 可回滚）
+- `quick-kb-archive` —— 通用归档（任意对象 / 不死链 / 可恢复）
+- `quick-kb-stats` —— 健康仪表盘（孤立率/KS Top/置信度/maturity 分布）
+- `quick-kb-import` —— 外部库导入（Obsidian/Notion/Logseq → inbox）
+
+### 新增配置
+
+- `references/kb-config-schema.md` —— kb.config.yaml 完整 schema + 校验规则 + 各技能读取映射
+
+### 新增文档
+
+- 5 语种 README（中/英/日/韩/西）+ `docs/quick-start.md`（5 分钟上手）
+
+### 偏差检查
+
+- `references/v0.4-deviation-check.md` —— 无重大偏差，3 处细微补充
+
+---
+
+## v0.3 · 2026-08-09 · assistant（个人助手）
+
+**摘要**：从「带引用的 RAG」升级为「个人决策助手」。引入 memory-agent + 认知资产层 + Decision Ledger 派生闭环。**核心差异化阶段**。
+
+### 新增 Agent
+
+- **`quick-kb-memory-agent`**（核心）—— 长期记忆调取。5 个 intent：
+  - `recall_similar` —— 经验召回（按 AGENTS_SPEC §3.5 排序公式）
+  - `check_beliefs` —— 原则/假设一致性判定
+  - `detect_repeat_mistakes` —— 历史失败模式重演检测
+  - `proactive_suggest` —— 4 个 memory 提醒事件
+  - `present_conflicts` —— ADR-011 冲突呈现
+
+### 新增技能（3 个）
+
+- `quick-kb-advisor` —— 决策辅助（三段输出：你的历史/你的原则/建议路径）
+- `quick-kb-project` —— 项目全生命周期（archive 含 lesson 派生 experience）
+- `quick-kb-goal` —— 目标管理（含 research-agent 学习路径 + memory 召回）
+
+### 新增模板（中英 14 个）
+
+- `decision.md`（Decision Ledger 8 字段）
+- `principle.md` / `belief.md` / `pattern.md` / `experience.md`（4 类认知资产）
+- `goal.md` / `project.md`
+
+### 新增文档
+
+- `references/frontmatter-v0.3.md` —— maturity 6 态 + KS 公式 + value.impact/uniqueness
+- `references/conflict-presentation-rule.md` —— ADR-011 落地说明
+- `references/proactive-reminders-v0.3.md` —— 全量 7 类事件
+
+### 升级
+
+- `frontmatter`：maturity（6 态）+ value.impact/uniqueness + 14 type 枚举（含 4 类认知资产）
+- `manager-agent`：v0.2→v0.3，新增 `detect_structure_drift` + KS 排序 refresh_value
+- `KS 公式`：`KS = confidence × log2(1 + reuse) × impact`（仅 maturity ≥ applied 参与 Top-N）
+- `memory-agent 排序`：`score = sim^0.45 × recency^0.20 × impact^0.15 × conf^0.20` + 类型加权 + 失败加权
+
+---
+
+## v0.2 · 2026-08-09 · loops（闭环完整）
+
+**摘要**：补齐六大闭环 + 两个 agent + 英文模板。从「单点 capture」到「闭环系统」。
+
+### 新增技能（3 个）
+
+- `quick-kb-connect` —— 类型化关系（supports/contradicts/evolves/supersedes）+ MOC + canvas
+- `quick-kb-query` —— strict 模式（默认）+ ADR-011 冲突呈现 + `.query-log.jsonl`
+- `quick-kb-review` —— 4 维分析（knowledge/value/structure/daily）+ 健康报告
+
+### 新增 Agent（2 个）
+
+- `quick-kb-manager-agent` —— 库内结构（tidy_inbox/build_moc/recommend_relations/detect_orphans/repair_deadlinks/refresh_value + manager 事件子集）
+- `quick-kb-research-agent` —— 外部资料（process_resource/extract_atoms/cross_verify/summarize）
+
+### 升级
+
+- `frontmatter`：新增 relations/context/value.reuse
+- `capture`：扩展 PDF/meeting/AI dialog/reading + defuddle
+- `ingest`：用 research-agent 替代内置 LLM；冲突检测（manager-agent 降级）
+- `templates`：5 个英文版本同步
+
+### 新增文档
+
+- `references/frontmatter-v0.2.md` / `v0.2-deviation-check.md`
+- `references/obsidian-integration.md`（5 依赖 + 降级 + 测试矩阵）
+- `references/proactive-reminders-v0.2.md`（manager 事件子集）
+
+---
+
+## v0.1 · 2026-08-08 · mvp（最小可用）
+
+**摘要**：从「设计文档」到「能跑通」。建立基础 capture → ingest → daily 流程。
+
+### 新增技能（4 个）
+
+- `quick-kb-init` —— 创建完整 vault 骨架 + 最小 kb.config.yaml + 4 中文模板
+- `quick-kb-capture` —— idea + web-clip（基础 HTML→MD + 标题相似度去重）
+- `quick-kb-ingest` —— 内置 LLM 抽取原子观点 + confidence 初始值
+- `quick-kb-daily` —— 4 段（做了/学到/想法/卡点）+ max 2 轮追问
+
+### 新增模板
+
+- `templates/zh/`：note-concept / note-idea / note-resource / daily
+
+### 新增示例
+
+- `examples/demo-vault/`：11 条样例（3 inbox + 6 formal + 2 daily），演示完整 ingest 链
+
+### 新增文档
+
+- `references/frontmatter-v0.1.md` —— v0.1 字段子集（confidence 可选）
+- `docs/dev/v0.1-mvp.md` —— 开发文档
+
+---
+
+<!-- =========================== 设计文档版本（与上面实现阶段独立） =========================== -->
+
 ## V2 · 2026-08-09 · 知识冲突 / Decision Ledger / Memory Agent 规格 / 主动提醒
 
 **摘要**：补齐 V1 的四个结构性缺口 —— 知识冲突管理、决策闭环、memory-agent 详细规格、事件驱动的主动提醒机制。
