@@ -165,7 +165,7 @@ source_of_truth:
 ````markdown
 # Import Report · 2026-08-09 · source=obsidian
 
-源路径：`/path/to/old-vault`
+源路径：`./old-vault`
 
 ## 统计
 
@@ -218,6 +218,12 @@ source_of_truth:
 | wikilink 指向源库不存在于 quick-knowledge | 保留 wikilink，待 connect/repair_deadlinks 后续处理 |
 
 ---
+
+## 路径约束（硬性）
+
+- **禁止绝对路径** —— import 报告与笔记产物中，`源路径` 字段不得使用 `file://`、`C:\`、`/Users/...` 等绝对路径
+- **源路径相对化** —— 源 vault 必须以相对路径（如 `./old-vault`、`../obsidian-export`）登记；若源在 vault 外部，先复制到 `01_resources/migrations/<source>/`
+- **source.url 仅两种合法形态** —— `https://原始来源 URL` 或 `01_resources/...` 相对路径
 
 ## 9. 边界
 

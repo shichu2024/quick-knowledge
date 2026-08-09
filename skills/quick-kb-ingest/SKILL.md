@@ -239,6 +239,12 @@ manager_agent.recommend_relations(
 
 ---
 
+## 路径约束（硬性）
+
+- **禁止绝对路径** —— 抽取产出的 concept/resource 笔记中，所有内联引用、`source.url`、`source.raw` 不得使用 `file://`、`C:\`、`/Users/...` 等绝对路径
+- **外部依赖复制入库** —— 若 ingest 依赖本地外部素材，先复制到 `01_resources/` 下相应子目录，再以 vault 相对路径引用
+- **source.url 仅两种合法形态** —— `https://原始来源 URL` 或 `01_resources/...` 相对路径
+
 ## 5. 边界
 
 - **原始素材永不删除** —— inbox 文件原地保留

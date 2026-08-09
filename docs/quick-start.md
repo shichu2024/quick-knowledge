@@ -55,7 +55,7 @@
 
 ```
 抓 https://example.com/article.pdf    → PDF
-读 /path/to/meeting-notes.md          → 本地文件
+读 ./meeting-notes.md                → 本地文件（外部依赖会复制到 01_resources/）
 抓和 Cursor 的这次对话                → AI 对话（v0.2+）
 ```
 
@@ -159,7 +159,7 @@ Other forms:
 
 ```
 Grab https://example.com/article.pdf    → PDF
-Read /path/to/meeting-notes.md          → local file
+Read ./meeting-notes.md                → local file (copied into 01_resources/)
 Grab this Cursor conversation           → AI dialog (v0.2+)
 ```
 
