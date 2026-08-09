@@ -1,14 +1,14 @@
 ---
 name: quick-kb-daily
 description: |
-  每日日志：把用户口述的一句话变成结构化日志（做了什么/学到什么/想法/卡点）。描述不足时反问补充（最多 2 轮），自动生成 wikilinks，发现待入库项时建议调用 capture。
+  每日日志：把用户口述的一句话变成结构化日志（做了什么/学到什么/想法/卡点）。描述不足时反问补充（最多 2 轮），自动生成 wikilinks，发现待入库项时建议调用 capture。v1.2 新增「AI 润色提议」——对 4 段中识别出的短句主动扩写，用户三选一确认。
   触发词（中文）：今天的日志 / 记日志 / daily / 今天做了什么
   Triggers (EN): daily log / today's notes / log today
-version: v0.1
-phase: v0.1
+version: v1.2
+phase: v1.2
 applies_to: 05_outputs/daily/YYYY/MM/
 source_of_truth:
-  - docs/DESIGN.md §6（frontmatter）· §8（模板）
+  - docs/DESIGN.md §6（frontmatter）· §6.10（AI 润色提议）· §8（模板）
   - docs/SKILLS_SPEC.md §8
   - docs/dev/v0.1-mvp.md WP5
   - references/frontmatter-v0.1.md
@@ -96,6 +96,66 @@ source_of_truth:
 - 用户拒绝或说「就这样」→ 立即停止，接受当前输入
 - 反问记录写入文件底部 callout（见 `templates/zh/daily.md` 反问记录区）
 
+### 步骤 3.5 · AI 润色提议（v1.2+ · 关键特性）
+
+**与反问机制的互补关系**：
+- 反问（步骤 3）：让用户**自己补全** vague input（被动）
+- 润色（步骤 3.5）：AI **主动扩写**短句（主动）
+- 串联顺序：先反问补全明显缺失 → 再润色提议优化表达
+
+#### 扫描候选
+
+反问结束后，扫描 4 段（做了什么 / 学到什么 / 想法 / 卡点）中所有列表项，识别**短句候选**：
+
+- 字符数 < 30（默认阈值，可被 `kb.config.capture_ai.polish_threshold_chars` 覆盖）
+- 或无标点（。！？.!?）
+- 或含「开会」「修 bug」「学了很多」「搞 X」等典型 vague 模式
+
+**反例**：长描述（> 30 字符、含完整上下文）→ 不进润色菜单。
+
+#### 一次性呈现编号菜单
+
+对所有候选短句同时生成润色版，一次性向用户呈现（避免逐条询问造成疲劳）：
+
+```
+✨ 检测到以下条目可能过于简短，是否润色？
+
+做了什么 段：
+  ① 「修 bug」     → 「修复用户登录时 token 过期未自动刷新的 bug」
+  ② 「开会」       → 「参加 RAG 模块评审会，决策向量库选型（Milvus vs pgvector）」
+学到什么 段：
+  ③ 「学了很多」   → 「学了 defuddle 抓取机制、Obsidian Bases 视图配置」
+
+[1] 全部润色   [2] 选编号润色（如 ①③）   [3] 全部保留   [4] 单条再改（输入编号）
+```
+
+#### 用户响应处理
+
+- **[1] 全部润色**：所有候选条目替换为润色版
+- **[2] 选编号润色**：仅替换指定条目
+- **[3] 全部保留**：跳过润色，走原流程
+- **[4] 单条再改**：用户输编号 + 补充要求，重新生成（上限 `polish_max_rounds` 默认 3 轮/条）
+
+#### 原句保存机制（与 capture 区别）
+
+daily 是日志性文件，**不**单独存 `source.original_text`，而是用**行内 HTML 注释**保留原句：
+
+```markdown
+## 做了什么
+- 修复用户登录时 token 过期未自动刷新的 bug
+  <!-- original: 修 bug -->
+- 参加 RAG 模块评审会，决策向量库选型（Milvus vs pgvector）
+  <!-- original: 开会 -->
+```
+
+frontmatter 加 `ai_polished_entries: [1, 2]`（被润色条目的编号列表，从 1 开始计数，跨段连续编号）。
+
+#### 降级
+
+- LLM 不可用 → 跳过润色提议，走原流程
+- 用户长时间未选 → 默认 [3] 全部保留（不阻塞日志写入）
+- 单条润色版与原句相似度 > 0.9 → 该条自动跳过
+
 ### 步骤 4 · wikilinks 自动抽取
 
 1. 扫描库内已有笔记标题（v0.1 范围：`02_areas/`、`01_resources/`、`04_projects/`、`03_goals/`、`05_outputs/decisions/`、`05_outputs/daily/`）。
@@ -174,6 +234,7 @@ source_of_truth:
 
 - 必填：`title` / `type=daily` / `created` / `updated` / `tags=[daily]` / `status`
 - 可选：`domain`（通常无）
+- v1.2+ 可选扩展：`ai_polished_entries: [编号列表]`（仅当步骤 3.5 有条目被润色时才写）
 
 ### 5.3 正文结构
 
@@ -206,9 +267,10 @@ source_of_truth:
 
 - **反问有上限** —— 最多 2 轮，用户拒绝立即停。
 - **不强制结构** —— 用户一句话也能记录，反问是增强不是阻塞。
-- **不改正文语义** —— 只做拆段、wikilink 转换、追加，不改写用户原话。
+- **默认不改正文语义** —— 只做拆段、wikilink 转换、追加，**不改写用户原话**；**例外**：v1.2+ 步骤 3.5 中用户显式选「润色」的短句，用润色版替换，原句以 `<!-- original: ... -->` 行内 HTML 注释保留。
+- **润色不批量改写整段** —— 仅针对识别出的单条短句，逐条提议；整段长描述不进润色流程。
 - **不更新 weekly review 锚点** —— v0.2 引入 review 技能后联动。
-- **不写 v0.2+ 字段** —— frontmatter 严格用 v0.1 子集。
+- **不写 v0.2+ 字段** —— frontmatter 严格用 v0.1 子集（`ai_polished_entries` 是 v1.2+ 可选扩展，不算 v0.2 正式字段）。
 
 ## 7. 降级路径
 
@@ -219,6 +281,8 @@ source_of_truth:
 | 库内无任何笔记（首次使用） | 跳过 wikilinks 抽取，待入库检测跳过 |
 | 同名 daily 文件已存在 | `append=true`（默认）追加；`append=false` 时询问是否覆盖 |
 | 笔记标题冲突 | 选最近 updated 的，加脚注 `[1]` 说明 |
+| LLM 不可用（v1.2+ 润色） | 跳过润色提议，走原流程 |
+| 用户未响应润色菜单（v1.2+） | 默认全部保留，不阻塞日志写入 |
 
 ---
 
@@ -267,6 +331,8 @@ source_of_truth:
 - [ ] 已有笔记标题被正确转 wikilink
 - [ ] 待入库候选（若有）写入对应段
 - [ ] `append=true` 时未覆盖既有内容
+- [ ] v1.2+ 润色：用户选润色的短句用润色版替换，原句以 `<!-- original: ... -->` 保留
+- [ ] v1.2+ 若有润色，frontmatter 含 `ai_polished_entries`；未润色时不写此字段
 
 ---
 
