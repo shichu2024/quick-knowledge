@@ -97,8 +97,8 @@ updated: 2026-08-09
 
 | 闭环 | 职责 | 主技能 | 输入 | 输出 | 健康指标 |
 |------|------|--------|------|------|---------|
-| **Capture** | 把网页/PDF/聊天/灵感低摩擦放入 inbox | `quick-kb-capture` | URL、文件、文本、语音转写 | inbox 原始素材 | inbox 周转时长（应 < 7 天） |
-| **Ingest** | 保留原始资料，生成结构化笔记 | `quick-kb-ingest` | inbox 素材 | areas/resources/projects 下的正式笔记 | 入库笔记平均 frontmatter 完整度 |
+| **Capture** | 把网页/PDF/聊天/灵感低摩擦放入 00_inbox | `quick-kb-capture` | URL、文件、文本、语音转写 | 00_inbox 原始素材 | 00_inbox 周转时长（应 < 7 天） |
+| **Ingest** | 保留原始资料，生成结构化笔记 | `quick-kb-ingest` | 00_inbox 素材 | 02_areas/01_resources/04_projects 下的正式笔记 | 入库笔记平均 frontmatter 完整度 |
 | **Normalize** | 统一标题、标签、日期、来源字段 | `quick-kb-ingest` / `quick-kb-normalize` | 已入库但字段不全的笔记 | 规范化后的笔记 | frontmatter 缺失率（应 < 5%） |
 | **Connect** | 建立双链、主题索引、知识地图 | `quick-kb-connect` + manager-agent | 规范化笔记 | MOC、wikilinks、canvas | 孤立笔记率（应 < 15%） |
 | **Query** | 回答时必须引用已有笔记或原始来源 | `quick-kb-query` | 自然语言问题 | 带引用的答案 | 引用命中率（应 > 80%） |
@@ -230,7 +230,7 @@ review:
 |------|------|-----------|---------|
 | `quick-kb-init` | — | 初始化 vault 目录骨架与系统文件 | 「初始化知识库」 |
 | `quick-kb-capture` | Capture | 多源低摩擦采集到 inbox | 「记一下这个想法…」「收藏这个网页」 |
-| `quick-kb-ingest` | Ingest + Normalize | inbox 素材正式入库 | 「处理 inbox」「把这条入库」 |
+| `quick-kb-ingest` | Ingest + Normalize | 00_inbox 素材正式入库 | 「处理 inbox」「把这条入库」 |
 | `quick-kb-connect` | Connect | 建 MOC、双链、知识地图 | 「连一下这几条」「建个 MOC」 |
 | `quick-kb-query` | Query | 强制引用的检索回答（事实型） | 「我笔记里关于 X 怎么说的」 |
 | `quick-kb-advisor` | Query+ | 基于个人经验辅助决策（思考型） | 「我要设计个插件系统，怎么搞」 |
@@ -266,7 +266,7 @@ review:
 
 ### 6.1 标准字段
 
-所有正式笔记（非 inbox 原始素材）使用以下 frontmatter：
+所有正式笔记（非 00_inbox 原始素材）使用以下 frontmatter：
 
 ```yaml
 ---
@@ -292,7 +292,7 @@ context: "通用场景；创业团队请同时参考 [[模块化单体]]"  # 可
 source:                                # 原始来源
   - url: https://example.com/article
   - note: "[[原始摘录]]"
-domain: ai-engineering                 # 所属领域（对应 areas/）
+domain: ai-engineering                 # 所属领域（对应 02_areas/）
 ---
 ```
 
@@ -300,22 +300,22 @@ domain: ai-engineering                 # 所属领域（对应 areas/）
 
 | 值 | 含义 | 主要存放 |
 |----|------|---------|
-| `concept` | 概念、原理、心智模型 | `areas/` |
-| `resource` | 外部资源摘要 | `resources/` |
-| `meeting` | 会议记录 | `inbox/meetings/` → 归档 |
-| `daily` | 每日日志 | `outputs/daily/` |
-| `review` | 周期复盘 | `outputs/reviews/` |
-| `decision` | 方案决策 | `outputs/decisions/` |
-| `goal` | 目标 | `goals/` |
-| `project` | 项目说明 | `projects/` |
-| `moc` | 主题索引 | `wiki/mocs/` |
-| `idea` | 灵感（inbox） | `inbox/ideas/` |
-| **`principle`** | 个人原则 · 跨项目方法论、价值观底线 | `principles/principles/` |
-| **`belief`** | 待验证的个人假设/判断 | `principles/beliefs/` |
-| **`pattern`** | 可复用的解决模式 | `principles/patterns/` |
-| **`experience`** | 具体历史事件/教训 | `principles/experiences/` |
+| `concept` | 概念、原理、心智模型 | `02_areas/` |
+| `resource` | 外部资源摘要 | `01_resources/` |
+| `meeting` | 会议记录 | `00_inbox/meetings/` → 归档 |
+| `daily` | 每日日志 | `05_outputs/daily/` |
+| `review` | 周期复盘 | `05_outputs/reviews/` |
+| `decision` | 方案决策 | `05_outputs/decisions/` |
+| `goal` | 目标 | `03_goals/` |
+| `project` | 项目说明 | `04_projects/` |
+| `moc` | 主题索引 | `06_wiki/mocs/` |
+| `idea` | 灵感（inbox） | `00_inbox/ideas/` |
+| **`principle`** | 个人原则 · 跨项目方法论、价值观底线 | `07_principles/principles/` |
+| **`belief`** | 待验证的个人假设/判断 | `07_principles/beliefs/` |
+| **`pattern`** | 可复用的解决模式 | `07_principles/patterns/` |
+| **`experience`** | 具体历史事件/教训 | `07_principles/experiences/` |
 
-> 后四类是**个人认知资产**，是 quick-knowledge 区别于通用 Wiki 的本质。它们没有 `domain`（横切），但可在领域专属目录里以同名文件覆盖（如 `areas/front-end/principles.md`）。
+> 后四类是**个人认知资产**，是 quick-knowledge 区别于通用 Wiki 的本质。它们没有 `domain`（横切），但可在领域专属目录里以同名文件覆盖（如 `02_areas/front-end/principles.md`）。
 
 ### 6.3 status 枚举（文档生命周期）
 
@@ -425,7 +425,7 @@ context: "创业团队 <50 人，迭代周期 1 周"
 
 ### 6.9 最小 frontmatter
 
-inbox 原始素材只要求两个字段，降低采集摩擦：
+00_inbox 原始素材只要求两个字段，降低采集摩擦：
 
 ```yaml
 ---
@@ -446,7 +446,7 @@ Ingest 时由 AI 补齐其余字段。
 
 | 能力 | 说明 |
 |------|------|
-| 整理 inbox | 按主题聚类 inbox 素材，推荐入库优先级 |
+| 整理 inbox | 按主题聚类 00_inbox 素材，推荐入库优先级 |
 | 创建/更新 MOC | 扫描某领域笔记，生成或刷新 MOC |
 | 推荐关联知识 | 给一条笔记，找出语义和标签相关的其他笔记 |
 | 检测孤立笔记 | 列出无入链无出链的笔记，建议归档或连接 |
