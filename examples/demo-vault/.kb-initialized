@@ -1,6 +1,7 @@
 quick-knowledge vault
 version: v0.1
 initialized_at: 2026-08-07T09:00
+restructured_at: 2026-08-09 (v1.1)
 language: zh
 domains: ai-engineering, general
 runtime_hint: demo
