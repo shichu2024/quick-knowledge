@@ -27,7 +27,7 @@ updated: 2026-08-09
 ### 文件位置
 
 ```
-system/agents/
+99_system/agents/
 ├── quick-kb-manager-agent.md
 ├── quick-kb-research-agent.md
 └── quick-kb-memory-agent.md
@@ -77,7 +77,7 @@ interface AgentResult {
 | intent | 输入 | 输出 |
 |--------|------|------|
 | `tidy_inbox` | inbox 笔记列表 | 聚类 + 入库优先级排序 |
-| `build_moc` | 领域名 / 标签 | MOC 笔记（写入 `wiki/mocs/`） |
+| `build_moc` | 领域名 / 标签 | MOC 笔记（写入 `06_wiki/mocs/`） |
 | `recommend_relations` | 单条笔记 | 候选 `relations.{supports/evolves}` 列表 |
 | `detect_orphans` | 全库快照 | 孤立笔记清单（无入链无出链） |
 | `repair_deadlinks` | 全库快照 | 死链清单 + 修复建议 |
@@ -108,9 +108,9 @@ manager_agent.detect_structure_drift(
   options: { min_count: 30 }
 )
 → {
-    found: [{ subarea: "areas/ai-engineering/mcp", count: 40, parent_ratio: 0.45 }],
+    found: [{ subarea: "02_areas/ai-engineering/mcp", count: 40, parent_ratio: 0.45 }],
     reasoning: "MCP 子领域近 6 个月新增 40 篇，占 AI 工程 45%，超阈值",
-    suggestions: [{ action: "promote_to_domain", target: "areas/mcp/" }]
+    suggestions: [{ action: "promote_to_domain", target: "02_areas/mcp/" }]
   }
 ```
 

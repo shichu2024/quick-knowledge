@@ -110,47 +110,40 @@ updated: 2026-08-09
 
 ## 4. 目录结构
 
-vault 根目录采用 **PARA + 系统层** 混合模型。所有目录名使用英文小写，保证跨平台一致。
+vault 根目录采用 **PARA + 系统层** 混合模型，并加两位数字前缀实现「输入 → 沉淀 → 目标 → 执行 → 产出 → 索引 → 元层 → 归档 → 系统」的流转可视化（见 ADR-015）。所有目录名使用英文小写，保证跨平台一致。
 
 ```
 <vault-root>/
-├── inbox/                          # 灵感库 · Capture 入口
+├── 00_inbox/                       # 灵感库 · Capture 入口（最上游输入）
 │   ├── ideas/                      #   碎片化想法
 │   ├── clips/                      #   网页摘录、PDF 摘要
 │   ├── meetings/                   #   会议记录
 │   ├── ai-dialogs/                 #   AI 对话精华
 │   └── reading/                    #   阅读笔记（待入库）
 │
-├── projects/                       # 项目 · 有明确起止
-│   ├── <project-slug>/             #   进行中项目
-│   └── _template/                  #   项目模板（软链引用 system/templates）
-│
-├── resources/                      # 外部资源 · 长期参考
+├── 01_resources/                   # 外部资源 · 长期参考（原材料输入）
 │   ├── articles/                   #   文章与网页收藏
 │   ├── books/                      #   书籍与读书笔记
 │   ├── courses/                    #   课程与讲座
 │   └── repos/                      #   开源项目与技术资料
 │
-├── areas/                          # 领域知识 · 核心模块
+├── 02_areas/                       # 领域知识 · 核心沉淀
 │   ├── <domain-slug>/              #   如 front-end、ai-engineering
 │   │   ├── _moc.md                 #     领域 MOC
 │   │   └── <sub-area>/             #     子领域
 │   └── general/                    #   通用认知
 │
-├── principles/                     # 个人认知资产 · 横切（区别于通用 Wiki 的核心）
-│   ├── principles/                 #   个人原则（跨项目方法论、价值观底线）
-│   │   ├── engineering.md
-│   │   └── management.md
-│   ├── beliefs/                    #   待验证假设
-│   ├── patterns/                   #   可复用解决模式
-│   └── experiences/                #   经历教训（具体事件）
+├── 03_goals/                       # 目标管理 · 方向牵引
+│   └── <goal-slug>/
+│       ├── goal.md                 #   目标定义 + 学习路径
+│       ├── progress/               #   日期进展记录
+│       └── _moc.md                 #   目标相关笔记索引
 │
-├── wiki/                           # 知识索引 · Connect 产物
-│   ├── _index.md                   #   全局导航页
-│   ├── mocs/                       #   领域/专题 MOC
-│   └── maps/                       #   知识地图（canvas）
+├── 04_projects/                    # 项目实践 · 执行落地
+│   ├── <project-slug>/             #   进行中项目
+│   └── _template/                  #   项目模板（软链引用 99_system/templates）
 │
-├── outputs/                        # 产出与复盘
+├── 05_outputs/                     # 产出与复盘 · 成果输出
 │   ├── daily/                      #   每日日志（按年月分子目录）
 │   │   └── YYYY/MM/
 │   ├── reviews/                    #   周期复盘
@@ -161,43 +154,53 @@ vault 根目录采用 **PARA + 系统层** 混合模型。所有目录名使用�
 │   ├── decisions/                  #   方案决策记录（ADR 风格）
 │   └── works/                      #   个人产出（文章/分享/方案）
 │
-├── goals/                          # 目标库 · 独立保存
-│   └── <goal-slug>/
-│       ├── goal.md                 #   目标定义 + 学习路径
-│       ├── progress/               #   日期进展记录
-│       └── _moc.md                 #   目标相关笔记索引
+├── 06_wiki/                        # 知识索引 · Connect 产物（全局导航）
+│   ├── _index.md                   #   全局导航页
+│   ├── mocs/                       #   领域/专题 MOC
+│   └── maps/                       #   知识地图（canvas）
 │
-├── system/                         # 系统与工具
-│   ├── skills/                     #   知识库技能（本框架本体）
-│   ├── agents/                     #   知识库 agent
-│   ├── templates/                  #   笔记/wiki/目标/项目模板（中英双语）
-│   │   ├── zh/
-│   │   └── en/
-│   ├── attachments/                #   附件资源
-│   ├── workflows/                  #   工作流文档
-│   ├── prompts/                    #   复用 prompt
-│   └── config/                     #   框架配置（kb.config.yaml）
+├── 07_principles/                  # 认知资产 · 跨领域元沉淀（区别于通用 Wiki 的核心）
+│   ├── principles/                 #   个人原则（跨项目方法论、价值观底线）
+│   │   ├── engineering.md
+│   │   └── management.md
+│   ├── beliefs/                    #   待验证假设
+│   ├── patterns/                   #   可复用解决模式
+│   └── experiences/                #   经历教训（具体事件）
 │
-└── archive/                        # 归档中心
-    ├── projects/                   #   已完结项目
-    ├── goals/                      #   已完成/取消目标
-    ├── reviews/                    #   历史复盘
-    └── materials/                  #   过期素材
+├── 98_archive/                     # 归档中心 · 已退出流转
+│   ├── projects/                   #   已完结项目
+│   ├── goals/                      #   已完成/取消目标
+│   ├── reviews/                    #   历史复盘
+│   └── materials/                  #   过期素材
+│
+└── 99_system/                      # 系统与工具 · 底层支撑
+    ├── skills/                     #   知识库技能（本框架本体）
+    ├── agents/                     #   知识库 agent
+    ├── templates/                  #   笔记/wiki/目标/项目模板（中英双语）
+    │   ├── zh/
+    │   └── en/
+    ├── attachments/                #   附件资源
+    ├── workflows/                  #   工作流文档
+    ├── prompts/                    #   复用 prompt
+    └── config/                     #   框架配置（kb.config.yaml）
 ```
+
+> **流转顺序**：`00 → 01 → 02 → 03 → 04 → 05 → 06 → 07 → 98 → 99`。IDE 文件浏览器按字典序自然排列即得到流转管线视图。详见 ADR-015。
 
 ### 4.1 命名约定
 
 | 对象 | 规则 | 示例 |
 |------|------|------|
 | 文件名 | kebab-case，无空格、无中文 | `rag-architecture.md` |
-| 目录名 | kebab-case，单数 | `areas/ai-engineering/` |
+| 顶层目录 | 两位数字前缀 + 下划线 + kebab-case | `02_areas/`、`99_system/` |
+| 子目录 | kebab-case，单数，无前缀 | `02_areas/ai-engineering/` |
 | 日期 | ISO 8601 | `2026-08-08` |
-| 子目录年月 | `YYYY/MM` | `outputs/daily/2026/08/` |
+| 子目录年月 | `YYYY/MM` | `05_outputs/daily/2026/08/` |
 | Inbox 临时文件 | 时间戳前缀 | `20260808-1430-想法.md` |
 
 ### 4.2 kb.config.yaml
 
-vault 根目录的 `system/config/kb.config.yaml` 是唯一可选配置文件，记录用户偏好（语言、默认领域、标签词表等）。未配置时全部走默认值，保证零配置可用。
+vault 根目录的 `99_system/config/kb.config.yaml` 是唯一可选配置文件，记录用户偏好（语言、默认领域、标签词表等）。未配置时全部走默认值，保证零配置可用。
 
 ```yaml
 # 示例（可选）
@@ -964,6 +967,18 @@ npx skills add <github-user>/quick-knowledge
 **决策**：新建 `docs/AGENTS_SPEC.md`，规格化 manager/research/memory 三 agent，重点是 memory-agent 的召回排序公式 `similarity × recency × impact × confidence` 与降级路径。
 **代价**：多一个文档维护；好处是 agent 行为可预期、可被任意技能按契约调用。
 **反馈来源**：外部评审「问题 3 · Memory Agent 需要更详细设计」（完全采纳）。
+
+### ADR-015 · 目录加两位数字前缀实现流转可视化
+
+**背景**：v1.0 vault 顶层目录采用扁平命名（inbox/ areas/ ... archive/ system/）。IDE 文件浏览器按字典序展示，archive 与 areas 相邻、inbox 与 goals 相邻，丢失了「输入 → 沉淀 → 目标 → 执行 → 产出 → 索引 → 系统」的流转语义。用户肉眼无法判断笔记处在管线哪个阶段。
+**决策**：v1.1 起所有 vault 顶层目录加 `NN_` 前缀，按流转顺序编号：00_inbox（输入）/ 01_resources（原材料）/ 02_areas（沉淀）/ 03_goals（牵引）/ 04_projects（执行）/ 05_outputs（产出）/ 06_wiki（索引）/ 07_principles（元层）/ 98_archive（退出）/ 99_system（底层）。98/99 借鉴 UNIX 高编号表底层的传统。
+**代价**：BREAKING CHANGE。v1.0 vault 无法自动迁移，用户需手动 `mv`（迁移指南见 `docs/dev/v1.1-restructure.md`）。目录名长度增加 3 字符。
+**否决的替代方案**：
+- 用 `_` 前缀做置顶（Obsidian 兼容但失去排序能力）
+- 用 emoji 前缀（跨平台渲染不一致、IDE 文本搜索不友好）
+- 用 `.inbox` 隐藏目录（破坏用户直观浏览）
+- 仅靠 README 文档说明流转顺序（不解决 IDE 字典序问题）
+**反馈来源**：用户在 v1.0 发布后的指令（2026-08-09）——「知识库目录按输入→沉淀→目标→执行→产出→索引→系统的流转逻辑排序，加上两位数字前缀固定顺序」。
 
 ---
 

@@ -19,16 +19,16 @@ updated: 2026-08-09
 
 ### 路径表达
 
-文档中所有路径形如 `inbox/ideas/`、`areas/<domain>/`，均为相对 vault 根目录。技能运行时通过 runtime 提供的当前工作目录或显式 vault 路径解析。
+文档中所有路径形如 `00_inbox/ideas/`、`02_areas/<domain>/`，均为相对 vault 根目录。技能运行时通过 runtime 提供的当前工作目录或显式 vault 路径解析。顶层目录加两位数字前缀实现流转可视化（见 ADR-015）。
 
 ### 输出反馈格式
 
 每次写入后向用户报告：
 
 ```
-✓ 写入：areas/ai-engineering/rag-architecture.md
+✓ 写入：02_areas/ai-engineering/rag-architecture.md
   类型：concept | 文档状态：active | 成熟度：understood | 置信度：70
-  来源：inbox/clips/20260808-1430-xxxx.md
+  来源：00_inbox/clips/20260808-1430-xxxx.md
   关联：[[Vector Database]]、[[Agent]]
 ```
 
@@ -53,13 +53,13 @@ updated: 2026-08-09
 
 ### 工作流
 
-1. **前置检查**：当前目录是否已含 `system/` 或 `.kb-initialized` 标记。是 → 提示已初始化，询问是否覆盖配置。
-2. **创建骨架**：按 DESIGN 第 4 节生成全部目录，含 `.gitkeep`。
+1. **前置检查**：当前目录是否已含 `99_system/` 或 `.kb-initialized` 标记。是 → 提示已初始化，询问是否覆盖配置。
+2. **创建骨架**：按 DESIGN 第 4 节生成全部目录（带 NN_ 前缀），含 `.gitkeep`。
 3. **生成系统文件**：
-   - `system/config/kb.config.yaml`（根据用户输入）
-   - `system/templates/{zh,en}/` 下铺设全部模板
-   - `wiki/_index.md` 全局导航页
-   - `inbox/_readme.md` 说明 inbox 用法
+   - `99_system/config/kb.config.yaml`（根据用户输入）
+   - `99_system/templates/{zh,en}/` 下铺设全部模板
+   - `06_wiki/_index.md` 全局导航页
+   - `00_inbox/_readme.md` 说明 inbox 用法
 4. **写入 Obsidian 配置**（若启用）：`.obsidian/` 基础配置、推荐 Bases 视图。
 5. **生成 README**：vault 根目录 `_readme.md`，说明这是 quick-knowledge vault。
 6. **提交标记**：写入 `.kb-initialized`（记录版本号、初始化日期）。
@@ -91,12 +91,12 @@ updated: 2026-08-09
 
 | 源类型 | 形态 | 处理 |
 |--------|------|------|
-| 纯文本想法 | 字符串 | 直接存 inbox/ideas/ |
-| URL | 网页链接 | 调用 defuddle/抓取 → inbox/clips/ |
-| PDF/文件 | 文件路径 | 提取文本摘要 → inbox/reading/ |
-| 会议转写 | 长文本 | 结构化为 inbox/meetings/ |
-| AI 对话 | 对话文本 | 提取关键观点 → inbox/ai-dialogs/ |
-| 阅读笔记 | 文本 | 存 inbox/reading/ |
+| 纯文本想法 | 字符串 | 直接存 00_inbox/ideas/ |
+| URL | 网页链接 | 调用 defuddle/抓取 → 00_inbox/clips/ |
+| PDF/文件 | 文件路径 | 提取文本摘要 → 00_inbox/reading/ |
+| 会议转写 | 长文本 | 结构化为 00_inbox/meetings/ |
+| AI 对话 | 对话文本 | 提取关键观点 → 00_inbox/ai-dialogs/ |
+| 阅读笔记 | 文本 | 存 00_inbox/reading/ |
 
 ### 工作流
 
@@ -104,7 +104,7 @@ updated: 2026-08-09
 2. **抓取与清洗**（URL/PDF）：调用 defuddle 或内置抓取，保留原始 HTML/正文到 `_raw/` 子目录，干净文本进 inbox。
 3. **最小 frontmatter**：只填 `title` + `captured_at`（见 DESIGN 6.3）。
 4. **AI 预标注**（可选）：根据内容猜测 1-3 个候选 tag，但**不**写入正式 tag 字段，而是写 `suggested_tags`，留给 Ingest 决定。
-5. **文件命名**：`inbox/<type>/YYYYMMDD-HHMM-<slug>.md`。
+5. **文件命名**：`00_inbox/<type>/YYYYMMDD-HHMM-<slug>.md`。
 6. **去重检测**：与 inbox 近 7 天内容比对相似度，>0.85 时提示「疑似重复：[文件名]，是否合并？」
 7. **主动提醒**（V2 新增 · 见 DESIGN §7.6）：若素材主题命中已有 `belief`/`pattern`/`experience`，调用 memory-agent 提示「这与你的 [[某原则]] 相关」；若与既有笔记存在 `contradicts` 苗头，提示「注意：与 [[某笔记]] 似乎冲突，Ingest 时建议声明各自 context」。提醒非阻塞，库内 < 50 条笔记时关闭。
 
@@ -135,7 +135,7 @@ capture_type: web-clip   # idea | web-clip | pdf | meeting | ai-dialog | reading
 
 ## 3. quick-kb-ingest（Ingest + Normalize 闭环）
 
-**职责**：把 inbox 素材正式入库为 areas/resources/projects 笔记。
+**职责**：把 inbox 素材正式入库为 02_areas/01_resources/04_projects 笔记。
 
 ### 触发词
 
@@ -146,7 +146,7 @@ capture_type: web-clip   # idea | web-clip | pdf | meeting | ai-dialog | reading
 
 | 参数 | 必填 | 说明 |
 |------|------|------|
-| 目标 `target` | 否 | 单条文件路径 / `inbox` 全量 / `inbox/ideas` 子目录 |
+| 目标 `target` | 否 | 单条文件路径 / `inbox` 全量 / `00_inbox/ideas` 子目录 |
 | 领域 `domain` | 否 | 指定领域，未指定则 AI 推荐 |
 | 档位 `depth` | 否 | `quick` / `standard`（默认）/ `deep` |
 
@@ -155,7 +155,7 @@ capture_type: web-clip   # idea | web-clip | pdf | meeting | ai-dialog | reading
 1. **扫描候选**：列出 target 内的 inbox 笔记，按 captured_at 排序。
 2. **逐条处理**（可并行，由 research-agent 承担）：
    1. **抽取原子观点**：一笔记一观点；多条观点拆成多条笔记。
-   2. **分类去向**：concept → areas/、resource → resources/、decision → outputs/decisions/（用 Decision Ledger 模板，见 DESIGN §8.4）。
+   2. **分类去向**：concept → 02_areas/、resource → 01_resources/、decision → 05_outputs/decisions/（用 Decision Ledger 模板，见 DESIGN §8.4）。
    3. **补全 frontmatter**：依据 DESIGN 第 6 节填全部字段（含 `relations`、`context`）。
    4. **标签规范化**：`suggested_tags` → 正式 `tags`，对照 `kb.config.yaml` 受控词表。
    5. **来源链接**：`source.note` 用 wikilink 指回 inbox 原始素材（永不删除原始）。
@@ -168,7 +168,7 @@ capture_type: web-clip   # idea | web-clip | pdf | meeting | ai-dialog | reading
 
 ### 输出（单条 concept 笔记示例）
 
-路径：`areas/ai-engineering/rag-architecture.md`
+路径：`02_areas/ai-engineering/rag-architecture.md`
 
 ```yaml
 ---
@@ -232,13 +232,13 @@ domain: ai-engineering
 2. **双链补全**（`action=links`）：
    - 找出每条笔记的 `related` 字段，自动创建反向 wikilink（Obsidian 双链语义）。
    - 检测标题共现、标签共现，推荐 3-5 个候选连接，由用户确认。
-3. **MOC 生成**（`action=moc`）：调用 manager-agent，按主题聚类，生成 `wiki/mocs/<domain>-moc.md`。
-4. **知识地图**（`action=canvas`）：调用 json-canvas 技能，生成 `wiki/maps/<domain>.canvas`。
+3. **MOC 生成**（`action=moc`）：调用 manager-agent，按主题聚类，生成 `06_wiki/mocs/<domain>-moc.md`。
+4. **知识地图**（`action=canvas`）：调用 json-canvas 技能，生成 `06_wiki/maps/<domain>.canvas`。
 5. **更新 _index.md**：将新 MOC 加入全局导航页。
 
 ### 输出（MOC 示例）
 
-路径：`wiki/mocs/ai-engineering-moc.md`
+路径：`06_wiki/mocs/ai-engineering-moc.md`
 
 ```markdown
 ---
@@ -411,7 +411,7 @@ RAG 的核心是检索后生成，关键决策在于分块策略和向量库选�
    - **project**：进度偏离、阻塞项。
    - **goal**：目标进展、学习路径完成度。
    - **daily**：时间分布、重复模式。
-4. **生成报告**：写入 `outputs/reviews/<period>/YYYY-Wxx.md`，按对应模板填充。
+4. **生成报告**：写入 `05_outputs/reviews/<period>/YYYY-Wxx.md`，按对应模板填充。
 5. **产出待办**（按优先级）：
    - 「这 3 条高价值低置信笔记该去验证了」
    - 「这 2 条结论被新笔记部分推翻，建议降为 `deprecated`」
@@ -461,7 +461,7 @@ RAG 的核心是检索后生成，关键决策在于分块策略和向量库选�
 
 ### 工作流
 
-1. **加载/创建当天日志**：路径 `outputs/daily/YYYY/MM/YYYY-MM-DD.md`。
+1. **加载/创建当天日志**：路径 `05_outputs/daily/YYYY/MM/YYYY-MM-DD.md`。
 2. **解析输入**：把用户口述拆成「做了什么 / 学到什么 / 想法 / 卡点」四块。
 3. **反问补充**（关键特性）：当某块描述不足（如「开会」太笼统），AI **必须**反问：
    - 「这个会议主题是什么？有没有决策需要记录？」
@@ -469,7 +469,7 @@ RAG 的核心是检索后生成，关键决策在于分块策略和向量库选�
    - 反问最多 2 轮，避免变成问卷。
 4. **抽取关联**：识别文本中的概念/项目/目标，自动生成 wikilinks。
 5. **抽取待入库项**：发现「这个想法值得记」→ 提示「→ 调用 quick-kb-capture 单独入库？」
-6. **更新 weekly review 锚点**：在 `outputs/reviews/weekly/` 当周文件里追加该日摘要。
+6. **更新 weekly review 锚点**：在 `05_outputs/reviews/weekly/` 当周文件里追加该日摘要。
 
 ### 输出
 
@@ -527,23 +527,23 @@ tags:
 ### 工作流（create）
 
 1. **目标澄清**：确认目标定义、成功标准、deadline、关联领域。
-2. **生成 goal.md**：写入 `goals/<slug>/goal.md`，含成功标准、关键里程碑。
+2. **生成 goal.md**：写入 `03_goals/<slug>/goal.md`，含成功标准、关键里程碑。
 3. **学习路径推荐**（`path_source=recommend`）：
    - 调用 research-agent，基于已入库笔记 + 公开资料生成路径。
    - 路径分层：基础概念 → 进阶 → 实战项目。
    - 每个节点关联库内已有笔记或建议 Capture 的资料。
-4. **建立 _moc.md**：路径 `goals/<slug>/_moc.md`，索引该目标的所有相关笔记。
+4. **建立 _moc.md**：路径 `03_goals/<slug>/_moc.md`，索引该目标的所有相关笔记。
 
 ### 工作流（progress）
 
-1. **追加进展**：写入 `goals/<slug>/progress/YYYY-MM-DD.md`。
+1. **追加进展**：写入 `03_goals/<slug>/progress/YYYY-MM-DD.md`。
 2. **更新里程碑**：勾选 goal.md 里完成的里程碑。
 3. **路径动态调整**：基于进展推荐新节点或跳过冗余节点。
 
 ### 工作流（complete/cancel）
 
-1. **归档**：移动 `goals/<slug>/` 到 `archive/goals/<slug>/`。
-2. **复盘联动**：生成一份对应目标的复盘草稿到 `outputs/reviews/`。
+1. **归档**：移动 `03_goals/<slug>/` 到 `98_archive/goals/<slug>/`。
+2. **复盘联动**：生成一份对应目标的复盘草稿到 `05_outputs/reviews/`。
 3. **状态传播**：相关笔记的 `status` 转 `archived`，`maturity` 视情况保留或提升。
 
 ### 输出（goal.md 示例）
@@ -607,7 +607,7 @@ related:
 
 ### 工作流（init）
 
-1. **创建目录**：`projects/<slug>/`。
+1. **创建目录**：`04_projects/<slug>/`。
 2. **生成 README**：项目说明、目标、关键决策、进度索引。
 3. **拉起子目录**：`notes/`（项目笔记）、`decisions/`（Decision Ledger，见 DESIGN §8.4）、`refs/`（参考资料 wikilink）。
 4. **建立 _moc.md**：项目内索引页。
@@ -625,8 +625,8 @@ related:
 ### 工作流（archive）
 
 1. **状态检查**：未关闭的决策/笔记提醒。
-2. **决策闭环**：扫描本项目 `decisions/`，对每条 Decision Ledger 补全 `actual` 与 `lesson`；将每条 lesson **自动派生为独立 `experience` 笔记**到 `principles/experiences/`，并在原 decision 中建立 wikilink。
-3. **迁移**：`projects/<slug>/` → `archive/projects/<slug>/`。
+2. **决策闭环**：扫描本项目 `decisions/`，对每条 Decision Ledger 补全 `actual` 与 `lesson`；将每条 lesson **自动派生为独立 `experience` 笔记**到 `07_principles/experiences/`，并在原 decision 中建立 wikilink。
+3. **迁移**：`04_projects/<slug>/` → `98_archive/projects/<slug>/`。
 4. **归档复盘**：生成项目复盘草稿（含 expected vs actual 偏差分析）。
 5. **清理引用**：更新指向该项目的 wikilinks；`status` 转 `archived`，`maturity` 视情况保留或提升。
 
@@ -671,7 +671,7 @@ related_goals:
 | 技能 | 触发词 | 输入 | 输出 | 边界 |
 |------|--------|------|------|------|
 | `quick-kb-normalize` | 规整笔记、normalize | 范围（领域/全库） | 补全 frontmatter、归一标签 | 不改正文，仅元数据 |
-| `quick-kb-archive` | 归档、archive | 目标对象 | 迁移到 archive/，更新引用 | 不删除，可恢复 |
+| `quick-kb-archive` | 归档、archive | 目标对象 | 迁移到 98_archive/，更新引用 | 不删除，可恢复 |
 | `quick-kb-stats` | KB 统计、健康度 | 范围 | 仪表盘（孤立率、置信度分布等） | 只读 |
 | `quick-kb-import` | 导入、import | 来源（Obsidian/Notion） | 转换后的笔记 + inbox 候选 | 不删原库 |
 
