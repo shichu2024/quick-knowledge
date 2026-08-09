@@ -4,6 +4,44 @@
 
 ---
 
+## v1.2 · 2026-08-09 · ai-polish（AI 润色提议）
+
+**摘要**：capture / daily 写入前新增「AI 润色提议」步骤——AI 主动生成扩写版，用户三选一（用润色 / 保留原文 / 再改一版）。解决「用户输入过简、事后看不懂」问题。**无 BREAKING CHANGE**。
+
+### 新增能力
+
+- **capture 步骤 2.5**：对 idea / meeting / ai-dialog / reading 类型，启发式触发（字符数 < 50 或无标点或用户显式说「润色」），AI 生成扩写版，三选一菜单
+- **daily 步骤 3.5**：扫描 4 段（Did/Learned/Ideas/Blockers）短句，一次性呈现编号润色菜单
+- **原文保存机制**：
+  - capture：`source.original_text` + frontmatter `ai_polished: true`
+  - daily：行内 `<!-- original: ... -->` HTML 注释 + frontmatter `ai_polished_entries: [编号]`
+- **配置**：`kb.config.capture_ai` 段（润色 prompt 中英双语 + 阈值 + 轮次上限）
+- **设计**：DESIGN §6.10 + ADR-016（决策、代价、否决方案）
+
+### 边界修订（向后兼容）
+
+- `quick-kb-capture`「不改正文」→「默认不改正文；用户选润色版时原文存 source.original_text」
+- `quick-kb-daily`「不改正文语义」→「同上；daily 用行内 HTML 注释保留原句」
+- **未改**：web-clip / pdf 抓取正文仍然逐字保留，**不进润色流程**
+
+### 与 ingest / 反问机制的关系
+
+| 维度 | AI 润色（v1.2） | Ingest | daily 反问（v0.2） |
+|------|----------------|--------|-------------------|
+| 时机 | capture / daily 写入前 | capture 后按需 | daily 写入前 |
+| 输入 | 用户原始输入 | 已 capture 内容 | vague input |
+| 输出 | 同语义扩写 | 结构化原子观点 | 用户自补的回答 |
+| 职责 | 改写 | 抽取 + 分类 | 澄清 |
+
+三者互补不重叠。
+
+### 不包含
+
+- 润色质量评估机制（推后到社区反馈后补）
+- 自动学习用户偏好的个性化 prompt（v1.3+ 候选）
+
+---
+
 ## v1.1 · 2026-08-09 · flow-restructure（目录流转制 + 路径硬约束）
 
 **摘要**：vault 顶层目录改为 `NN_` 数字前缀（按流转语义排序）；同时落地「文档引用禁绝对路径」硬约束。

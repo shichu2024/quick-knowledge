@@ -102,11 +102,12 @@ updated: 2026-08-09
 
 1. **识别源类型**：自动判断 URL/文件/文本。
 2. **抓取与清洗**（URL/PDF）：调用 defuddle 或内置抓取，保留原始 HTML/正文到 `_raw/` 子目录，干净文本进 inbox。
-3. **最小 frontmatter**：只填 `title` + `captured_at`（见 DESIGN 6.3）。
-4. **AI 预标注**（可选）：根据内容猜测 1-3 个候选 tag，但**不**写入正式 tag 字段，而是写 `suggested_tags`，留给 Ingest 决定。
-5. **文件命名**：`00_inbox/<type>/YYYYMMDD-HHMM-<slug>.md`。
-6. **去重检测**：与 inbox 近 7 天内容比对相似度，>0.85 时提示「疑似重复：[文件名]，是否合并？」
-7. **主动提醒**（V2 新增 · 见 DESIGN §7.6）：若素材主题命中已有 `belief`/`pattern`/`experience`，调用 memory-agent 提示「这与你的 [[某原则]] 相关」；若与既有笔记存在 `contradicts` 苗头，提示「注意：与 [[某笔记]] 似乎冲突，Ingest 时建议声明各自 context」。提醒非阻塞，库内 < 50 条笔记时关闭。
+3. **AI 润色提议**（v1.2+ · 仅限用户手敲输入）：对 idea / meeting / ai-dialog / reading 类型，若 input 字符数 < 50 或无标点或用户显式说「润色」，AI 主动生成扩写版，连同原文呈现三选一（[1] 用润色 / [2] 保留原文 / [3] 再改一版）。用户选 [1] 时正文写润色版、原文存 `source.original_text`、frontmatter 加 `ai_polished: true`。web-clip / pdf 不进润色流程。详见 DESIGN §6.10 + ADR-016。
+4. **最小 frontmatter**：只填 `title` + `captured_at`（见 DESIGN 6.3）。
+5. **AI 预标注**（可选）：根据内容猜测 1-3 个候选 tag，但**不**写入正式 tag 字段，而是写 `suggested_tags`，留给 Ingest 决定。
+6. **文件命名**：`00_inbox/<type>/YYYYMMDD-HHMM-<slug>.md`。
+7. **去重检测**：与 inbox 近 7 天内容比对相似度，>0.85 时提示「疑似重复：[文件名]，是否合并？」
+8. **主动提醒**（V2 新增 · 见 DESIGN §7.6）：若素材主题命中已有 `belief`/`pattern`/`experience`，调用 memory-agent 提示「这与你的 [[某原则]] 相关」；若与既有笔记存在 `contradicts` 苗头，提示「注意：与 [[某笔记]] 似乎冲突，Ingest 时建议声明各自 context」。提醒非阻塞，库内 < 50 条笔记时关闭。
 
 ### 输出
 
@@ -467,9 +468,10 @@ RAG 的核心是检索后生成，关键决策在于分块策略和向量库选�
    - 「这个会议主题是什么？有没有决策需要记录？」
    - 「你说『学了很多』，能具体列出 1-2 个要点吗？」
    - 反问最多 2 轮，避免变成问卷。
-4. **抽取关联**：识别文本中的概念/项目/目标，自动生成 wikilinks。
-5. **抽取待入库项**：发现「这个想法值得记」→ 提示「→ 调用 quick-kb-capture 单独入库？」
-6. **更新 weekly review 锚点**：在 `05_outputs/reviews/weekly/` 当周文件里追加该日摘要。
+4. **AI 润色提议**（v1.2+ · 关键特性）：反问结束后，扫描 4 段中所有 < 30 字符的短句，一次性向用户呈现编号润色菜单（[1] 全部润色 / [2] 选编号润色 / [3] 全部保留 / [4] 单条再改）。选定的条目用润色版替换，原句以 `<!-- original: ... -->` 行内 HTML 注释保留。frontmatter 加 `ai_polished_entries: [条目编号]`。与反问互补：反问让用户自补，润色由 AI 主动扩写。详见 DESIGN §6.10 + ADR-016。
+5. **抽取关联**：识别文本中的概念/项目/目标，自动生成 wikilinks。
+6. **抽取待入库项**：发现「这个想法值得记」→ 提示「→ 调用 quick-kb-capture 单独入库？」
+7. **更新 weekly review 锚点**：在 `05_outputs/reviews/weekly/` 当周文件里追加该日摘要。
 
 ### 输出
 
