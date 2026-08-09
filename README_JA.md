@@ -1,8 +1,6 @@
 # quick-knowledge
 
 > 個人ナレッジベース × AI スキルフレームワーク —— 一連のスキルで、断片的な情報を再利用可能な個人資産に蒸留します。
->
-> **ナレッジベースの価値 = 知識密度 × 呼び出し頻度 × 検証深度**
 
 [中文](./README.md) · [English](./README_EN.md) · [한국어](./README_KO.md) · [Español](./README_ES.md)
 

@@ -1,8 +1,6 @@
 # quick-knowledge
 
 > Personal Knowledge Base × AI Skill Framework — distill fragmented information into reusable personal assets with one set of skills.
->
-> **Knowledge Base Value = Knowledge Density × Recall Frequency × Verification Depth**
 
 [中文](./README.md) · [日本語](./README_JA.md) · [한국어](./README_KO.md) · [Español](./README_ES.md)
 

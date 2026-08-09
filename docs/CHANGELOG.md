@@ -213,7 +213,6 @@ V1 完整快照见 `docs/archive/V1/`。
 
 ### 核心内容
 
-- **价值公式**：知识库价值 = 知识密度 × 调用频次 × 验证深度
 - **六大闭环**：Capture / Ingest / Normalize / Connect / Query / Review
 - **目录结构**：PARA + 系统层 + `principles/`（认知资产）
 - **技能清单**：10 核心 + 4 扩展

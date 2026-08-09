@@ -1,8 +1,6 @@
 # quick-knowledge
 
 > Base de conocimiento personal × Framework de habilidades IA — destila información fragmentada en activos personales reutilizables con un conjunto de habilidades.
->
-> **Valor de la base de conocimiento = Densidad de conocimiento × Frecuencia de recuperación × Profundidad de verificación**
 
 [中文](./README.md) · [English](./README_EN.md) · [日本語](./README_JA.md) · [한국어](./README_KO.md)
 

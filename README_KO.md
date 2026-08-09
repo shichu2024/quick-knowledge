@@ -1,8 +1,6 @@
 # quick-knowledge
 
 > 개인 지식 베이스 × AI 스킬 프레임워크 —— 하나의 스킬 세트로 파편화된 정보를 재사용 가능한 개인 자산으로 증류합니다.
->
-> **지식 베이스 가치 = 지식 밀도 × 호출 빈도 × 검증 깊이**
 
 [中文](./README.md) · [English](./README_EN.md) · [日本語](./README_JA.md) · [Español](./README_ES.md)
 

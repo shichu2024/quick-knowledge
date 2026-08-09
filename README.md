@@ -1,8 +1,6 @@
 # quick-knowledge
 
 > 个人知识库 × AI 技能框架 —— 用一套技能，把碎片信息蒸馏成可复用的个人资产。
->
-> **知识库价值 = 知识密度 × 调用频次 × 验证深度**
 
 [English](./README_EN.md) · [日本語](./README_JA.md) · [한국어](./README_KO.md) · [Español](./README_ES.md)
 
