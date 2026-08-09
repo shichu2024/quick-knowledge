@@ -27,21 +27,19 @@
 
 ```
 .
-├── inbox/                # 待采集的素材
-├── concepts/             # 概念笔记
-├── resources/            # 资源笔记
-├── principles/           # 认知资产（principle/belief/pattern/experience）
-├── projects/             # 项目
-├── goals/                # 目标
-├── daily/                # 每日笔记
-├── reviews/              # 复盘
-├── outputs/reviews/      # 复盘报告
-├── wiki/mocs/            # MOC 索引
-├── archive/              # 归档
-├── templates/            # 模板（从技能复制）
-├── system/               # 系统文件
-└── kb.config.yaml        # 配置
+├── 00_inbox/             # 待采集的素材
+├── 01_resources/         # 资源笔记
+├── 02_areas/             # 领域知识（含 concept）
+├── 03_goals/             # 目标
+├── 04_projects/          # 项目
+├── 05_outputs/           # daily / reviews / decisions
+├── 06_wiki/mocs/         # MOC 索引
+├── 07_principles/        # 认知资产（principle/belief/pattern/experience）
+├── 98_archive/           # 归档
+└── 99_system/            # 系统文件（含 templates、kb.config.yaml）
 ```
+
+> 数字前缀按「输入 → 沉淀 → 目标 → 执行 → 产出 → 索引 → 元层 → 归档 → 系统」流转顺序固定，详见 ADR-015。
 
 ### Step 2 · 第一条 Capture
 
@@ -51,7 +49,7 @@
 抓 https://example.com/article
 ```
 
-技能会把网页正文转 Markdown，写入 `inbox/<时间戳>-<标题>.md`。frontmatter 已填好 `title` / `captured_at` / `source.url` / `status: inbox`。
+技能会把网页正文转 Markdown，写入 `00_inbox/<时间戳>-<标题>.md`。frontmatter 已填好 `title` / `captured_at` / `source.url` / `status: inbox`。
 
 其他抓取方式：
 
@@ -155,7 +153,7 @@ Grab a webpage:
 Grab https://example.com/article
 ```
 
-The skill converts HTML to Markdown and writes `inbox/<timestamp>-<title>.md` with `title` / `captured_at` / `source.url` / `status: inbox` filled.
+The skill converts HTML to Markdown and writes `00_inbox/<timestamp>-<title>.md` with `title` / `captured_at` / `source.url` / `status: inbox` filled.
 
 Other forms:
 

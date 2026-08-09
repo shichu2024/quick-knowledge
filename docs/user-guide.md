@@ -8,7 +8,7 @@
 
 ### Capture（采集）
 
-**目标**：低摩擦地把外部素材放进 `inbox/`，**不追求分类**。
+**目标**：低摩擦地把外部素材放进 `00_inbox/`，**不追求分类**。
 
 | 触发词 | 用途 |
 |--------|------|
@@ -50,7 +50,7 @@
 
 ```
 规整全库
-规整 inbox/imported/  # 仅处理导入的
+规整 00_inbox/imported/  # 仅处理导入的
 规整 v0.1 旧笔记 dry-run  # 预览
 ```
 
@@ -151,7 +151,7 @@ quick-kb-* 技能
 任何「在多个方案间做选择」的决策都应开。
 
 ```
-在 [[projects/plugin-system]] 开 Decision：隔离方案选型
+在 [[04_projects/plugin-system]] 开 Decision：隔离方案选型
 ```
 
 ### 8 字段闭环
@@ -170,13 +170,13 @@ lesson:    # 学到什么（待补）
 ### 归档派生 experience（v0.3 核心闭环）
 
 ```
-归档项目 [[projects/plugin-system]]
+归档项目 [[04_projects/plugin-system]]
 ```
 
 技能会：
 1. 扫所有 decisions/，补全 actual + lesson
 2. 自动计算 outcome（success / failure / mixed）
-3. **每条 lesson 派生为独立 experience 笔记**到 `principles/experiences/`
+3. **每条 lesson 派生为独立 experience 笔记**到 `07_principles/experiences/`
 4. 原 decision 建立 `derived_to`，新 experience 建立 `derived_from`
 
 → 此后这些 experience 可被 memory-agent 召回，影响你的未来决策。**这是 quick-knowledge 区别于通用 Wiki 工具的关键机制**。
@@ -270,7 +270,7 @@ A：`quick-kb-normalize scope=legacy`，自动迁移 `related → relations` + �
 
 ### Q：归档的笔记还能被召回吗？
 
-A：能。memory-agent 默认排除 `archive/`，但可通过 `proactive_reminders` 或显式 query 找回。
+A：能。memory-agent 默认排除 `98_archive/`，但可通过 `proactive_reminders` 或显式 query 找回。
 
 ### Q：与 nuwa-skill / 其他 skills 的关系？
 
