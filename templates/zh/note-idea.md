@@ -14,6 +14,9 @@ source:                                # optional · 若来自对话/他人/链�
   # - person: "{{谁说的}}"
 suggested_tags:                        # optional · AI 预标注候选；ingest 时转正为 tags
   - {{domain}}/{{topic}}
+# ai_polished: false                   # v1.2+ · 用户采纳 AI 润色版时改 true
+# source:                              # v1.2+ · 仅 ai_polished=true 时写
+#   - original_text: {{用户原始输入}}
 ---
 
 # {{简短标题}}

@@ -14,6 +14,9 @@ source:                                # optional · if from a conversation/pers
   # - person: "{{who said it}}"
 suggested_tags:                        # optional · AI-prefilled candidates; promoted to tags at ingest
   - {{domain}}/{{topic}}
+# ai_polished: false                   # v1.2+ · set true when user accepts AI-polished version
+# source:                              # v1.2+ · only present when ai_polished=true
+#   - original_text: {{user's original input}}
 ---
 
 # {{short title}}

@@ -187,6 +187,18 @@ captured_at:
 
 v0.2 capture 可附加 `suggested_tags` / `capture_type` / `source` 等扩展字段，**不**写正式字段。
 
+### 7.1 v1.2+ AI 润色扩展字段（可选）
+
+v1.2 起，capture 经过润色提议且用户选「用润色版」时，附加可选字段（仍属 inbox 扩展，不进 §2 正式字段清单）：
+
+```yaml
+ai_polished: true                 # 默认 false / 不写；仅当用户采纳润色版时为 true
+source:
+  original_text: <用户原始输入>    # 仅 ai_polished=true 时存在；与 source.url/raw 并列
+```
+
+daily 文件不同——用 frontmatter `ai_polished_entries: [条目编号]` + 正文行内 `<!-- original: ... -->` 注释保留原句（详见 `skills/quick-kb-daily/SKILL.md` 步骤 3.5）。
+
 ---
 
 ## 8. 校验规则
