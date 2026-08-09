@@ -8,6 +8,7 @@
  * - frontmatter 含 title + type
  * - type 在 14 种枚举内（concept/resource/idea/daily/review/decision/goal/project/moc
  *   + principle/belief/pattern/experience）
+ * - source.url 不得为绝对路径（file:// 或盘符开头），外部依赖须复制到 01_resources/
  *
  * 退出码：0 通过，1 失败
  */
@@ -27,7 +28,7 @@ function* walk(dir) {
     if (entry.startsWith('.')) continue
     if (entry === 'node_modules' || entry === '_raw') continue
     // 跳过模板（占位符 frontmatter）与 inbox 原始素材（无 type）与 _readme.md（meta 文档）
-    if (entry === 'templates' || entry === 'inbox') continue
+    if (entry === 'templates' || entry === '00_inbox' || entry === 'inbox') continue
     if (entry === '_readme.md') continue
     const full = join(dir, entry)
     const st = statSync(full)
@@ -84,6 +85,20 @@ for (const dir of dirs) {
     if (fm.type && !VALID_TYPES.has(fm.type)) {
       console.error(`✗ ${file}: invalid type "${fm.type}"`)
       failures++
+    }
+    // source.url 绝对路径检测（外部依赖须复制到 01_resources/，禁止 file:// 或盘符路径）
+    // 独立行扫描，不依赖 parser（parser 不支持 dotted key）
+    let srcUrl = null
+    const mNested = content.match(/^source:\s*\r?\n[ \t]+url:\s*(.+?)\s*$/m)
+    const mDotted = content.match(/^source\.url:\s*(.+?)\s*$/m)
+    const mUnder = content.match(/^source_url:\s*(.+?)\s*$/m)
+    srcUrl = (mNested && mNested[1]) || (mDotted && mDotted[1]) || (mUnder && mUnder[1])
+    if (srcUrl) {
+      srcUrl = srcUrl.replace(/^['"]|['"]$/g, '')
+      if (/^(file:\/|[A-Za-z]:[\\/])/.test(srcUrl)) {
+        console.error(`✗ ${file}: source.url must not be absolute path "${srcUrl}" (copy external dep to 01_resources/)`)
+        failures++
+      }
     }
   }
 }

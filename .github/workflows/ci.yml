@@ -17,7 +17,7 @@ jobs:
           node-version: '20'
       - name: Validate frontmatter of all .md notes
         run: |
-          # 只校验 demo-vault 正式笔记（templates/ 是占位符模板，inbox 是原始素材，不校验）
+          # 只校验 demo-vault 正式笔记（templates/ 是占位符模板，00_inbox 是原始素材，不校验）
           node scripts/check-frontmatter.mjs examples/demo-vault/ \
             || (echo "::error::Frontmatter validation failed"; exit 1)
 
@@ -58,5 +58,5 @@ jobs:
           test -f examples/demo-vault/_readme.md
           test -f examples/demo-vault/.kb-initialized
           # 校验至少有 1 个 v0.1 笔记 + 1 个 v0.3 认知资产
-          test -n "$(find examples/demo-vault/areas -name '*.md' -type f | head -1)"
-          test -n "$(find examples/demo-vault/principles -name '*.md' -type f | head -1)"
+          test -n "$(find examples/demo-vault/02_areas -name '*.md' -type f | head -1)"
+          test -n "$(find examples/demo-vault/07_principles -name '*.md' -type f | head -1)"
