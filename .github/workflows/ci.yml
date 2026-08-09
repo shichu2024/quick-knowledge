@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  frontmatter-check:
+    name: Frontmatter Validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Validate frontmatter of all .md notes
+        run: |
+          # 只校验 demo-vault 正式笔记（templates/ 是占位符模板，inbox 是原始素材，不校验）
+          node scripts/check-frontmatter.mjs examples/demo-vault/ \
+            || (echo "::error::Frontmatter validation failed"; exit 1)
+
+  link-check:
+    name: Wikilink & Markdown Link Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Check wikilinks in demo-vault
+        run: |
+          node scripts/check-links.mjs examples/demo-vault/ \
+            || (echo "::error::Dead wikilinks detected"; exit 1)
+
+  placeholder-check:
+    name: No Unfilled Placeholders in demo
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ensure demo-vault has no unfilled {{}} placeholders
+        run: |
+          # templates/ 含 {{}} 是正常的；demo-vault 不应有
+          if grep -rE '\{\{[^}]+\}\}' examples/demo-vault/ --include='*.md'; then
+            echo "::error::demo-vault contains unfilled template placeholders"
+            exit 1
+          fi
+
+  demo-vault-init:
+    name: Demo vault can be re-initialized
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Sanity check demo-vault structure
+        run: |
+          # 校验 demo-vault 至少有 _readme.md 与 .kb-initialized
+          test -f examples/demo-vault/_readme.md
+          test -f examples/demo-vault/.kb-initialized
+          # 校验至少有 1 个 v0.1 笔记 + 1 个 v0.3 认知资产
+          test -n "$(find examples/demo-vault/areas -name '*.md' -type f | head -1)"
+          test -n "$(find examples/demo-vault/principles -name '*.md' -type f | head -1)"

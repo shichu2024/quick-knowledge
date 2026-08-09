@@ -57,7 +57,7 @@ value:
 
 ## 决策记录（Decision Ledger）
 
-- [[decisions/2026-08-isolation-choice-v2|Decision 002：本项目隔离方案选型（进程级 + capability）]]
+- decisions/2026-08-isolation-choice-v2（待开）：本项目隔离方案选型（进程级 + capability）
 
 ## 里程碑
 

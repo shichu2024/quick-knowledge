@@ -52,5 +52,5 @@ value:
 
 ## 升格路径
 
-- 验证通过 + 可量化阈值 → 升格为 [[principle/微前端适用边界]]
+- 验证通过 + 可量化阈值 → 升格为 principle/微前端适用边界（待 Capture）
 - 被反证推翻 → 降为 `maturity: deprecated` + 强化 contradicts

@@ -65,7 +65,7 @@ value:
 ## 相关模式
 
 - [[pattern/in-process-sandbox]] · 互斥（仅适用于可信扩展）
-- [[pattern/capability-based-security]] · 可组合
+- pattern/capability-based-security（待 Capture）· 可组合
 
 ## 待抽象
 
