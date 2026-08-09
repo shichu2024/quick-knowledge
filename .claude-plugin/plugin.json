@@ -1,6 +1,6 @@
 {
   "name": "quick-knowledge",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Personal Knowledge Base × AI Skill Framework — distill fragmented information into reusable personal assets. Six closed loops (Capture / Ingest / Normalize / Connect / Query / Review) + 3 agents (manager / research / memory).",
   "publisher": {
     "name": "shichu2024",

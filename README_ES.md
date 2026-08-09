@@ -92,7 +92,8 @@ KS = confidence × log2(1 + reuse) × impact
 | v0.2 loops | ✅ | connect/query/review + manager/research-agent + plantillas inglesas |
 | v0.3 assistant | ✅ | memory-agent + advisor/project/goal + plantillas de activos cognitivos |
 | v0.4 extensions | ✅ | normalize/archive/stats/import + kb.config + README multilingüe |
-| v1.0 release | 🚧 | CONTRIBUTING/LICENSE + CI + publicación demo-vault |
+| v1.0 release | ✅ | CONTRIBUTING/LICENSE + CI + publicación demo-vault |
+| v1.1 flow-restructure | ✅ | Prefijo `NN_` en nivel superior + prohibición de rutas absolutas (⚠️ BREAKING) |
 
 ---
 

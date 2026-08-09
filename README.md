@@ -171,7 +171,8 @@ quick-knowledge/
 | v0.2 | loops | ✅ 已完成 | connect/query/review + manager/research-agent + 英文模板 |
 | v0.3 | assistant | ✅ 已完成 | memory-agent + advisor/project/goal + 认知资产模板 |
 | v0.4 | extensions | ✅ 已完成 | normalize/archive/stats/import + kb.config 完整 + 多语言 README |
-| v1.0 | release | 🚧 待开发 | CONTRIBUTING/COMMUNITY/LICENSE + CI + demo-vault 发布 |
+| v1.0 | release | ✅ 已完成 | CONTRIBUTING/COMMUNITY/LICENSE + CI + demo-vault 发布 |
+| v1.1 | flow-restructure | ✅ 已完成 | 顶层目录 `NN_` 前缀 + 路径硬约束（⚠️ BREAKING） |
 
 详见 [docs/](./docs/) 目录。
 

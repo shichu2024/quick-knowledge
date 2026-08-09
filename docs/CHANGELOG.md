@@ -4,6 +4,52 @@
 
 ---
 
+## v1.1 · 2026-08-09 · flow-restructure（目录流转制 + 路径硬约束）
+
+**摘要**：vault 顶层目录改为 `NN_` 数字前缀（按流转语义排序）；同时落地「文档引用禁绝对路径」硬约束。
+
+⚠️ **BREAKING CHANGE** —— vault 顶层目录从扁平命名改为 `NN_` 前缀。v1.0 vault 需手动迁移，详见 `docs/dev/v1.1-restructure.md` 与 ADR-015。
+
+### BREAKING：顶层目录重命名
+
+| 旧 | 新 | 流转语义 |
+|----|----|---------|
+| `inbox/` | `00_inbox/` | 灵感库（最上游输入） |
+| `resources/` | `01_resources/` | 外部资源（原材料输入） |
+| `areas/` | `02_areas/` | 领域知识（核心沉淀） |
+| `goals/` | `03_goals/` | 目标管理（方向牵引） |
+| `projects/` | `04_projects/` | 项目实践（执行落地） |
+| `outputs/` | `05_outputs/` | 产出与复盘（成果输出） |
+| `wiki/` | `06_wiki/` | 知识索引（全局导航） |
+| `principles/` | `07_principles/` | 认知资产（原则/信念/模式/经验） |
+| `archive/` | `98_archive/` | 归档（紧贴 system） |
+| `system/` | `99_system/` | 系统与工具（底层支撑） |
+
+**理由**：IDE 文件浏览器按字典序排，扁平命名丢失流转语义；加 `NN_` 前缀后肉眼一眼可辨笔记处在管线哪个阶段。详见 ADR-015。
+
+### 任务 A：路径硬约束（禁绝对路径）
+
+- **3 处 `/path/to/...` 占位符** → 相对路径示例（`docs/quick-start.md` 中英 + `quick-kb-import/SKILL.md`）
+- **3 个 SKILL 加「路径约束（硬性）」段**：`quick-kb-capture` / `quick-kb-ingest` / `quick-kb-import`
+  - 统一三条：禁绝对路径 / 外部依赖复制到 `01_resources/` / `source.url` 仅 `http(s)://` 或 vault 相对路径
+- **CI 校验**：`scripts/check-frontmatter.mjs` 新增 `source.url` 绝对路径检测（覆盖 `file://`、盘符路径）
+- **保留能力**：`[[principle/xxx]]` / `[[belief/xxx]]` / `[[pattern/xxx]]` / `[[experience/xxx]]` 等省略前缀 wikilink 由 `check-links.mjs` basename 兜底解析，**不变**
+
+### 其他改动
+
+- `check-frontmatter.mjs`：inbox 跳过规则同步到 `00_inbox`（保留旧名向后兼容）
+- `ci.yml`：`demo-vault-init` job 的 find 路径同步（`areas` → `02_areas`、`principles` → `07_principles`）
+- `.kb-initialized`：保留 `version: v0.1`，加 `restructured_at: 2026-08-09 (v1.1)`
+- v0.x dev 文档顶部加历史注释，指向 ADR-015
+- `plugin.json` + `marketplace.json` version → 1.1.0；`phases` 增加 v1.1 条目
+
+### 不包含
+
+- v1.0 vault 自动迁移脚本（用户手动迁移，按映射表 sed 即可）
+- 录屏 / 发布社交材料
+
+---
+
 ## v1.0 · 2026-08-09 · release（公开发布）
 
 **摘要**：对外发布到 GitHub + skills marketplace。无新功能，全是发布打磨。

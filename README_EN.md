@@ -151,7 +151,8 @@ quick-knowledge/
 | v0.2 | loops | ✅ Done | connect/query/review + manager/research-agent + en templates |
 | v0.3 | assistant | ✅ Done | memory-agent + advisor/project/goal + cognitive asset templates |
 | v0.4 | extensions | ✅ Done | normalize/archive/stats/import + kb.config + multilingual README |
-| v1.0 | release | 🚧 Pending | CONTRIBUTING/COMMUNITY/LICENSE + CI + demo-vault release |
+| v1.0 | release | ✅ Done | CONTRIBUTING/COMMUNITY/LICENSE + CI + demo-vault release |
+| v1.1 | flow-restructure | ✅ Done | Top-level `NN_` prefix + absolute-path hard ban (⚠️ BREAKING) |
 
 See [docs/](./docs/).
 

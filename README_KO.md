@@ -92,7 +92,8 @@ KS = confidence × log2(1 + reuse) × impact
 | v0.2 loops | ✅ | connect/query/review + manager/research-agent + 영어 템플릿 |
 | v0.3 assistant | ✅ | memory-agent + advisor/project/goal + 인지 자산 템플릿 |
 | v0.4 extensions | ✅ | normalize/archive/stats/import + kb.config + 다국어 README |
-| v1.0 release | 🚧 | CONTRIBUTING/LICENSE + CI + demo-vault 공개 |
+| v1.0 release | ✅ | CONTRIBUTING/LICENSE + CI + demo-vault 공개 |
+| v1.1 flow-restructure | ✅ | 최상위 `NN_` 접두사 + 절대 경로 하드 제약 (⚠️ BREAKING) |
 
 ---
 
