@@ -1,0 +1,58 @@
+name: 特性建议 / Feature Request
+description: 提议新功能或改进
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢你的建议！提特性前请先看 [DESIGN.md](https://github.com/shichu2024/quick-knowledge/blob/master/docs/DESIGN.md)。
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: 解决的问题 / Problem
+      description: 这个特性解决什么痛点？
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: 设想的方案 / Proposed Solution
+      description: 你希望技能/系统怎么表现？
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: 影响范围 / Affected Area
+      options:
+        - 新技能 / New skill
+        - 现有技能增强 / Existing skill enhancement
+        - Agent 增强 / Agent enhancement
+        - 模板 / Template
+        - 文档 / Documentation
+        - 治理 / Governance
+        - 其他 / Other
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: design-check
+    attributes:
+      label: 设计对齐检查 / Design Alignment
+      options:
+        - label: 我已阅读 DESIGN.md 并认为此特性契合项目方向 / I've read DESIGN.md and believe this fits
+          required: true
+        - label: 此特性属于六大闭环之一 / This fits one of the six closed loops
+          required: false
+        - label: 我已搜索既有 issue / I've searched existing issues
+          required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 备选方案 / Alternatives Considered
+    validations:
+      required: false

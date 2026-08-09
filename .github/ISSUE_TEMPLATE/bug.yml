@@ -1,0 +1,78 @@
+name: Bug 报告 / Bug Report
+description: 报告 quick-knowledge 的问题
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢报告 bug！请尽量填全以下信息。
+        Thanks for reporting! Please fill in as much as possible.
+
+  - type: input
+    id: runtime
+    attributes:
+      label: Runtime / 运行环境
+      description: 哪个 runtime？（Claude Code / Codex / Cursor / OpenCode / 其他）
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: quick-knowledge 版本
+      description: v0.1 / v0.2 / v0.3 / v0.4 / v1.0
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: 现象 / What happened
+      description: 你做了什么？期望什么？实际什么？
+      placeholder: |
+        1. 我说了 '...'
+        2. 技能做了 '...'
+        3. 我期望 '...'，但实际 '...'
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: 日志/截图 / Logs & Screenshots
+      description: 若有报错信息或截图，请贴这里
+    validations:
+      required: false
+
+  - type: dropdown
+    id: skill
+    attributes:
+      label: 涉及技能 / Skill involved
+      options:
+        - quick-kb-init
+        - quick-kb-capture
+        - quick-kb-ingest
+        - quick-kb-daily
+        - quick-kb-connect
+        - quick-kb-query
+        - quick-kb-review
+        - quick-kb-advisor
+        - quick-kb-project
+        - quick-kb-goal
+        - quick-kb-normalize
+        - quick-kb-archive
+        - quick-kb-stats
+        - quick-kb-import
+        - 其他 / other
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: 检查清单 / Checklist
+      options:
+        - label: 我已搜索既有 issue，确认未重复 / I've searched existing issues
+          required: true
+        - label: 我已阅读相关 SKILL.md 与 DESIGN.md / I've read the relevant SKILL.md and DESIGN.md
+          required: true

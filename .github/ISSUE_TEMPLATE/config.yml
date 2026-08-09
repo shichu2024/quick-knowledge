@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 社区讨论 / Community Discussion
+    url: https://github.com/shichu2024/quick-knowledge/discussions
+    about: 一般问题/想法请到 Discussions，不要开 issue / General questions go to Discussions
+  - name: 📖 设计文档 / Design Doc
+    url: https://github.com/shichu2024/quick-knowledge/blob/master/docs/DESIGN.md
+    about: 提特性前请先读设计文档 / Read DESIGN.md before proposing features
