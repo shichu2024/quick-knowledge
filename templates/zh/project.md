@@ -1,6 +1,6 @@
 <!--
 模板：project 项目（中文 · v0.3）
-用途：项目主笔记（projects/<slug>/_readme.md），含经验复用建议和 Decision Ledger 索引。
+用途：项目主笔记（04_projects/<slug>/_readme.md），含经验复用建议和 Decision Ledger 索引。
 真相源：references/frontmatter-v0.3.md · docs/DESIGN.md §6.2/§8.4 · docs/AGENTS_SPEC.md §4
 -->
 ---

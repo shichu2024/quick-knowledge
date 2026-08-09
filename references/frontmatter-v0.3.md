@@ -53,19 +53,19 @@ supersedes: references/frontmatter-v0.2.md（v0.2 字段仍兼容，v0.3 起知�
 
 | 类别 | type | 主要存放 |
 |------|------|---------|
-| 知识 | concept | areas/ |
-| 知识 | **principle** | principles/principles/ |
-| 知识 | **belief** | principles/beliefs/ |
-| 知识 | **pattern** | principles/patterns/ |
-| 知识 | **experience** | principles/experiences/ |
-| 资源 | resource | resources/ |
-| 文档 | daily | outputs/daily/ |
-| 文档 | review | outputs/reviews/ |
-| 文档 | decision | outputs/decisions/ 或 projects/<slug>/decisions/ |
-| 文档 | moc | wiki/mocs/ |
-| 实体 | goal | goals/<slug>/ |
-| 实体 | project | projects/<slug>/ |
-| 入口 | idea | inbox/ideas/ |
+| 知识 | concept | 02_areas/ |
+| 知识 | **principle** | 07_principles/principles/ |
+| 知识 | **belief** | 07_principles/beliefs/ |
+| 知识 | **pattern** | 07_principles/patterns/ |
+| 知识 | **experience** | 07_principles/experiences/ |
+| 资源 | resource | 01_resources/ |
+| 文档 | daily | 05_outputs/daily/ |
+| 文档 | review | 05_outputs/reviews/ |
+| 文档 | decision | 05_outputs/decisions/ 或 04_projects/<slug>/decisions/ |
+| 文档 | moc | 06_wiki/mocs/ |
+| 实体 | goal | 03_goals/<slug>/ |
+| 实体 | project | 04_projects/<slug>/ |
+| 入口 | idea | 00_inbox/ideas/ |
 
 ### 3.1 认知资产 4 类（v0.3 新增）
 
@@ -78,7 +78,7 @@ supersedes: references/frontmatter-v0.2.md（v0.2 字段仍兼容，v0.3 起知�
 
 **核心区别**（ADR-007）：
 - 这 4 类**无 `domain`**（横切）
-- 允许领域覆盖：如 `areas/front-end/principles.md` 是该领域专属原则集
+- 允许领域覆盖：如 `02_areas/front-end/principles.md` 是该领域专属原则集
 - 是 quick-knowledge 与通用 Wiki 的本质差异
 
 ---
@@ -173,7 +173,7 @@ value:                         # v0.3 完整
   impact: 4                    # v0.3 新增
   uniqueness: 3                # v0.3 新增
 source:
-  - note: "[[inbox/clips/20260809-1000-rag-article]]"
+  - note: "[[00_inbox/clips/20260809-1000-rag-article]]"
 domain: ai-engineering
 ---
 ```
@@ -203,7 +203,7 @@ value:
   impact: 5
   uniqueness: 4
 source:
-  - note: "[[projects/bi-engine/decisions/001-隔离方案]]"
+  - note: "[[04_projects/bi-engine/decisions/001-隔离方案]]"
 derived_from: "[[决策 001：选型 Y]]"   # v0.3 派生关系
 # domain 字段不写（认知资产横切）
 ---
@@ -243,5 +243,5 @@ derived_from: "[[决策 001：选型 Y]]"   # v0.3 派生关系
 ## 10. 升级路径
 
 - **v0.2 → v0.3**：v0.3 技能开始写 maturity + 完整 value；认知资产目录启用；KS 排序在 review 落地
-- **v0.3 → v0.4**：normalize 批量回填历史笔记；archive/stats/import 扩展技能；config 完整支持
+- **v0.3 → v0.4**：normalize 批量回填历史笔记；98_archive/stats/import 扩展技能；config 完整支持
 - **v0.4 → v1.0**：发布打磨，无新字段

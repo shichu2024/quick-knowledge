@@ -1,6 +1,6 @@
 <!--
 Template: resource note (English · v0.2)
-Purpose: External resource summary (article, book, course, open-source project). Written to resources/<category>/.
+Purpose: External resource summary (article, book, course, open-source project). Written to 01_resources/<category>/.
 Difference: concept is "my understanding"; resource is "summary of others' work".
 Source of truth: references/frontmatter-v0.2.md · docs/DESIGN.md §6/§8
 -->

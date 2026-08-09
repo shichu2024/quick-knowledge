@@ -1,6 +1,6 @@
 <!--
 Template: goal (English · v0.3)
-Purpose: Goal management + learning path. Written by quick-kb-goal create to goals/<slug>/goal.md.
+Purpose: Goal management + learning path. Written by quick-kb-goal create to 03_goals/<slug>/goal.md.
 Source of truth: references/frontmatter-v0.3.md · docs/DESIGN.md §6 · docs/SKILLS_SPEC.md §9
 -->
 ---
@@ -56,7 +56,7 @@ value:
 
 ## Related projects
 
-- [[projects/{{project-slug}}/_readme|{{project name}}]]
+- [[04_projects/{{project-slug}}/_readme|{{project name}}]]
 
 ## Related notes
 

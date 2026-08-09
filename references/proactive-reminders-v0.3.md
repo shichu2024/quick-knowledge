@@ -56,7 +56,7 @@ memory_agent.proactive_suggest({
 是否复用？建议在 _readme.md 的「经验复用建议」区块引用。
 ```
 
-**写入位置**：`projects/<slug>/_readme.md` 的「经验复用建议」段
+**写入位置**：`04_projects/<slug>/_readme.md` 的「经验复用建议」段
 
 ---
 
@@ -83,7 +83,7 @@ memory_agent.proactive_suggest({
 建议先看。
 ```
 
-**写入位置**：`goals/<slug>/goal.md` 的「相关笔记」段
+**写入位置**：`03_goals/<slug>/goal.md` 的「相关笔记」段
 
 ---
 
@@ -221,7 +221,7 @@ memory 事件优先于 manager 事件检测（memory 优先级更高）。例如
 ### 6.2 提醒去重
 
 - 同会话内同一笔记不重复提醒
-- 用户已 dismiss 的提醒不重复弹出（v0.4 可记录到 system/workflows/.reminder-state.json）
+- 用户已 dismiss 的提醒不重复弹出（v0.4 可记录到 99_system/workflows/.reminder-state.json）
 
 ### 6.3 与降级配合
 

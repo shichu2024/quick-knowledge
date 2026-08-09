@@ -77,7 +77,7 @@ project: "[[{{project README}}]"
 
 ## Lesson
 
-> Extracted by quick-kb-project at archive, auto-derived to an independent experience note in `principles/experiences/`
+> Extracted by quick-kb-project at archive, auto-derived to an independent experience note in `07_principles/experiences/`
 
 {{One-line reusable lesson · e.g., "Plugin systems must use process-level isolation; performance is secondary"}}
 

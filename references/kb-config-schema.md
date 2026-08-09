@@ -181,7 +181,7 @@ review:
 yaml-validator --schema references/kb-config-schema.yaml kb.config.yaml
 ```
 
-quick-kb-init upgrade 时自动跑一次校验，写 warning 到 `system/workflows/.config-check.log`。
+quick-kb-init upgrade 时自动跑一次校验，写 warning 到 `99_system/workflows/.config-check.log`。
 
 ---
 

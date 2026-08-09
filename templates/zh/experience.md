@@ -1,6 +1,6 @@
 <!--
 模板：experience 经历教训（中文 · v0.3）
-用途：具体历史事件/教训。无 domain，写入 principles/experiences/。
+用途：具体历史事件/教训。无 domain，写入 07_principles/experiences/。
 关键：通常由 quick-kb-project 在 archive 时从 Decision Ledger 的 lesson 字段自动派生。
 真相源：references/frontmatter-v0.3.md · docs/DESIGN.md §6.2/§6.4/§8.4
 -->

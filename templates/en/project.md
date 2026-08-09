@@ -1,6 +1,6 @@
 <!--
 Template: project (English · v0.3)
-Purpose: Project main note (projects/<slug>/_readme.md), with experience reuse advice and Decision Ledger index.
+Purpose: Project main note (04_projects/<slug>/_readme.md), with experience reuse advice and Decision Ledger index.
 Source of truth: references/frontmatter-v0.3.md · docs/DESIGN.md §6.2/§8.4 · docs/AGENTS_SPEC.md §4
 -->
 ---

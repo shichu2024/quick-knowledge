@@ -1,6 +1,6 @@
 <!--
 模板：pattern 可复用解决模式（中文 · v0.3）
-用途：从多次实践中抽象出的可复用方案。无 domain，写入 principles/patterns/。
+用途：从多次实践中抽象出的可复用方案。无 domain，写入 07_principles/patterns/。
 真相源：references/frontmatter-v0.3.md · docs/DESIGN.md §6.2/§6.4
 -->
 ---

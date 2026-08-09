@@ -1,6 +1,6 @@
 <!--
 模板：concept 笔记（中文 · v0.2）
-用途：记录一个概念、原理或心智模型。Ingest 后写入 areas/<domain>/。
+用途：记录一个概念、原理或心智模型。Ingest 后写入 02_areas/<domain>/。
 填充：由 quick-kb-ingest（接 research-agent）自动填充；用户可手动修订。
 真相源：references/frontmatter-v0.2.md · docs/DESIGN.md §6/§8.3
 -->

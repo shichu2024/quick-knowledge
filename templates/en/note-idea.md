@@ -1,6 +1,6 @@
 <!--
 Template: idea note (English · v0.2)
-Purpose: Fragmented ideas, thoughts, materials to be digested. Written to inbox/ideas/ by quick-kb-capture.
+Purpose: Fragmented ideas, thoughts, materials to be digested. Written to 00_inbox/ideas/ by quick-kb-capture.
 Note: Inbox raw materials follow DESIGN §6.9 minimal frontmatter (title + captured_at).
       suggested_tags are AI-prefilled hints, optional, decided at ingest.
 Source of truth: references/frontmatter-v0.2.md §7 · docs/DESIGN.md §6.9

@@ -24,7 +24,7 @@ source_of_truth: docs/DESIGN.md §6
 
 ## 2. 字段清单（正式笔记）
 
-正式笔记 = 已经 ingest 入库到 `areas/` / `resources/` / `projects/` / `goals/` 等目录的笔记。
+正式笔记 = 已经 ingest 入库到 `02_areas/` / `01_resources/` / `04_projects/` / `03_goals/` 等目录的笔记。
 
 | 字段 | 必填 | 类型 | v0.1 取值 / 说明 | 对应 DESIGN |
 |------|------|------|----------------|-------------|
@@ -35,7 +35,7 @@ source_of_truth: docs/DESIGN.md §6
 | `tags` | ✓ | string[] | 受控标签（`domain/topic` 形式建议） | §6.1 |
 | `status` | ✓ | enum | v0.1 仅：`inbox` / `draft` / `active` / `done`（`cancelled` / `archived` 推迟到 v0.2+ 项目/目标场景） | §6.3 |
 | `source` | 可选 | list of `{url?, note?}` | 原始来源；URL 与 wikilink 至少一项 | §6.1 |
-| `domain` | 可选 | string | 所属领域（对应 `areas/`）；横切认知资产（v0.3 引入）不留此字段 | §6.1 |
+| `domain` | 可选 | string | 所属领域（对应 `02_areas/`）；横切认知资产（v0.3 引入）不留此字段 | §6.1 |
 | `confidence` | 可选 | number 0-100 | ingest 时按规则给初值（单源 40 / 多源 60+ / 一手 80+），用户可改 | §6.5 |
 
 ### 2.1 关于 `confidence` 的说明

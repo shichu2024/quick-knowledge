@@ -1,6 +1,6 @@
 <!--
 Template: belief (English · v0.3)
-Purpose: Personal hypothesis / judgment, not yet fully verified. No domain. Stored in principles/beliefs/.
+Purpose: Personal hypothesis / judgment, not yet fully verified. No domain. Stored in 07_principles/beliefs/.
 Source of truth: references/frontmatter-v0.3.md · docs/DESIGN.md §6.2/§6.4
 -->
 ---

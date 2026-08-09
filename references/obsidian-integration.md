@@ -21,7 +21,7 @@ source_of_truth:
 | obsidian-skill | quick-knowledge 如何使用 | 缺失时降级 | 引入阶段 |
 |----------------|------------------------|-----------|---------|
 | `obsidian-markdown` | 写入笔记时遵守 wikilink、callout、properties 规范 | 纯 GFM（GitHub-flavored Markdown） | v0.2 |
-| `obsidian-bases` | 生成 inbox/areas/goals 的 .base 视图做仪表盘 | 跳过 .base 生成 | v0.2（按需） |
+| `obsidian-bases` | 生成 00_inbox/02_areas/goals 的 .base 视图做仪表盘 | 跳过 .base 生成 | v0.2（按需） |
 | `json-canvas` | connect 闭环生成知识地图 .canvas | 跳过 .canvas，仅产出 MOC | v0.2 |
 | `obsidian-cli` | 与 Obsidian 应用交互（打开笔记、触发命令） | 跳过自动打开 | v0.2（按需） |
 | `defuddle` | capture 闭环抓取网页时提取干净正文 | 基础 HTML→MD（去 script/style/nav） | v0.2 |
@@ -63,7 +63,7 @@ source_of_truth:
 **用途**：connect 闭环生成知识地图。
 
 **集成点**：
-- `quick-kb-connect action=canvas`：生成 `wiki/maps/<domain>.canvas`
+- `quick-kb-connect action=canvas`：生成 `06_wiki/maps/<domain>.canvas`
 - 节点 = 笔记，边 = relations（按类型着色：supports=绿 / contradicts=红 / evolves=蓝 / supersedes=灰）
 
 **缺失降级**：
@@ -90,7 +90,7 @@ source_of_truth:
 
 **集成点**：
 - `quick-kb-capture source_type=web-clip`：调 defuddle 处理 URL
-- 原始 HTML 保留到 `inbox/clips/_raw/`
+- 原始 HTML 保留到 `00_inbox/clips/_raw/`
 
 **缺失降级**：
 - 基础 HTML→MD：

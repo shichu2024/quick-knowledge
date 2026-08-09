@@ -1,6 +1,6 @@
 <!--
 Template: concept note (English · v0.2)
-Purpose: Record a concept, principle, or mental model. Written to areas/<domain>/ after ingest.
+Purpose: Record a concept, principle, or mental model. Written to 02_areas/<domain>/ after ingest.
 Fill: Auto-filled by quick-kb-ingest (via research-agent); user may revise.
 Source of truth: references/frontmatter-v0.2.md · docs/DESIGN.md §6/§8.3
 -->

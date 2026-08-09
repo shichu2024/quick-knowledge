@@ -77,7 +77,7 @@ project: "[[{{project README}}]"   # 所属项目 wikilink
 
 ## Lesson · 教训
 
-> 项目归档时由 quick-kb-project 提取，自动派生为独立 experience 笔记到 `principles/experiences/`
+> 项目归档时由 quick-kb-project 提取，自动派生为独立 experience 笔记到 `07_principles/experiences/`
 
 {{一句话提炼可复用的教训 · 例：「插件体系必须进程级隔离，性能次要」}}
 

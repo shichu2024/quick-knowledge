@@ -1,6 +1,6 @@
 <!--
 Template: daily log (English · v0.2)
-Purpose: Daily journal, written to outputs/daily/YYYY/MM/YYYY-MM-DD.md by quick-kb-daily.
+Purpose: Daily journal, written to 05_outputs/daily/YYYY/MM/YYYY-MM-DD.md by quick-kb-daily.
 Features: AI asks follow-up questions when description is vague (max 2 rounds); auto-generates wikilinks for existing note titles.
 Source of truth: references/frontmatter-v0.2.md · docs/DESIGN.md §6/§8 · docs/SKILLS_SPEC.md §8
 Note: daily is a doc-type note (no maturity); but still has relations/value structure.

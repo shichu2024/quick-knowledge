@@ -1,6 +1,6 @@
 <!--
 Template: experience (English · v0.3)
-Purpose: Concrete historical event / lesson. No domain. Stored in principles/experiences/.
+Purpose: Concrete historical event / lesson. No domain. Stored in 07_principles/experiences/.
 Key: usually auto-derived by quick-kb-project (on archive) from the Decision Ledger lesson field.
 Source of truth: references/frontmatter-v0.3.md · docs/DESIGN.md §6.2/§6.4/§8.4
 -->

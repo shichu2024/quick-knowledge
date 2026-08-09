@@ -1,6 +1,6 @@
 <!--
 模板：idea 笔记（中文 · v0.1）
-用途：碎片化灵感、想法、待消化的素材。由 quick-kb-capture 写入 inbox/ideas/。
+用途：碎片化灵感、想法、待消化的素材。由 quick-kb-capture 写入 00_inbox/ideas/。
 说明：inbox 原始素材走 DESIGN §6.9 最小 frontmatter（title + captured_at），
       suggested_tags 是 AI 预标注的候选标签 hint，不强制，由 ingest 决定。
 真相源：references/frontmatter-v0.1.md §3 · docs/DESIGN.md §6.9

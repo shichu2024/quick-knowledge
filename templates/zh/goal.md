@@ -1,6 +1,6 @@
 <!--
 模板：goal 目标（中文 · v0.3）
-用途：目标管理 + 学习路径。由 quick-kb-goal create 写入 goals/<slug>/goal.md。
+用途：目标管理 + 学习路径。由 quick-kb-goal create 写入 03_goals/<slug>/goal.md。
 真相源：references/frontmatter-v0.3.md · docs/DESIGN.md §6 · docs/SKILLS_SPEC.md §9
 -->
 ---
@@ -56,7 +56,7 @@ value:
 
 ## 关联项目
 
-- [[projects/{{project-slug}}/_readme|{{项目名}}]]
+- [[04_projects/{{project-slug}}/_readme|{{项目名}}]]
 
 ## 相关笔记
 

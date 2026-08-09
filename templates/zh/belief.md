@@ -1,6 +1,6 @@
 <!--
 模板：belief 待验证假设（中文 · v0.3）
-用途：个人假设/判断，尚未充分验证。无 domain，写入 principles/beliefs/。
+用途：个人假设/判断，尚未充分验证。无 domain，写入 07_principles/beliefs/。
 真相源：references/frontmatter-v0.3.md · docs/DESIGN.md §6.2/§6.4
 -->
 ---

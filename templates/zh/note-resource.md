@@ -1,6 +1,6 @@
 <!--
 模板：resource 笔记（中文 · v0.2）
-用途：外部资源摘要（文章、书、课程、开源项目等）。Ingest 后写入 resources/<category>/。
+用途：外部资源摘要（文章、书、课程、开源项目等）。Ingest 后写入 01_resources/<category>/。
 区别：concept 是"我的理解"，resource 是"别人写的东西的摘要"。
 真相源：references/frontmatter-v0.2.md · docs/DESIGN.md §6/§8
 -->

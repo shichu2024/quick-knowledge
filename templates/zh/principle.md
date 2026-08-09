@@ -1,6 +1,6 @@
 <!--
 模板：principle 个人原则（中文 · v0.3）
-用途：跨项目方法论、价值观底线。无 domain（横切），写入 principles/principles/。
+用途：跨项目方法论、价值观底线。无 domain（横切），写入 07_principles/principles/。
 真相源：references/frontmatter-v0.3.md · docs/DESIGN.md §6.2/§6.4
 -->
 ---

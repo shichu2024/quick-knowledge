@@ -167,7 +167,7 @@ context: "通用 RAG 架构；创业团队请参考 [[轻量 RAG 方案]]"
 value:
   reuse: 0
 source:
-  - note: "[[inbox/clips/20260809-1000-rag-article]]"
+  - note: "[[00_inbox/clips/20260809-1000-rag-article]]"
   - url: https://example.com/rag
 ---
 ```

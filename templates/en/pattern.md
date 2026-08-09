@@ -1,6 +1,6 @@
 <!--
 Template: pattern (English · v0.3)
-Purpose: Reusable solution pattern abstracted from multiple practices. No domain. Stored in principles/patterns/.
+Purpose: Reusable solution pattern abstracted from multiple practices. No domain. Stored in 07_principles/patterns/.
 Source of truth: references/frontmatter-v0.3.md · docs/DESIGN.md §6.2/§6.4
 -->
 ---

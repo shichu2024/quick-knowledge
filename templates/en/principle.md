@@ -1,6 +1,6 @@
 <!--
 Template: principle (English · v0.3)
-Purpose: Cross-project methodology / values baseline. No domain (cross-cutting). Stored in principles/principles/.
+Purpose: Cross-project methodology / values baseline. No domain (cross-cutting). Stored in 07_principles/principles/.
 Source of truth: references/frontmatter-v0.3.md · docs/DESIGN.md §6.2/§6.4
 -->
 ---
