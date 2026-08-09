@@ -6,7 +6,7 @@ description: |
   Triggers (EN): new project / archive project
 version: v0.3
 phase: v0.3
-applies_to: 写 projects/<slug>/ · archive/projects/ · principles/experiences/（派生）
+applies_to: 写 04_projects/<slug>/ · 98_archive/projects/ · 07_principles/experiences/（派生）
 source_of_truth:
   - docs/DESIGN.md §7.4 / §8.4（Decision Ledger）
   - docs/SKILLS_SPEC.md §10
@@ -40,7 +40,7 @@ source_of_truth:
   1. 扫 `decisions/`，补全每条 Decision Ledger 的 `actual` 与 `lesson`
   2. 每条 lesson 自动派生为独立 `experience` 笔记
   3. 原 decision 建立指向派生 experience 的 wikilink（`derived_from`）
-  4. 项目目录迁移到 `archive/projects/<slug>/`
+  4. 项目目录迁移到 `98_archive/projects/<slug>/`
   5. 生成归档复盘草稿（expected vs actual 偏差分析）
 
 ### 不做（v0.4+）
@@ -66,10 +66,10 @@ source_of_truth:
 ## 4. 工作流 · init
 
 ```
-1. 校验：projects/<slug>/ 不存在（幂等：已存在则报错并指引用 update）
+1. 校验：04_projects/<slug>/ 不存在（幂等：已存在则报错并指引用 update）
 
 2. 创建结构：
-   projects/<slug>/
+   04_projects/<slug>/
    ├── _readme.md         # 用 templates/zh/project.md
    ├── _moc.md            # 项目内索引
    ├── notes/             # 项目笔记
@@ -89,7 +89,7 @@ source_of_truth:
      constraints: <team/tech stack if known>
    })
    → suggestions: [
-       { related_notes: [...相似 projects/experiences], message: "..." }
+       { related_notes: [...相似 04_projects/experiences], message: "..." }
      ]
 
 5. 把召回结果写入 _readme.md 的「经验复用建议」段：
@@ -110,7 +110,7 @@ source_of_truth:
 
 7. 询问关联 goal（若 goal 提供）：
    - 在 _readme.md 的 relations.supports 引用
-   - 在 goals/<goal-slug>/goal.md 的「关联项目」段引用本项目
+   - 在 03_goals/<goal-slug>/goal.md 的「关联项目」段引用本项目
 
 8. 更新顶层 _moc.md（若有）加入项目入口
 ```
@@ -120,7 +120,7 @@ source_of_truth:
 ## 5. 工作流 · update
 
 ```
-1. 校验：projects/<slug>/ 存在
+1. 校验：04_projects/<slug>/ 存在
 
 2. 追加进展：
    - progress/<YYYY-MM-DD>.md（用 daily 模板简化版）
@@ -154,7 +154,7 @@ source_of_truth:
 
 3. lesson 派生 experience（V2 关键）：
    对每条 Decision Ledger 的 lesson：
-   3.1 在 principles/experiences/<YYYY-MM-DD>-<topic>.md 创建新笔记
+   3.1 在 07_principles/experiences/<YYYY-MM-DD>-<topic>.md 创建新笔记
        （用 experience.md 模板）
    3.2 填充关键字段：
        - title: <事件一句话 · 含时间/项目>
@@ -162,19 +162,19 @@ source_of_truth:
        - 事件经过: <原 decision 的 options/chosen/reason 摘要>
        - 结果: <原 decision 的 actual>
        - 教训: <原 decision 的 lesson>  ← 核心派生
-       - derived_from: [[projects/<slug>/decisions/<原 decision>]]
+       - derived_from: [[04_projects/<slug>/decisions/<原 decision>]]
        - outcome: step 2.3 计算结果
        - source.note: [[<原 decision>]]
        - tags: [experience/<topic>, project/<slug>]
    3.3 在原 Decision Ledger 中：
-       - 添加 derived_to: [[principles/experiences/<新笔记>]]（双向引用）
+       - 添加 derived_to: [[07_principles/experiences/<新笔记>]]（双向引用）
        - status: active → archived
    3.4 检查可升格：lesson 中是否含可抽象的 principle/pattern 候选
-       - 若用户确认 → 在 principles/principles/ 或 principles/patterns/ 新建
+       - 若用户确认 → 在 07_principles/principles/ 或 07_principles/patterns/ 新建
        - relations.evolves: [[<派生 experience>]]
 
 4. 迁移目录：
-   projects/<slug>/ → archive/projects/<slug>/
+   04_projects/<slug>/ → 98_archive/projects/<slug>/
    （保留所有子目录与 wikilink 完整性）
 
 5. 更新 _readme.md：
@@ -184,7 +184,7 @@ source_of_truth:
    - 派生 experience 索引
 
 6. 归档复盘草稿（可选 · retrospective=true）：
-   在 archive/projects/<slug>/retrospective.md 生成：
+   在 98_archive/projects/<slug>/retrospective.md 生成：
    ## 决策复盘
    | 决策 | expected | actual | 偏差 | lesson → experience |
    |------|---------|--------|------|---------------------|
@@ -202,7 +202,7 @@ source_of_truth:
 ### init 成功输出
 
 ```
-✅ 项目已创建：projects/<slug>/
+✅ 项目已创建：04_projects/<slug>/
    - _readme.md（已填充基础字段）
    - _moc.md（索引骨架）
    - notes/ decisions/ progress/ refs/（空目录）
@@ -217,13 +217,13 @@ source_of_truth:
    - decisions/<YYYY-MM-DD>-<topic>.md 已创建（待补 actual/lesson）
 
 🔗 关联目标：
-   - goals/<goal-slug>/goal.md 已添加项目引用
+   - 03_goals/<goal-slug>/goal.md 已添加项目引用
 ```
 
 ### archive 成功输出
 
 ```
-✅ 项目已归档：archive/projects/<slug>/
+✅ 项目已归档：98_archive/projects/<slug>/
 
 📋 决策闭环：
    - 补全 Decision Ledger: 3 条
@@ -232,7 +232,7 @@ source_of_truth:
      - [[experience/2026-XX-XX-yyy]]
      - [[experience/2026-XX-XX-zzz]]
 
-📊 复盘草稿：archive/projects/<slug>/retrospective.md
+📊 复盘草稿：98_archive/projects/<slug>/retrospective.md
 
 🔄 状态更新：
    - status: active → archived
@@ -248,7 +248,7 @@ source_of_truth:
 - **archive**：
   - 已补 actual/lesson 的 Decision Ledger 跳过，不重复询问
   - 已派生的 experience 检查 derived_from，避免重复创建
-  - 已迁移到 archive/ 的项目二次 archive 报错
+  - 已迁移到 98_archive/ 的项目二次 archive 报错
 
 ---
 
@@ -258,7 +258,7 @@ source_of_truth:
 |---------|---------|
 | memory-agent 不可用（init） | 跳过「经验复用建议」段，标注「⚠ 未启用记忆召回」 |
 | 库内 < 50 条（init） | memory-agent.proactive_suggest 自动关闭（限流）；README 段留空 |
-| `principles/experiences/` 目录不存在（archive） | 自动创建（v0.3 已建） |
+| `07_principles/experiences/` 目录不存在（archive） | 自动创建（v0.3 已建） |
 | Decision Ledger 模板缺失 | 报错并指引用户先运行 quick-kb-init 同步模板 |
 
 ---
@@ -267,7 +267,7 @@ source_of_truth:
 
 ### init
 
-- [ ] projects/<slug>/ 创建完整子目录结构
+- [ ] 04_projects/<slug>/ 创建完整子目录结构
 - [ ] _readme.md 含 frontmatter（type: project, status: active）
 - [ ] memory-agent 被调用（new_project_init 事件）
 - [ ] 召回结果写入「经验复用建议」段（按 experience/pattern/principle 分类）
@@ -285,7 +285,7 @@ source_of_truth:
 - [ ] 每条 lesson 派生为独立 experience 笔记
 - [ ] 派生 experience 含 derived_from + outcome + source.note
 - [ ] 原 Decision Ledger 含 derived_to（双向引用）
-- [ ] 项目目录迁移到 archive/projects/
+- [ ] 项目目录迁移到 98_archive/projects/
 - [ ] _readme.md status → archived, maturity → teachable
 - [ ] 复盘草稿含 expected vs actual 偏差分析
 - [ ] 派生的 experience 文件名唯一（slug + 日期）

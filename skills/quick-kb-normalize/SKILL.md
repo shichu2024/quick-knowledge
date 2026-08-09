@@ -73,7 +73,7 @@ source_of_truth:
 2. 对每条候选笔记执行（顺序）：
 
    2.1 字段补全（fields）：
-       - type 缺失 → 推断（按路径：inbox/→idea, principles/→按子目录）
+       - type 缺失 → 推断（按路径：00_inbox/→idea, 07_principles/→按子目录）
        - status 缺失 → inbox / draft（按位置）
        - created / updated 缺失 → 取文件 mtime
        - confidence 缺失 → 50（默认）
@@ -182,7 +182,7 @@ source_of_truth:
 
 ---
 
-## [[inbox/my-idea]]
+## [[00_inbox/my-idea]]
 
 ### 字段补全
 - + status: inbox  # 按路径推断
@@ -216,7 +216,7 @@ source_of_truth:
 - **不改正文**：仅修改 frontmatter（YAML 区块）
 - **不删笔记**：归 archive 技能
 - **不重建死链**：归 connect / repair_deadlinks
-- **不动 principles/ 下的认知资产正文**：仅补全 frontmatter
+- **不动 07_principles/ 下的认知资产正文**：仅补全 frontmatter
 
 ---
 

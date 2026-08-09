@@ -1,12 +1,12 @@
 ---
 name: quick-kb-ingest
 description: |
-  把 inbox 素材正式入库为 areas/resources 笔记：调用 research-agent 抽取原子观点、补全 v0.2 完整 frontmatter（含 relations/context/value.reuse）、链接原始素材、给置信度初值、做冲突检测。v0.3 将接入 memory-agent 做更准确的冲突判定。
+  把 inbox 素材正式入库为 02_areas/resources 笔记：调用 research-agent 抽取原子观点、补全 v0.2 完整 frontmatter（含 relations/context/value.reuse）、链接原始素材、给置信度初值、做冲突检测。v0.3 将接入 memory-agent 做更准确的冲突判定。
   触发词（中文）：处理 inbox / 入库 / 把这条归档 / 消化这条 / 这条入库
   Triggers (EN): process inbox / ingest this / promote this note
 version: v0.2
 phase: v0.2
-applies_to: inbox/ → areas/ / resources/
+applies_to: 00_inbox/ → 02_areas/ / 01_resources/
 source_of_truth:
   - docs/DESIGN.md §6（frontmatter）· §6.7（冲突处理）
   - docs/SKILLS_SPEC.md §3
@@ -29,7 +29,7 @@ source_of_truth:
 
 - 扫描 inbox 候选（单条 / 子目录 / 全 inbox；6 类源）
 - 调用 **research-agent** 抽取原子观点（替换 v0.1 内置 LLM）
-- 分类去向：concept → `areas/<domain>/`、resource → `resources/<category>/`、idea（仍待消化）→ 留 inbox，标 `status: draft`
+- 分类去向：concept → `02_areas/<domain>/`、resource → `01_resources/<category>/`、idea（仍待消化）→ 留 inbox，标 `status: draft`
 - 补全 **v0.2 完整 frontmatter**（含 relations/context/value.reuse）
 - `source.note` 用 wikilink 指回 inbox 原始素材
 - 置信度初值规则（research-agent 决定）
@@ -47,7 +47,7 @@ source_of_truth:
 
 | 参数 | 必填 | 默认 | 说明 |
 |------|------|------|------|
-| `target` | 否 | `inbox` | 单条文件路径 / `inbox` 全量 / `inbox/ideas` 等子目录 |
+| `target` | 否 | `inbox` | 单条文件路径 / `inbox` 全量 / `00_inbox/ideas` 等子目录 |
 | `domain` | 否 | research-agent 推荐 | 指定领域 |
 | `depth` | 否 | `standard` | `quick` / `standard` / `deep`（v0.2 deep 与 standard 一致；v0.3 接 memory-agent 才有差异） |
 
@@ -95,9 +95,9 @@ research_agent.extract_atoms(
 
 | 观点类型 | 目标目录 | 模板 |
 |---------|---------|------|
-| concept | `areas/<domain>/<slug>.md` | [`templates/zh/note-concept.md`](../../templates/zh/note-concept.md) |
-| resource | `resources/<category>/<slug>.md` | [`templates/zh/note-resource.md`](../../templates/zh/note-resource.md) |
-| idea（仍不够结构化） | 留 `inbox/ideas/`，更新 `status: draft` | 不创建新文件 |
+| concept | `02_areas/<domain>/<slug>.md` | [`templates/zh/note-concept.md`](../../templates/zh/note-concept.md) |
+| resource | `01_resources/<category>/<slug>.md` | [`templates/zh/note-resource.md`](../../templates/zh/note-resource.md) |
+| idea（仍不够结构化） | 留 `00_inbox/ideas/`，更新 `status: draft` | 不创建新文件 |
 
 > v0.2 不产出 decision/goal/project/principle/belief/pattern/experience/moc/review/daily 类型。
 
@@ -172,11 +172,11 @@ manager_agent.recommend_relations(
 
 ```
 ⚠ 冲突检测命中：
-  新笔记：[[areas/ai-engineering/microservices]]
-  既有笔记：[[areas/ai-engineering/modular-monolith]]
+  新笔记：[[02_areas/ai-engineering/microservices]]
+  既有笔记：[[02_areas/ai-engineering/modular-monolith]]
   类型：contradicts（上下文相关，非对错）
   → 已自动建立双向 contradicts 关系
-  → 请补充各自的 context（推荐：[[areas/ai-engineering/microservices]] 的 context = "大团队、多团队并行"）
+  → 请补充各自的 context（推荐：[[02_areas/ai-engineering/microservices]] 的 context = "大团队、多团队并行"）
 ```
 
 ### 步骤 4 · 写入并反馈
@@ -184,9 +184,9 @@ manager_agent.recommend_relations(
 对每条产出：
 
 ```
-✓ 写入：areas/ai-engineering/rag-architecture.md
+✓ 写入：02_areas/ai-engineering/rag-architecture.md
   类型：concept | 状态：active | 置信度：60
-  来源：inbox/clips/20260809-1000-<slug>.md
+  来源：00_inbox/clips/20260809-1000-<slug>.md
   标签：ai/rag · eng/architecture
   relations：
     supports: [[Vector Database]]
@@ -223,17 +223,17 @@ manager_agent.recommend_relations(
 
 ```markdown
 > [!info] 已入库
-> - [[areas/ai-engineering/rag-architecture]]（concept · 2026-08-09）
+> - [[02_areas/ai-engineering/rag-architecture]]（concept · 2026-08-09）
 >   - relations: supports [[Vector Database]] / evolves [[RAG 基础概念]]
-> - [[resources/articles/...]]（resource · 2026-08-09）
+> - [[01_resources/articles/...]]（resource · 2026-08-09）
 ```
 
 ---
 
 ## 4. 输出契约
 
-- concept：`areas/<domain>/<slug>.md`
-- resource：`resources/<category>/<slug>.md`
+- concept：`02_areas/<domain>/<slug>.md`
+- resource：`01_resources/<category>/<slug>.md`
 - frontmatter 严格遵循 [`frontmatter-v0.2.md`](../../references/frontmatter-v0.2.md)
 - 反馈格式对齐 SKILLS_SPEC §通用约定
 
@@ -255,7 +255,7 @@ manager_agent.recommend_relations(
 | manager-agent 不可用 | 不做关系推荐与冲突检测，relations 全空，标 `needs_review: true` |
 | 候选素材为空/格式损坏 | 跳过，报告 |
 | 无候选（target 无文件） | 输出「inbox 已清空」 |
-| 目标 domain 不存在 | 自动创建 `areas/<domain>/_moc.md` |
+| 目标 domain 不存在 | 自动创建 `02_areas/<domain>/_moc.md` |
 | 文件名冲突 | `-2`/`-3` |
 
 ---

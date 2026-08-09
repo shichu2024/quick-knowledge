@@ -6,7 +6,7 @@ description: |
   Triggers (EN): new goal / learning path for / update goal progress
 version: v0.3
 phase: v0.3
-applies_to: 写 goals/<slug>/ · archive/goals/ · 读写相关笔记 status
+applies_to: 写 03_goals/<slug>/ · 98_archive/goals/ · 读写相关笔记 status
 source_of_truth:
   - docs/DESIGN.md §7.4
   - docs/SKILLS_SPEC.md §9
@@ -71,7 +71,7 @@ source_of_truth:
    - 关联领域 domain
    - 情境 context（为什么立这个目标）
 
-2. 生成 goals/<slug>/goal.md（用 templates/{zh,en}/goal.md）：
+2. 生成 03_goals/<slug>/goal.md（用 templates/{zh,en}/goal.md）：
    - title / context / deadline / domain
    - 成功标准（success_criteria）
    - 学习路径段：留空待 step 4
@@ -80,7 +80,7 @@ source_of_truth:
    - 关联项目段：留空
 
 3. 建立子目录：
-   goals/<slug>/
+   03_goals/<slug>/
    ├── goal.md
    ├── _moc.md            # 目标内索引
    └── progress/          # 进展日志
@@ -126,7 +126,7 @@ source_of_truth:
 ## 5. 工作流 · progress
 
 ```
-1. 校验：goals/<slug>/ 存在
+1. 校验：03_goals/<slug>/ 存在
 
 2. 追加进展：
    - progress/<YYYY-MM-DD>.md（结构：完成 / 学到 / 想法 / 卡点）
@@ -167,11 +167,11 @@ source_of_truth:
      · 若 status 是 draft → 建议转 active（学习产出已稳定）
 
 3. 归档：
-   goals/<slug>/ → archive/goals/<slug>/
+   03_goals/<slug>/ → 98_archive/goals/<slug>/
    （保留 progress 历史可追溯）
 
 4. 复盘联动：
-   生成 outputs/reviews/goal-<slug>-<YYYY-MM-DD>.md（草稿）：
+   生成 05_outputs/reviews/goal-<slug>-<YYYY-MM-DD>.md（草稿）：
    ## 目标复盘：<goal>
    ### 成功标准达成情况
    - [x] 标准 1 · 完成于 <date>
@@ -194,7 +194,7 @@ source_of_truth:
 ## 7. 工作流 · path（重新生成路径）
 
 ```
-1. 校验：goals/<slug>/goal.md 存在
+1. 校验：03_goals/<slug>/goal.md 存在
 2. 备份当前路径到 goal.md 的「路径历史」段（追加，不删除）
 3. 重新调 research-agent（基于当前库内笔记 + 已完成里程碑）
 4. 新路径写入「学习路径」段
@@ -208,7 +208,7 @@ source_of_truth:
 ### create 成功输出
 
 ```
-✅ 目标已创建：goals/<slug>/goal.md
+✅ 目标已创建：03_goals/<slug>/goal.md
 
 🎯 成功标准：
    - [ ] 标准 1
@@ -233,10 +233,10 @@ source_of_truth:
 ### complete 成功输出
 
 ```
-✅ 目标已完成：archive/goals/<slug>/
+✅ 目标已完成：98_archive/goals/<slug>/
 
 📊 里程碑达成：3/3
-📝 复盘草稿：outputs/reviews/goal-<slug>-<date>.md
+📝 复盘草稿：05_outputs/reviews/goal-<slug>-<date>.md
 
 🔄 状态传播：
    - status: active → done
@@ -270,7 +270,7 @@ source_of_truth:
 
 ### create
 
-- [ ] goals/<slug>/goal.md 创建
+- [ ] 03_goals/<slug>/goal.md 创建
 - [ ] frontmatter 含 type: goal, status: active, deadline, domain
 - [ ] 成功标准可验证（非空泛描述）
 - [ ] research-agent 被调用（path_source=recommend 时）
@@ -289,7 +289,7 @@ source_of_truth:
 
 - [ ] 用户二次确认
 - [ ] goal.md status/maturity 更新
-- [ ] 目录迁移到 archive/goals/
+- [ ] 目录迁移到 98_archive/goals/
 - [ ] 复盘草稿生成
 - [ ] 状态传播至关联笔记（询问而非强制）
 
@@ -301,5 +301,5 @@ source_of_truth:
 |--------|------|-------|
 | 新增 `path` 工作流（重新生成） | SKILLS_SPEC §9 未列 path action 但 dev doc WP6 提及「路径动态调整」 | docs/dev/v0.3-assistant.md WP6 关键点 |
 | complete 时关联项目归档需询问 | SKILLS_SPEC §10 同样设计，避免目标完成时强制归档进行中项目 | docs/SKILLS_SPEC.md §10 边界 |
-| 复盘草稿路径用 outputs/reviews/ | SKILLS_SPEC §9 工作流第 2 步明确 | docs/SKILLS_SPEC.md §9 |
+| 复盘草稿路径用 05_outputs/reviews/ | SKILLS_SPEC §9 工作流第 2 步明确 | docs/SKILLS_SPEC.md §9 |
 | memory-agent 召回限 domain 内 | DESIGN §7.6 new_goal_create 示例「关联领域 [[前端工程]] 有 2 条原则」 | docs/DESIGN.md §7.6 |

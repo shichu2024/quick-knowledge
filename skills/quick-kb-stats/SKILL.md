@@ -7,7 +7,7 @@ description: |
   Triggers (EN): kb stats / vault health / dashboard
 version: v0.4
 phase: v0.4
-applies_to: 只读全库 · 输出 outputs/reviews/adhoc/
+applies_to: 只读全库 · 输出 05_outputs/reviews/adhoc/
 source_of_truth:
   - docs/DESIGN.md §6.5（KS）/ §6.4（maturity）/ §6.3（captured_at）
   - docs/SKILLS_SPEC.md §11
@@ -33,7 +33,7 @@ source_of_truth:
 ### 做
 
 - 计算全部指标（见 §4）
-- 输出 Markdown 报告到 `outputs/reviews/adhoc/stats-YYYY-MM-DD.md`
+- 输出 Markdown 报告到 `05_outputs/reviews/adhoc/stats-YYYY-MM-DD.md`
 - 输出 Obsidian Bases 视图配置（如启用）
 - 与上次 stats 对比（若存在）
 
@@ -71,7 +71,7 @@ source_of_truth:
 | 低复用高占用清单 | confidence ≥ 70 AND value.reuse = 0 | confidence + value.reuse |
 | inbox 周转时长 | 平均 captured_at → status 离开 inbox 的天数 | frontmatter.captured_at + 历史 |
 | 死链数 | 找不到对应文件的 [[X]] 数 | wikilink 扫描 |
-| MOC 数 | wiki/mocs/ 下文件数 | 文件路径 |
+| MOC 数 | 06_wiki/mocs/ 下文件数 | 文件路径 |
 | 孤立 MOC | 无入链的 MOC | wikilink 图谱 |
 | domain 分布 | 按 domain 计数 + 占比 | frontmatter.domain |
 | 近 30/90 天活跃度 | 近 N 天 updated 的笔记数 | frontmatter.updated |
@@ -88,7 +88,7 @@ source_of_truth:
 ```
 1. 扫描全库（或 scope 指定范围）
    - 收集所有 .md 文件路径
-   - 跳过 archive/ 与 system/ 目录（除非显式 scope）
+   - 跳过 98_archive/ 与 99_system/ 目录（除非显式 scope）
 
 2. 解析 frontmatter（YAML 区块）
    - 解析失败的笔记计入「frontmatter 损坏」类
@@ -111,13 +111,13 @@ source_of_truth:
    - 取平均 / 中位数 / P90
    - 注：离开日期不可考时记为 N/A
 
-7. 与上次 stats 对比（若 outputs/reviews/adhoc/ 有历史）：
+7. 与上次 stats 对比（若 05_outputs/reviews/adhoc/ 有历史）：
    - 总数变化、孤立率变化、KS Top 10 变化
 
 8. 生成报告：
    - Markdown 格式
    - 含指标表 + 高价值低置信清单 + 低复用高占用清单 + KS Top 10 + 对比段
-   - 输出到 outputs/reviews/adhoc/stats-YYYY-MM-DD.md
+   - 输出到 05_outputs/reviews/adhoc/stats-YYYY-MM-DD.md
 ```
 
 ---
@@ -127,7 +127,7 @@ source_of_truth:
 ````markdown
 # Vault 健康仪表盘 · 2026-08-09
 
-> 范围：全库（不含 archive/system） · 总笔记数：87
+> 范围：全库（不含 98_archive/system） · 总笔记数：87
 
 ## 总览
 
@@ -220,7 +220,7 @@ view: table
 ## 8. 幂等保证
 
 - 同一天多次 stats：
-  - 默认覆盖 `outputs/reviews/adhoc/stats-YYYY-MM-DD.md`
+  - 默认覆盖 `05_outputs/reviews/adhoc/stats-YYYY-MM-DD.md`
   - 保留 `stats-YYYY-MM-DD-HHMM.md`（备份）以备对比
 - 全只读，对库无副作用
 
@@ -248,7 +248,7 @@ view: table
 
 ## 11. 自检清单
 
-- [ ] 总笔记数正确（不含 archive/system）
+- [ ] 总笔记数正确（不含 98_archive/system）
 - [ ] type / status / maturity / domain 分布加总 = 总数
 - [ ] 孤立率定义正确（无入链 AND 无出链）
 - [ ] KS Top 10 仅 maturity ≥ applied 参与
@@ -257,7 +257,7 @@ view: table
 - [ ] 低复用高占用阈值正确（confidence ≥ 70 AND reuse = 0）
 - [ ] inbox 周转时长含平均 / 中位数 / P90
 - [ ] 对比段引用上次 stats（若存在）
-- [ ] 报告路径正确：outputs/reviews/adhoc/stats-YYYY-MM-DD.md
+- [ ] 报告路径正确：05_outputs/reviews/adhoc/stats-YYYY-MM-DD.md
 - [ ] Obsidian Bases 段仅 Obsidian vault 启用时输出
 - [ ] 不修改任何笔记
 

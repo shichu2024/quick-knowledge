@@ -2,13 +2,13 @@
 name: quick-kb-archive
 description: |
   通用归档技能。安全归档任意对象（不限于 project/goal）：concept/resource/idea/decision 等。
-  状态检查 → 迁移到 archive/ → 更新指向归档对象的 wikilinks（避免死链）→ 可恢复。
+  状态检查 → 迁移到 98_archive/ → 更新指向归档对象的 wikilinks（避免死链）→ 可恢复。
   与 v0.3 project.archive 不同：本技能不触发 lesson 派生，纯归档操作。
   触发词（中文）：归档 / archive / 把 X 收起来
   Triggers (EN): archive / put away / move to archive
 version: v0.4
 phase: v0.4
-applies_to: 写 archive/ · 更新 wikilinks · 不删笔记
+applies_to: 写 98_archive/ · 更新 wikilinks · 不删笔记
 source_of_truth:
   - docs/DESIGN.md §10 / §6.1（status 流转）
   - docs/SKILLS_SPEC.md §11
@@ -44,7 +44,7 @@ source_of_truth:
 ### 做
 
 - 状态检查（提醒未关闭的关联项）
-- 迁移到 `archive/<type>/` 子目录
+- 迁移到 `98_archive/<type>/` 子目录
 - 更新指向归档对象的 wikilinks
 - status → archived
 - 生成归档记录（archive_index）
@@ -89,12 +89,12 @@ source_of_truth:
    - 用户确认后进入迁移
 
 4. 迁移：
-   - 决定目标路径：archive/<type>/<原相对路径>
-     · archive/concepts/<...>
-     · archive/resources/<...>
-     · archive/ideas/<...>
-     · archive/decisions/<...>（孤立 decision，非项目内）
-     · archive/materials/<...>（过期素材）
+   - 决定目标路径：98_archive/<type>/<原相对路径>
+     · 98_archive/concepts/<...>
+     · 98_archive/resources/<...>
+     · 98_archive/ideas/<...>
+     · 98_archive/decisions/<...>（孤立 decision，非项目内）
+     · 98_archive/materials/<...>（过期素材）
    - 移动文件（保留原相对结构）
 
 5. 更新原笔记 frontmatter：
@@ -108,11 +108,11 @@ source_of_truth:
    - 扫描全库含 [[X]] 的笔记
    - 在每处添加标注：「[[X]] (已归档)」
    - 不删除 wikilink（保持可追溯）
-   - 若 dead link 严格模式开启（kb.config.yaml）→ 改为 [[archive/<type>/X|X (已归档)]]
+   - 若 dead link 严格模式开启（kb.config.yaml）→ 改为 [[98_archive/<type>/X|X (已归档)]]
 
 7. 写入 archive_index：
-   archive/_index.md 追加：
-   - [[archive/<type>/<原路径>|<title>]] · 归档于 <date> · 原因：<reason>
+   98_archive/_index.md 追加：
+   - [[98_archive/<type>/<原路径>|<title>]] · 归档于 <date> · 原因：<reason>
 
 8. 输出汇总报告
 ```
@@ -125,7 +125,7 @@ source_of_truth:
 1. 解析 target（同 archive）
 
 2. 反向迁移：
-   archive/<type>/<...> → <原路径>
+   98_archive/<type>/<...> → <原路径>
    - 从 archive_meta 读原路径（若记录）
    - 若原路径已不存在 → 恢复到原位置
    - 若原路径已被新笔记占用 → 询问用户（覆盖 / 重命名 / 取消）
@@ -139,7 +139,7 @@ source_of_truth:
    - 移除「(已归档)」标注
    - 恢复 [[X]] 原形
 
-5. 从 archive/_index.md 移除条目
+5. 从 98_archive/_index.md 移除条目
 
 6. 输出报告
 ```
@@ -166,15 +166,15 @@ source_of_truth:
 ✅ 已归档：3 条笔记
 
 📋 处理详情：
-   - [[concept/X]] → archive/concepts/X.md
+   - [[concept/X]] → 98_archive/concepts/X.md
      · 被 5 处引用 → 已标注「(已归档)」
      · status: active → archived
-   - [[resource/Y]] → archive/resources/Y.md
+   - [[resource/Y]] → 98_archive/resources/Y.md
      · 被 0 处引用（无影响）
-   - [[idea/Z]] → archive/ideas/Z.md
+   - [[idea/Z]] → 98_archive/ideas/Z.md
      · 被 2 处引用 → 已标注
 
-📝 archive_index 已更新：archive/_index.md
+📝 archive_index 已更新：98_archive/_index.md
 ```
 
 ### unarchive 成功
@@ -183,7 +183,7 @@ source_of_truth:
 ✅ 已恢复：[[concept/X]] → concepts/X.md
    - status: archived → active
    - 5 处 wikilink 已恢复
-   - archive/_index.md 移除条目
+   - 98_archive/_index.md 移除条目
 ```
 
 ### check 输出
@@ -217,7 +217,7 @@ source_of_truth:
 | 缺失依赖 | 降级行为 |
 |---------|---------|
 | manager-agent 不可用 | wikilink 扫描降为全库 Grep `[[X]]` |
-| archive/ 目录不存在 | 自动创建 |
+| 98_archive/ 目录不存在 | 自动创建 |
 | archive_meta 字段缺失 | unarchive 时询问用户原位置 |
 | 原路径被占用（unarchive） | 询问用户：覆盖 / 重命名 / 取消 |
 
@@ -228,11 +228,11 @@ source_of_truth:
 - [ ] target 解析正确（单条/多条/wikilink）
 - [ ] check 模式不执行归档
 - [ ] archive 前用户确认（必须）
-- [ ] 迁移到正确的 archive/<type>/ 子目录
+- [ ] 迁移到正确的 98_archive/<type>/ 子目录
 - [ ] frontmatter status → archived
 - [ ] archive_meta 段记录 archived_at + reason + 原路径
 - [ ] 指向归档对象的 wikilinks 全部标注「(已归档)」
-- [ ] archive/_index.md 追加条目
+- [ ] 98_archive/_index.md 追加条目
 - [ ] unarchive 完整恢复（含 wikilink）
 - [ ] 已归档笔记二次归档报错
 - [ ] decision 类型提醒先走 project archive

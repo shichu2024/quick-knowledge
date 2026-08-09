@@ -6,7 +6,7 @@ description: |
   Triggers (EN): capture this / save this / clip this page / quick note / capture pdf
 version: v0.2
 phase: v0.2
-applies_to: inbox/
+applies_to: 00_inbox/
 source_of_truth:
   - docs/DESIGN.md §6.9（inbox 最小 frontmatter）· §9.2（obsidian-skills 依赖）
   - docs/SKILLS_SPEC.md §2
@@ -32,12 +32,12 @@ source_of_truth:
 
 | 源类型 | v0.1 | v0.2 | 流向 |
 |--------|------|------|------|
-| 纯文本想法 | ✓ | ✓ | `inbox/ideas/` |
-| URL（网页） | ✓ 基础 | ✓ defuddle | `inbox/clips/` + `_raw/` |
-| PDF / 文件 | ✗ | ✓ | `inbox/reading/` |
-| 会议转写 | ✗ | ✓ | `inbox/meetings/` |
-| AI 对话 | ✗ | ✓ | `inbox/ai-dialogs/` |
-| 阅读笔记 | ✗ | ✓ | `inbox/reading/` |
+| 纯文本想法 | ✓ | ✓ | `00_inbox/ideas/` |
+| URL（网页） | ✓ 基础 | ✓ defuddle | `00_inbox/clips/` + `_raw/` |
+| PDF / 文件 | ✗ | ✓ | `00_inbox/reading/` |
+| 会议转写 | ✗ | ✓ | `00_inbox/meetings/` |
+| AI 对话 | ✗ | ✓ | `00_inbox/ai-dialogs/` |
+| 阅读笔记 | ✗ | ✓ | `00_inbox/reading/` |
 
 **v0.2 仍不做**：主动提醒（memory 事件，DESIGN §7.6）→ v0.3
 
@@ -80,7 +80,7 @@ source_of_truth:
 #### 2b · web-clip（URL）
 
 1. **优先调 defuddle**（obsidian-skills/defuddle）抓干净正文
-2. **保留原始**：HTML 写入 `inbox/clips/_raw/YYYYMMDD-HHMM-<slug>.html`
+2. **保留原始**：HTML 写入 `00_inbox/clips/_raw/YYYYMMDD-HHMM-<slug>.html`
 3. **降级**：defuddle 不可用 → 基础 HTML→MD（去 `<script>/<style>/<nav>/<footer>/<aside>`，保留 `<article>/<main>/<section>`）
 4. **失败**：抓取失败（404/付费墙/超时）→ 仍写笔记，`partial: true`
 
@@ -112,21 +112,21 @@ source_of_truth:
 - 其他源：标题相似度 > 0.85（与近 7 天同子目录文件比对）→ 提示
 
 ```
-⚠ 疑似重复：inbox/clips/20260809-1000-<existing>.md（相似度 0.92）
+⚠ 疑似重复：00_inbox/clips/20260809-1000-<existing>.md（相似度 0.92）
   - [合并] / [新建] / [取消]
 ```
 
 ### 步骤 4 · 生成文件名
 
-`inbox/<source-dir>/YYYYMMDD-HHMM-<slug>.md`
+`00_inbox/<source-dir>/YYYYMMDD-HHMM-<slug>.md`
 
 | source_type | 子目录 |
 |-------------|--------|
-| idea | `inbox/ideas/` |
-| web-clip | `inbox/clips/` |
-| pdf / reading | `inbox/reading/` |
-| meeting | `inbox/meetings/` |
-| ai-dialog | `inbox/ai-dialogs/` |
+| idea | `00_inbox/ideas/` |
+| web-clip | `00_inbox/clips/` |
+| pdf / reading | `00_inbox/reading/` |
+| meeting | `00_inbox/meetings/` |
+| ai-dialog | `00_inbox/ai-dialogs/` |
 
 `<slug>` kebab-case，限 40 字符。重名追加 `-2`/`-3`。
 
@@ -155,12 +155,12 @@ partial: false             # 抓取/解析不全时改 true
 ### 步骤 6 · 反馈输出
 
 ```
-✓ 已采集（{{source_type}} · inbox/{{dir}}/20260809-1430-<slug>.md）
+✓ 已采集（{{source_type}} · 00_inbox/{{dir}}/20260809-1430-<slug>.md）
   标题：{{生成的标题}}
   候选标签：{{suggested_tags}}
   partial: {{true|false}}
   下一步：
-    → quick-kb-ingest inbox/{{dir}}/20260809-1430-<slug>.md
+    → quick-kb-ingest 00_inbox/{{dir}}/20260809-1430-<slug>.md
 ```
 
 ---

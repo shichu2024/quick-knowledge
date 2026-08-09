@@ -1,12 +1,12 @@
 ---
 name: quick-kb-connect
 description: |
-  建立双链、生成 MOC、绘制知识地图（canvas）。调用 manager-agent 的 recommend_relations/build_moc；写入类型化 relations（不再写扁平 related）；生成 wiki/mocs/<domain>-moc.md；接 json-canvas 生成 .canvas（Obsidian 缺失跳过）。
+  建立双链、生成 MOC、绘制知识地图（canvas）。调用 manager-agent 的 recommend_relations/build_moc；写入类型化 relations（不再写扁平 related）；生成 06_wiki/mocs/<domain>-moc.md；接 json-canvas 生成 .canvas（Obsidian 缺失跳过）。
   触发词（中文）：连一下 / 建个 MOC / 给这领域建索引 / 画个知识地图 / 连接笔记
   Triggers (EN): connect these / build moc / map this domain / link notes
 version: v0.2
 phase: v0.2
-applies_to: wiki/ + 各笔记 frontmatter.relations
+applies_to: 06_wiki/ + 各笔记 frontmatter.relations
 source_of_truth:
   - docs/DESIGN.md §6.7（关系类型化）· §9.2（obsidian-skills）
   - docs/SKILLS_SPEC.md §4
@@ -33,9 +33,9 @@ source_of_truth:
 
 - 调 manager-agent.recommend_relations 推荐类型化关系
 - 写入 `relations`（supports/contradicts/evolves/supersedes），不再写扁平 `related`
-- 调 manager-agent.build_moc 生成 `wiki/mocs/<domain>-moc.md`
-- 接 json-canvas 生成 `wiki/maps/<domain>.canvas`（Obsidian 缺失跳过）
-- 更新 `wiki/_index.md` 全局导航
+- 调 manager-agent.build_moc 生成 `06_wiki/mocs/<domain>-moc.md`
+- 接 json-canvas 生成 `06_wiki/maps/<domain>.canvas`（Obsidian 缺失跳过）
+- 更新 `06_wiki/_index.md` 全局导航
 
 ### 不做
 
@@ -60,14 +60,14 @@ source_of_truth:
 
 解析 `scope`：
 
-- 领域名（如 `ai-engineering`）→ 扫描 `areas/<scope>/` 全部笔记
+- 领域名（如 `ai-engineering`）→ 扫描 `02_areas/<scope>/` 全部笔记
 - 某条笔记路径 → 扫描该笔记 + 同 domain 的候选池
 - 某标签 → 扫描全库含该标签的笔记
 
 输出候选清单：
 
 ```
-范围：areas/ai-engineering/（12 条笔记）
+范围：02_areas/ai-engineering/（12 条笔记）
 action：all
 开始处理…
 ```
@@ -114,7 +114,7 @@ manager_agent.recommend_relations(
 manager_agent.build_moc(
   payload: { scope: "{{domain}}" }
 ) → {
-  found: [{ path: "wiki/mocs/<domain>-moc.md", action: "created" | "updated" }]
+  found: [{ path: "06_wiki/mocs/<domain>-moc.md", action: "created" | "updated" }]
 }
 ```
 
@@ -131,12 +131,12 @@ manager_agent.build_moc(
 ### 步骤 4 · 知识地图（action=canvas 或 all）
 
 1. 探测 json-canvas 技能是否可用
-2. 可用 → 调用生成 `wiki/maps/<domain>.canvas`，节点 = 笔记、边 = relations（按类型着色）
+2. 可用 → 调用生成 `06_wiki/maps/<domain>.canvas`，节点 = 笔记、边 = relations（按类型着色）
 3. 不可用 → 跳过，报告「Obsidian-skills 缺失，仅产出 MOC；安装后运行 connect action=canvas 补全」
 
 ### 步骤 5 · 更新全局导航
 
-更新 `wiki/_index.md`：
+更新 `06_wiki/_index.md`：
 
 - 主题 MOC 段加入新 MOC wikilink
 - 最近段可选更新
@@ -155,11 +155,11 @@ manager_agent.build_moc(
     ⏭ 跳过（相似度 < 阈值）× M
 
   MOC：
-    ✓ wiki/mocs/ai-engineering-moc.md（新建 / 更新）
+    ✓ 06_wiki/mocs/ai-engineering-moc.md（新建 / 更新）
     聚类：RAG (4) · Agent (3) · 工具调用 (2) · 待补充 (1)
 
   Canvas：
-    ✓ wiki/maps/ai-engineering.canvas
+    ✓ 06_wiki/maps/ai-engineering.canvas
     （或：⏭ Obsidian 缺失，跳过）
 
   下一步：
@@ -177,11 +177,11 @@ manager_agent.build_moc(
 
 ### 5.2 MOC 路径
 
-`wiki/mocs/<domain>-moc.md`
+`06_wiki/mocs/<domain>-moc.md`
 
 ### 5.3 Canvas 路径
 
-`wiki/maps/<domain>.canvas`（Obsidian 缺失时不创建）
+`06_wiki/maps/<domain>.canvas`（Obsidian 缺失时不创建）
 
 ---
 
@@ -217,7 +217,7 @@ manager_agent.build_moc(
 - [ ] MOC 模板对齐 `templates/zh/moc.md`
 - [ ] 既有 MOC 的人工修订段被保留
 - [ ] Canvas 在 Obsidian 缺失时正确跳过
-- [ ] 全局导航 `wiki/_index.md` 已更新
+- [ ] 全局导航 `06_wiki/_index.md` 已更新
 
 ---
 

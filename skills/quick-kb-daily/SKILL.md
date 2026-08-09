@@ -6,7 +6,7 @@ description: |
   Triggers (EN): daily log / today's notes / log today
 version: v0.1
 phase: v0.1
-applies_to: outputs/daily/YYYY/MM/
+applies_to: 05_outputs/daily/YYYY/MM/
 source_of_truth:
   - docs/DESIGN.md §6（frontmatter）· §8（模板）
   - docs/SKILLS_SPEC.md §8
@@ -30,7 +30,7 @@ source_of_truth:
 
 ### 做
 
-- 加载/创建 `outputs/daily/YYYY/MM/YYYY-MM-DD.md`
+- 加载/创建 `05_outputs/daily/YYYY/MM/YYYY-MM-DD.md`
 - 4 段拆分：做了什么 / 学到什么 / 想法 / 卡点
 - **反问机制**（最多 2 轮，不变成问卷）
 - wikilinks 自动抽取（识别已有笔记标题）
@@ -58,7 +58,7 @@ source_of_truth:
 
 ### 步骤 1 · 加载或创建日志文件
 
-- 路径：`outputs/daily/YYYY/MM/YYYY-MM-DD.md`
+- 路径：`05_outputs/daily/YYYY/MM/YYYY-MM-DD.md`
 - 月份子目录不存在 → 创建（含 `.gitkeep`）
 - 文件不存在 → 基于 [`templates/zh/daily.md`](../../templates/zh/daily.md) 创建
 - 文件已存在 → 加载现有内容；`append=true` 时追加，`false` 时提示是否覆盖（默认不覆盖）
@@ -98,7 +98,7 @@ source_of_truth:
 
 ### 步骤 4 · wikilinks 自动抽取
 
-1. 扫描库内已有笔记标题（v0.1 范围：`areas/`、`resources/`、`projects/`、`goals/`、`outputs/decisions/`、`outputs/daily/`）。
+1. 扫描库内已有笔记标题（v0.1 范围：`02_areas/`、`01_resources/`、`04_projects/`、`03_goals/`、`05_outputs/decisions/`、`05_outputs/daily/`）。
 2. 用户文本中出现某标题（或强别名）→ 自动转 `[[标题]]`。
 3. **幂等**：已是 `[[...]]` 的不重复转换。
 4. 标题冲突（多个同名笔记）→ 选最近 updated 的一条，加脚注。
@@ -151,7 +151,7 @@ source_of_truth:
 ### 步骤 7 · 反馈输出
 
 ```
-✓ 日志已更新：outputs/daily/2026/08/2026-08-09.md
+✓ 日志已更新：05_outputs/daily/2026/08/2026-08-09.md
   追加：做了什么 ×N / 学到什么 ×N / 想法 ×N / 卡点 ×N
   wikilinks：[[项目 X]]、[[某 concept]]
   待入库候选：N 条（见文件末尾「待入库」段）
@@ -166,7 +166,7 @@ source_of_truth:
 
 ### 5.1 路径
 
-`outputs/daily/YYYY/MM/YYYY-MM-DD.md`
+`05_outputs/daily/YYYY/MM/YYYY-MM-DD.md`
 
 ### 5.2 frontmatter
 
@@ -276,5 +276,5 @@ source_of_truth:
 |--------|------|-----------|
 | 不更新 weekly review 锚点 | v0.2 才有 review 技能 | dev/v0.1-mvp.md WP5；SKILLS_SPEC §8 step 6 推迟 |
 | 不主动提醒 | memory 事件在 v0.3 | 同上 |
-| wikilinks 仅扫 v0.1 范围目录 | v0.1 仅有 areas/resources/projects/goals/outputs | 设计文档 §4 目录适用范围 |
+| wikilinks 仅扫 v0.1 范围目录 | v0.1 仅有 02_areas/01_resources/04_projects/03_goals/05_outputs | 设计文档 §4 目录适用范围 |
 | frontmatter 不写 confidence/domain | daily 笔记通常无领域与置信度 | DESIGN §6.4 daily 属文档型，无 maturity；frontmatter-v0.1.md §2 字段均为可选 |

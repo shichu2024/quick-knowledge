@@ -154,7 +154,7 @@ RAG 的核心是检索后生成 [[RAG 架构设计]]。
 
 ### 步骤 7 · 落查询日志
 
-每次 query 写入 `system/workflows/.query-log.jsonl`（追加）：
+每次 query 写入 `99_system/workflows/.query-log.jsonl`（追加）：
 
 ```json
 {

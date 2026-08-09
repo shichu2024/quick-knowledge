@@ -31,7 +31,7 @@ source_of_truth:
 | 参数 | 必填 | 默认 | 说明 |
 |------|------|------|------|
 | `language` | 否 | `zh` | 模板语言：`zh` / `en`（v0.1 仅铺设 `zh`） |
-| `domains` | 否 | `["general"]` | 初始领域列表，用于创建 `areas/<domain>/` 子目录 |
+| `domains` | 否 | `["general"]` | 初始领域列表，用于创建 `02_areas/<domain>/` 子目录 |
 | `obsidian` | 否 | 自动探测 | 是否生成 `.obsidian/` 基础配置（v0.1 不处理，留给 v0.2） |
 | `vault_root` | 否 | 当前工作目录 | vault 根路径；不传则在 CWD 创建 |
 
@@ -43,15 +43,15 @@ source_of_truth:
 
 ### 步骤 1 · 前置检查（幂等守门）
 
-1. 检查 `vault_root` 下是否已存在 `.kb-initialized` 标记文件或 `system/` 目录。
+1. 检查 `vault_root` 下是否已存在 `.kb-initialized` 标记文件或 `99_system/` 目录。
 2. **若已初始化**：
    - 不覆盖任何文件。
    - 输出提示：
 
    ```
    ⚠ 已检测到 quick-knowledge vault（初始化于 2026-08-08，版本 v0.1）。
-     - 如需重新初始化，请手动删除 .kb-initialized 与 system/ 后重试。
-     - 如需升级配置，编辑 system/config/kb.config.yaml。
+     - 如需重新初始化，请手动删除 .kb-initialized 与 99_system/ 后重试。
+     - 如需升级配置，编辑 99_system/config/kb.config.yaml。
    ```
 
    - 结束流程。
@@ -65,7 +65,7 @@ source_of_truth:
 骨架清单（按创建顺序）：
 
 ```
-inbox/
+00_inbox/
 ├── ideas/
 ├── clips/
 │   └── _raw/              # 原始抓取保留区
@@ -73,30 +73,30 @@ inbox/
 ├── ai-dialogs/
 └── reading/
 
-projects/
+04_projects/
 └── _template/             # 项目模板占位
 
-resources/
+01_resources/
 ├── articles/
 ├── books/
 ├── courses/
 └── repos/
 
-areas/
+02_areas/
 └── <domain>/              # 对每个用户输入 domain 创建；至少 general
     └── _moc.md            # 领域 MOC 占位（含模板头）
 
-principles/
+07_principles/
 ├── principles/
 ├── beliefs/
 ├── patterns/
 └── experiences/
 
-wiki/
+06_wiki/
 ├── mocs/
 └── maps/
 
-outputs/
+05_outputs/
 ├── daily/                 # YYYY/MM/ 由 daily 技能动态创建
 ├── reviews/
 │   ├── weekly/
@@ -106,9 +106,9 @@ outputs/
 ├── decisions/
 └── works/
 
-goals/
+03_goals/
 
-system/
+99_system/
 ├── skills/                # 软链或复制本框架技能（v0.1 仅创建空目录）
 ├── agents/                # v0.2+ 才有 agent 文件
 ├── templates/
@@ -119,7 +119,7 @@ system/
 ├── prompts/
 └── config/
 
-archive/
+98_archive/
 ├── projects/
 ├── goals/
 ├── reviews/
@@ -128,7 +128,7 @@ archive/
 
 ### 步骤 3 · 生成系统文件
 
-#### 3.1 `system/config/kb.config.yaml`（最小版）
+#### 3.1 `99_system/config/kb.config.yaml`（最小版）
 
 ```yaml
 # quick-knowledge vault 配置 · 由 quick-kb-init 生成
@@ -136,7 +136,7 @@ archive/
 
 language: zh                       # zh | en（模板语言）
 default_domain: general            # 默认领域
-domains:                           # 已注册领域（与 areas/ 子目录对应）
+domains:                           # 已注册领域（与 02_areas/ 子目录对应）
   - general
 # tags_vocabulary:                 # v0.4 启用（受控标签词表）
 # review:                          # v0.2 启用
@@ -147,7 +147,7 @@ domains:                           # 已注册领域（与 areas/ 子目录对�
 #   enabled: true
 ```
 
-#### 3.2 `system/templates/zh/` 下铺设 4 个 v0.1 模板
+#### 3.2 `99_system/templates/zh/` 下铺设 4 个 v0.1 模板
 
 复制仓库 `templates/zh/` 下的：
 
@@ -158,7 +158,7 @@ domains:                           # 已注册领域（与 areas/ 子目录对�
 
 若仓库本身被克隆安装，则从仓库根 `templates/zh/` 复制；若 runtime 提供 inline 内嵌，按 SKILL 提示词内嵌版本写入。**已存在同名文件则跳过，不覆盖。**
 
-#### 3.3 `wiki/_index.md`（全局导航页占位）
+#### 3.3 `06_wiki/_index.md`（全局导航页占位）
 
 ```markdown
 ---
@@ -175,7 +175,7 @@ tags:
 > quick-knowledge vault 索引页。MOC 生成（v0.2）后将自动填充。
 
 ## 领域
-- [[areas/general/_moc|General]]
+- [[02_areas/general/_moc|General]]
 
 ## 主题 MOC
 - _（待 quick-kb-connect 生成）_
@@ -184,7 +184,7 @@ tags:
 - _（待 quick-kb-review 列出）_
 ```
 
-#### 3.4 `inbox/_readme.md`（inbox 用法说明）
+#### 3.4 `00_inbox/_readme.md`（inbox 用法说明）
 
 ```markdown
 # Inbox · 采集入口
@@ -204,11 +204,11 @@ tags:
 ## 工作流
 
 1. `quick-kb-capture "想记的东西"` → 写入 inbox 子目录
-2. `quick-kb-ingest inbox/clips/某条.md` → 入库到 areas/resources
+2. `quick-kb-ingest 00_inbox/clips/某条.md` → 入库到 02_areas/resources
 3. inbox 原始素材**永不删除**，由 review 闭环统一清理
 ```
 
-#### 3.5 `areas/<domain>/_moc.md`（每个领域一份）
+#### 3.5 `02_areas/<domain>/_moc.md`（每个领域一份）
 
 ```markdown
 ---
@@ -243,7 +243,7 @@ domain: {{domain}}
 ## 快速开始
 
 1. **采集**：`quick-kb-capture "想法"` 或 `quick-kb-capture <URL>`
-2. **入库**：`quick-kb-ingest inbox/`
+2. **入库**：`quick-kb-ingest 00_inbox/`
 3. **日志**：`quick-kb-daily`
 
 完整指南见 [docs/quick-start.md](docs/quick-start.md)（v0.4 提供）。
@@ -254,7 +254,7 @@ domain: {{domain}}
 
 ## 配置
 
-编辑 [system/config/kb.config.yaml](system/config/kb.config.yaml)。
+编辑 [99_system/config/kb.config.yaml](99_system/config/kb.config.yaml)。
 ```
 
 ### 步骤 5 · 写入 `.kb-initialized` 标记
@@ -281,11 +281,11 @@ runtime_hint: {{auto-detected}}
 
   创建目录：N 个（含 .gitkeep）
   系统文件：
-    - system/config/kb.config.yaml
-    - system/templates/zh/ × 4
-    - wiki/_index.md
-    - inbox/_readme.md
-    - areas/{{domain}}/_moc.md × N
+    - 99_system/config/kb.config.yaml
+    - 99_system/templates/zh/ × 4
+    - 06_wiki/_index.md
+    - 00_inbox/_readme.md
+    - 02_areas/{{domain}}/_moc.md × N
     - _readme.md（vault 根）
     - .kb-initialized
 
@@ -302,16 +302,16 @@ runtime_hint: {{auto-detected}}
 
 | 目录 | v0.1 是否使用 | 使用者 |
 |------|--------------|--------|
-| `inbox/ideas/`, `inbox/clips/` | ✓ | capture / ingest |
-| `inbox/meetings/`, `ai-dialogs/`, `reading/` | 创建但不写 | v0.2 capture |
-| `areas/<domain>/` | ✓ | ingest |
-| `resources/` | ✓ | ingest |
-| `outputs/daily/` | ✓ | daily |
-| `outputs/reviews/`, `decisions/`, `works/` | 创建但不写 | v0.2+ review/project |
-| `principles/` | 创建但不写 | v0.3 认知资产 |
-| `projects/`, `goals/`, `wiki/mocs/`, `wiki/maps/` | 创建但不写 | v0.2+ connect / v0.3 goal/project |
-| `archive/` | 创建但不写 | v0.3+ project / v0.4 archive |
-| `system/templates/en/` | 创建空目录 | v0.2 英文模板 |
+| `00_inbox/ideas/`, `00_inbox/clips/` | ✓ | capture / ingest |
+| `00_inbox/meetings/`, `ai-dialogs/`, `reading/` | 创建但不写 | v0.2 capture |
+| `02_areas/<domain>/` | ✓ | ingest |
+| `01_resources/` | ✓ | ingest |
+| `05_outputs/daily/` | ✓ | daily |
+| `05_outputs/reviews/`, `decisions/`, `works/` | 创建但不写 | v0.2+ review/project |
+| `07_principles/` | 创建但不写 | v0.3 认知资产 |
+| `04_projects/`, `03_goals/`, `06_wiki/mocs/`, `06_wiki/maps/` | 创建但不写 | v0.2+ connect / v0.3 goal/project |
+| `98_archive/` | 创建但不写 | v0.3+ project / v0.4 archive |
+| `99_system/templates/en/` | 创建空目录 | v0.2 英文模板 |
 
 > **理由**：完整骨架让用户从 day 1 看到最终形态，避免后续升级时频繁迁移目录结构。v0.1 不使用的目录靠 `_moc.md` 占位或 `.gitkeep` 标注用途。
 
@@ -322,7 +322,7 @@ runtime_hint: {{auto-detected}}
 - **不创建任何笔记内容** —— 只铺骨架 + 占位文件。
 - **不破坏既有文件** —— 同名文件跳过，输出跳过列表。
 - **不接入 Obsidian** —— `.obsidian/` 配置在 v0.2 引入 obsidian-skills 后启用。
-- **不生成 agent 文件** —— `system/agents/` 在 v0.2 起由对应阶段填充。
+- **不生成 agent 文件** —— `99_system/agents/` 在 v0.2 起由对应阶段填充。
 
 ## 6. 降级路径
 
@@ -338,9 +338,9 @@ runtime_hint: {{auto-detected}}
 ## 7. 自检清单（执行后）
 
 - [ ] vault 根含 `.kb-initialized` 与 `_readme.md`
-- [ ] `system/config/kb.config.yaml` 存在且 `language` 字段有效
-- [ ] `system/templates/zh/` 含 4 个模板文件
-- [ ] `inbox/`、`areas/`、`resources/`、`principles/`、`wiki/`、`outputs/`、`goals/`、`projects/`、`archive/`、`system/` 顶层目录齐全
+- [ ] `99_system/config/kb.config.yaml` 存在且 `language` 字段有效
+- [ ] `99_system/templates/zh/` 含 4 个模板文件
+- [ ] `00_inbox/`、`02_areas/`、`01_resources/`、`07_principles/`、`06_wiki/`、`05_outputs/`、`03_goals/`、`04_projects/`、`98_archive/`、`99_system/` 顶层目录齐全
 - [ ] 每个空叶子目录含 `.gitkeep`
 - [ ] 每个领域至少一个 `_moc.md`
 - [ ] 二次执行：提示已初始化，不覆盖

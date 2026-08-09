@@ -6,7 +6,7 @@ description: |
   Triggers (EN): weekly review / monthly review / kb health check
 version: v0.2
 phase: v0.2
-applies_to: outputs/reviews/<period>/ + 各笔记 value.reuse
+applies_to: 05_outputs/reviews/<period>/ + 各笔记 value.reuse
 source_of_truth:
   - docs/DESIGN.md §6.6（价值维度）· §7.1（manager）
   - docs/SKILLS_SPEC.md §7
@@ -60,8 +60,8 @@ source_of_truth:
 
 | period | 数据源 |
 |--------|--------|
-| daily | outputs/daily/YYYY/MM/YYYY-MM-DD.md |
-| weekly | outputs/daily/YYYY/MM/ 当周 + projects/*/notes 当周更新 |
+| daily | 05_outputs/daily/YYYY/MM/YYYY-MM-DD.md |
+| weekly | 05_outputs/daily/YYYY/MM/ 当周 + 04_projects/*/notes 当周更新 |
 | monthly | weekly 复盘 + 全月 daily |
 | quarterly | monthly 复盘聚合 |
 | yearly | quarterly 复盘聚合 |
@@ -75,7 +75,7 @@ source_of_truth:
 manager_agent.refresh_value(
   payload: {
     snapshot: {{全库快照}},
-    query_log: {{读取 system/workflows/.query-log.jsonl}}
+    query_log: {{读取 99_system/workflows/.query-log.jsonl}}
   }
 ) → {
   found: [{ path: "...", new_reuse: 12, old_reuse: 8 }, ...]
@@ -109,11 +109,11 @@ manager_agent.refresh_value(
 #### 3.4 project 维度
 
 - 活跃项目进度偏离
-- 阻塞项（projects/*/notes 中 status=blocked 或含「卡点」关键词）
+- 阻塞项（04_projects/*/notes 中 status=blocked 或含「卡点」关键词）
 
 #### 3.5 goal 维度
 
-- 目标进展（goals/*/progress/）
+- 目标进展（03_goals/*/progress/）
 - 学习路径完成度（v0.3 goal 技能完善）
 
 #### 3.6 daily 维度
@@ -123,7 +123,7 @@ manager_agent.refresh_value(
 
 ### 步骤 4 · 生成健康报告
 
-写入 `outputs/reviews/<period>/YYYY-Wxx.md`（weekly）/ `YYYY-MM.md`（monthly）/ 以此类推。
+写入 `05_outputs/reviews/<period>/YYYY-Wxx.md`（weekly）/ `YYYY-MM.md`（monthly）/ 以此类推。
 
 #### 健康指标表
 
@@ -183,7 +183,7 @@ manager_agent.refresh_value(
 
 ```
 ✓ Review 完成（period: weekly, range: 2026-W32）
-  报告：outputs/reviews/weekly/2026-W32.md
+  报告：05_outputs/reviews/weekly/2026-W32.md
   价值刷新：N 条笔记 value.reuse 更新
   待办：6 项（高 × 2 / 中 × 3 / 低 × 1）
 
@@ -197,11 +197,11 @@ manager_agent.refresh_value(
 
 ### 5.1 报告路径
 
-- weekly：`outputs/reviews/weekly/YYYY-Wxx.md`
-- monthly：`outputs/reviews/monthly/YYYY-MM.md`
-- quarterly：`outputs/reviews/quarterly/YYYY-Qx.md`
-- yearly：`outputs/reviews/yearly/YYYY.md`
-- adhoc：`outputs/reviews/adhoc/YYYY-MM-DD.md`
+- weekly：`05_outputs/reviews/weekly/YYYY-Wxx.md`
+- monthly：`05_outputs/reviews/monthly/YYYY-MM.md`
+- quarterly：`05_outputs/reviews/quarterly/YYYY-Qx.md`
+- yearly：`05_outputs/reviews/yearly/YYYY.md`
+- adhoc：`05_outputs/reviews/adhoc/YYYY-MM-DD.md`
 
 ### 5.2 报告结构
 
