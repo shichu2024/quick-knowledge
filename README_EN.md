@@ -153,6 +153,7 @@ quick-knowledge/
 | v0.4 | extensions | ✅ Done | normalize/archive/stats/import + kb.config + multilingual README |
 | v1.0 | release | ✅ Done | CONTRIBUTING/COMMUNITY/LICENSE + CI + demo-vault release |
 | v1.1 | flow-restructure | ✅ Done | Top-level `NN_` prefix + absolute-path hard ban (⚠️ BREAKING) |
+| v1.2 | ai-polish | ✅ Done | AI polish proposal for user-typed capture / daily entries (3-way choice) |
 
 See [docs/](./docs/).
 

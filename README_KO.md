@@ -94,6 +94,7 @@ KS = confidence × log2(1 + reuse) × impact
 | v0.4 extensions | ✅ | normalize/archive/stats/import + kb.config + 다국어 README |
 | v1.0 release | ✅ | CONTRIBUTING/LICENSE + CI + demo-vault 공개 |
 | v1.1 flow-restructure | ✅ | 최상위 `NN_` 접두사 + 절대 경로 하드 제약 (⚠️ BREAKING) |
+| v1.2 ai-polish | ✅ | capture / daily 사용자 직접 입력에 대한 AI 윤문 제안 (3선택) |
 
 ---
 

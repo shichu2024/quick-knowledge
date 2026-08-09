@@ -94,6 +94,7 @@ KS = confidence × log2(1 + reuse) × impact
 | v0.4 extensions | ✅ | normalize/archive/stats/import + kb.config + README multilingüe |
 | v1.0 release | ✅ | CONTRIBUTING/LICENSE + CI + publicación demo-vault |
 | v1.1 flow-restructure | ✅ | Prefijo `NN_` en nivel superior + prohibición de rutas absolutas (⚠️ BREAKING) |
+| v1.2 ai-polish | ✅ | Propuesta de pulido por IA para entradas de capture / daily escritas por el usuario (3 opciones) |
 
 ---
 

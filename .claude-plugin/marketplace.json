@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "quick-knowledge",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Personal Knowledge Base × AI Skill Framework — distill fragmented information into reusable personal assets. Six closed loops + 3 agents (manager / research / memory).",
   "owner": {
     "name": "shichu2024",
@@ -76,7 +76,8 @@
     "v0.3": { "codename": "assistant", "status": "released" },
     "v0.4": { "codename": "extensions", "status": "released" },
     "v1.0": { "codename": "release", "status": "released" },
-    "v1.1": { "codename": "flow-restructure", "status": "released" }
+    "v1.1": { "codename": "flow-restructure", "status": "released" },
+    "v1.2": { "codename": "ai-polish", "status": "released" }
   },
   "install": {
     "one_liner": "npx skills add shichu2024/quick-knowledge",

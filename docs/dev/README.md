@@ -19,6 +19,7 @@
 | **v0.4** | `extensions` | 运维扩展 + 国际化 | normalize / archive / stats / import + config 完整 + README 多语言 |
 | **v1.0** | `release` | 对外发布 | 完整文档/示例 + CONTRIBUTING/COMMUNITY + marketplace |
 | **v1.1** | `flow-restructure` | 目录流转制 + 路径硬约束 | 顶层目录 `NN_` 前缀 + source.url 绝对路径禁令（⚠️ BREAKING） |
+| **v1.2** | `ai-polish` | 用户手敲输入的 AI 润色提议 | capture 步骤 2.5 + daily 步骤 3.5 + 三选一确认 + 原文保存 |
 
 ---
 
@@ -159,6 +160,7 @@ WP 标记：`WPn · <名称>`，每个 WP 含：交付物、依赖、关键实�
 - [`v0.4-extensions.md`](./v0.4-extensions.md) —— 扩展与多语言
 - [`v1.0-release.md`](./v1.0-release.md) —— 发布
 - [`v1.1-restructure.md`](./v1.1-restructure.md) —— 目录流转制 + 路径硬约束（迁移指南）
+- [`v1.2-ai-polish.md`](./v1.2-ai-polish.md) —— AI 润色提议（capture / daily）
 
 ---
 

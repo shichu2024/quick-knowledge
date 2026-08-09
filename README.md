@@ -173,6 +173,7 @@ quick-knowledge/
 | v0.4 | extensions | ✅ 已完成 | normalize/archive/stats/import + kb.config 完整 + 多语言 README |
 | v1.0 | release | ✅ 已完成 | CONTRIBUTING/COMMUNITY/LICENSE + CI + demo-vault 发布 |
 | v1.1 | flow-restructure | ✅ 已完成 | 顶层目录 `NN_` 前缀 + 路径硬约束（⚠️ BREAKING） |
+| v1.2 | ai-polish | ✅ 已完成 | capture / daily 用户手敲输入的 AI 润色提议（三选一） |
 
 详见 [docs/](./docs/) 目录。
 
