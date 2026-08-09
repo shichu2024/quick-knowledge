@@ -24,7 +24,7 @@ It solves three things:
 
 ```
 You: "Grab this article https://example.com/rag-best-practices"
-→ quick-kb-capture: HTML → Markdown, writes to inbox/
+→ quick-kb-capture: HTML → Markdown, writes to 00_inbox/
 
 You: "Ingest this one"
 → quick-kb-ingest: extracts atomic viewpoints, suggests concept tags + relations

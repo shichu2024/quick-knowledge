@@ -27,7 +27,7 @@ source_of_truth:
 | intent | v0.2 | v0.3 | 输入 | 输出 |
 |--------|------|------|------|------|
 | `tidy_inbox` | ✓ | ✓ | inbox 笔记列表 | 聚类 + 入库优先级排序 |
-| `build_moc` | ✓ | ✓ | 领域名 / 标签 | MOC 笔记（写入 `wiki/mocs/`） |
+| `build_moc` | ✓ | ✓ | 领域名 / 标签 | MOC 笔记（写入 `06_wiki/mocs/`） |
 | `recommend_relations` | ✓ | ✓ | 单条笔记 | 候选 `relations.{supports/evolves}` 列表 |
 | `detect_orphans` | ✓ | ✓ | 全库快照 | 孤立笔记清单（无入链无出链） |
 | `repair_deadlinks` | ✓ | ✓ | 全库快照 | 死链清单 + 修复建议 |
@@ -101,7 +101,7 @@ manager_agent(
 4. 检测缺口：某聚类笔记数 < 3 → 标「待补充」
 
 **输出**：
-- MOC 笔记写入 `wiki/mocs/<domain>-moc.md`，基于 [`templates/zh/moc.md`](../templates/zh/moc.md)
+- MOC 笔记写入 `06_wiki/mocs/<domain>-moc.md`，基于 [`templates/zh/moc.md`](../templates/zh/moc.md)
 - 已存在 MOC → diff merge（保留人工修订章节，仅刷新自动生成区）
 
 **示例**：
@@ -109,7 +109,7 @@ manager_agent(
 ```
 manager_agent.build_moc(payload: { scope: "ai-engineering" })
  → {
-     found: [{ path: "wiki/mocs/ai-engineering-moc.md", action: "created" }],
+     found: [{ path: "06_wiki/mocs/ai-engineering-moc.md", action: "created" }],
      reasoning: "扫描 12 条 ai-engineering 笔记，聚为 3 类：RAG/Agent/工具调用"
    }
 ```

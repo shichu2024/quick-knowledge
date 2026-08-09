@@ -333,7 +333,7 @@ score = 0.68^0.45 × 0.836^0.20 × 1.0^0.15 × 0.85^0.20
 |---------|---------|
 | 库内笔记 < 50 条 | `proactive_suggest` 全部关闭；其他 intent 返回 `degraded: true` + reasoning：「库内经验不足，以下基于有限样本」 |
 | 无 embedding 服务 | similarity 降为「标签 Jaccard + 标题关键词重叠」（权重各 0.5） |
-| principles/ 目录不存在 | check_beliefs 返回空 + reasoning「未启用认知资产层」 |
+| 07_principles/ 目录不存在 | check_beliefs 返回空 + reasoning「未启用认知资产层」 |
 | memory-agent 完全不可用 | 调用方技能（advisor/project/goal）退化为「只查 concept 不调经验」的 RAG，并明确告知用户 |
 
 ---

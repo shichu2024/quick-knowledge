@@ -24,7 +24,7 @@
 
 ```
 你：「抓一下这篇 https://example.com/rag-best-practices」
-→ quick-kb-capture：网页正文 → Markdown，写入 inbox/
+→ quick-kb-capture：网页正文 → Markdown，写入 00_inbox/
 
 你：「入库这条」
 → quick-kb-ingest：抽取原子观点，建议 concept 标签与关系，写入 concepts/
