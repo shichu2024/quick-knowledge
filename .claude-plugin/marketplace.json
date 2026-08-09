@@ -1,7 +1,12 @@
 {
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "quick-knowledge",
   "version": "1.0.0",
-  "description": "Personal Knowledge Base × AI Skill Framework — distill fragmented information into reusable personal assets.",
+  "description": "Personal Knowledge Base × AI Skill Framework — distill fragmented information into reusable personal assets. Six closed loops + 3 agents (manager / research / memory).",
+  "owner": {
+    "name": "shichu2024",
+    "url": "https://github.com/shichu2024"
+  },
   "publisher": "shichu2024",
   "homepage": "https://github.com/shichu2024/quick-knowledge",
   "repository": {
@@ -22,6 +27,27 @@
     "codex",
     "cursor",
     "opencode"
+  ],
+  "plugins": [
+    {
+      "name": "quick-knowledge",
+      "description": "Personal Knowledge Base × AI Skill Framework. 14 skills (Capture/Ingest/Normalize/Connect/Query/Review/Advisor/Project/Goal/Archive/Stats/Import + Init/Daily) + 3 agents (manager/research/memory). Six closed loops distill fragmented info into reusable cognitive assets.",
+      "displayName": "quick-knowledge",
+      "author": {
+        "name": "shichu2024",
+        "url": "https://github.com/shichu2024"
+      },
+      "category": "productivity",
+      "source": "./",
+      "homepage": "https://github.com/shichu2024/quick-knowledge",
+      "license": "MIT",
+      "tags": [
+        "knowledge-management",
+        "agent-skills",
+        "personal-knowledge-base",
+        "obsidian"
+      ]
+    }
   ],
   "skills": [
     { "name": "quick-kb-init", "path": "skills/quick-kb-init/" },
@@ -53,6 +79,7 @@
   },
   "install": {
     "one_liner": "npx skills add shichu2024/quick-knowledge",
+    "claude_code": "/plugin marketplace add shichu2024/quick-knowledge",
     "manual_paths": {
       "claude-code": "~/.claude/skills/quick-knowledge/",
       "codex": "~/.codex/skills/quick-knowledge/",

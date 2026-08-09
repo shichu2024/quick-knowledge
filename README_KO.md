@@ -22,9 +22,22 @@
 
 ## 설치
 
+### 방식 1 · 범용 원라이너 (권장, 모든 runtime)
+
 ```bash
 npx skills add shichu2024/quick-knowledge
 ```
+
+### 방식 2 · Claude Code marketplace
+
+Claude Code 안에서:
+
+```
+/plugin marketplace add shichu2024/quick-knowledge
+/plugin install quick-knowledge
+```
+
+### 방식 3 · 수동 설치 (runtime별)
 
 | Runtime | 경로 |
 |---------|------|

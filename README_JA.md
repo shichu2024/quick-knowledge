@@ -22,9 +22,22 @@
 
 ## インストール
 
+### 方式 1 ・ 汎用ワンライナー（推奨・全 runtime 対応）
+
 ```bash
 npx skills add shichu2024/quick-knowledge
 ```
+
+### 方式 2 ・ Claude Code marketplace
+
+Claude Code 内で：
+
+```
+/plugin marketplace add shichu2024/quick-knowledge
+/plugin install quick-knowledge
+```
+
+### 方式 3 ・ 手動インストール（runtime 別）
 
 | Runtime | パス |
 |---------|------|

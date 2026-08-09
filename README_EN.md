@@ -43,13 +43,22 @@ You: "Weekly review"
 
 ## Installation
 
-### One-liner (Recommended)
+### Option 1 · Universal one-liner (Recommended, all runtimes)
 
 ```bash
 npx skills add shichu2024/quick-knowledge
 ```
 
-### Manual Install (by runtime)
+### Option 2 · Claude Code marketplace
+
+Inside Claude Code:
+
+```
+/plugin marketplace add shichu2024/quick-knowledge
+/plugin install quick-knowledge
+```
+
+### Option 3 · Manual Install (by runtime)
 
 | Runtime | Install Path |
 |---------|--------------|

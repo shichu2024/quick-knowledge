@@ -22,9 +22,22 @@ Resuelve tres problemas:
 
 ## Instalación
 
+### Opción 1 · Comando universal (Recomendado, todos los runtimes)
+
 ```bash
 npx skills add shichu2024/quick-knowledge
 ```
+
+### Opción 2 · Claude Code marketplace
+
+Dentro de Claude Code:
+
+```
+/plugin marketplace add shichu2024/quick-knowledge
+/plugin install quick-knowledge
+```
+
+### Opción 3 · Instalación manual (por runtime)
 
 | Runtime | Ruta |
 |---------|------|

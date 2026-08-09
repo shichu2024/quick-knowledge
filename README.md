@@ -43,13 +43,22 @@
 
 ## 安装
 
-### 一行命令（推荐）
+### 方式 1 · 通用一行命令（推荐，所有 runtime）
 
 ```bash
 npx skills add shichu2024/quick-knowledge
 ```
 
-### 手动安装（按 runtime）
+### 方式 2 · Claude Code marketplace
+
+在 Claude Code 里：
+
+```
+/plugin marketplace add shichu2024/quick-knowledge
+/plugin install quick-knowledge
+```
+
+### 方式 3 · 手动安装（按 runtime）
 
 | Runtime | 安装路径 |
 |---------|---------|
