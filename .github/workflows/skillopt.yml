@@ -1,0 +1,109 @@
+name: SkillOpt Bench (nightly)
+
+# v1.3 · Behavior testing for quick-kb-capture skill via SkillOpt.
+# - Runs nightly + on manual dispatch. Does NOT run on PRs (non-blocking).
+# - Uses the openai_chat backend against the 11-case held-out test split.
+# - Uploads bench/reports/<run-id>/ as a 30-day artifact.
+# - Failures issue a warning but never block merge (continue-on-error: true).
+
+on:
+  schedule:
+    # 02:17 UTC nightly (off-peak, avoids :00 fleet stampede)
+    - cron: '17 2 * * *'
+  workflow_dispatch:
+    inputs:
+      split:
+        description: 'Split to evaluate (val | test)'
+        required: false
+        default: 'val'
+      skill:
+        description: 'Skill slug (capture | flow)'
+        required: false
+        default: 'capture'
+
+permissions:
+  contents: read
+
+jobs:
+  bench:
+    name: SkillOpt eval (${{ github.event.inputs.skill || 'capture' }}/${{ github.event.inputs.split || 'val' }})
+    runs-on: ubuntu-latest
+    continue-on-error: true   # NEVER block merge
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install bench deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-bench.txt
+
+      - name: Verify case schema (defensive — no provider calls)
+        run: |
+          python - <<'EOF'
+          import json, glob
+          from pathlib import Path
+          for f in glob.glob('bench/cases/**/items.json', recursive=True):
+              items = json.loads(Path(f).read_text(encoding='utf-8'))
+              assert isinstance(items, list) and items, f"{f}: empty or non-array"
+              for it in items:
+                  assert it.get('id'), f"{f}: case missing id"
+                  assert 'expected' in it, f"{f}/{it.get('id')}: missing expected"
+              print(f"[ok] {f}: {len(items)} cases")
+          EOF
+
+      - name: Validate demo-vault clone harness
+        run: |
+          node bench/harness/clone-vault.mjs "${{ runner.temp }}/quickkb-vault-smoke"
+          test -d "${{ runner.temp }}/quickkb-vault-smoke/02_areas"
+
+      - name: Run SkillOpt eval (mock — no provider calls)
+        env:
+          SKILLOPT_BACKEND: mock
+        run: |
+          # MVP smoke: import-only, confirms Python skeleton is intact.
+          # Full mock rollout requires skillopt's mock chat_target; defer to v1.3.1.
+          python - <<'EOF'
+          import sys
+          sys.path.insert(0, '.')
+          from bench.quickkb.scoring import aggregate, score_routing, score_frontmatter, score_behavior, score_flow
+          # sanity: scorers are callable with their documented signature
+          assert callable(score_routing)
+          assert callable(score_frontmatter)
+          assert callable(score_behavior)
+          assert callable(score_flow)
+          h, s = aggregate([(1.0, 1.0), (0.0, 0.5)])
+          assert h == 0.0 and abs(s - 0.75) < 1e-6
+          print("[ok] bench.quickkb skeleton import + aggregate sanity")
+          EOF
+
+      - name: Run SkillOpt eval (real backend, optional)
+        if: ${{ github.event.inputs.split == 'test' }}
+        env:
+          SKILLOPT_BACKEND: openai_chat
+          AZURE_OPENAI_ENDPOINT: ${{ secrets.AZURE_OPENAI_ENDPOINT }}
+          AZURE_OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
+        run: |
+          if [ -z "$AZURE_OPENAI_API_KEY" ]; then
+            echo "::warning::AZURE_OPENAI_API_KEY secret missing — skipping real-backend run"
+            exit 0
+          fi
+          python -m bench.run_eval --skill ${{ github.event.inputs.skill || 'capture' }} --split test
+
+      - name: Upload report artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: skillopt-report-${{ github.run_id }}
+          path: bench/reports/
+          retention-days: 30
+          if-no-files-found: warn

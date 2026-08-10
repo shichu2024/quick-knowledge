@@ -1,0 +1,9 @@
+# requirements-bench.txt — optional dependencies for SkillOpt behavior testing.
+# Install: pip install -r requirements-bench.txt
+#
+# This is SEPARATE from the base project (which has no Python deps);
+# the main quick-knowledge repo remains pure Node.js + markdown.
+
+skillopt>=0.2.0,<0.3.0    # text-space skill optimizer (Microsoft, MIT)
+pyyaml>=6.0               # frontmatter parsing for scoring/
+jsonschema>=4.0           # optional: bench/cases/_schema.json validation

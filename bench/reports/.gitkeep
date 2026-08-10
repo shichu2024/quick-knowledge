@@ -1,0 +1,3 @@
+# bench/reports/ — SkillOpt eval/train artifacts are written here per run.
+# Each run creates <skill>-<split>-<timestamp>/ with rollouts.json + predictions/.
+# This .gitkeep preserves the empty dir; artifacts themselves are gitignored.

@@ -18,3 +18,20 @@ desktop.ini
 
 # 本地敏感配置（覆盖默认时不入库）
 system/config/kb.config.local.yaml
+
+# v1.3 SkillOpt bench artifacts (regenerated per run, not source-of-truth)
+bench/reports/*
+!bench/reports/.gitkeep
+bench/.tmp-vault/
+
+# Python (bench/quickkb)
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.venv/
+venv/
+
+# SkillOpt local configs / secrets
+.env
+.env.local
