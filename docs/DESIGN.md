@@ -482,6 +482,35 @@ Ingest 时由 AI 补齐其余字段。
 
 ---
 
+### 6.11 行为评测与技能文本优化（v1.3+）
+
+**问题**：v0.1–v1.2 的 CI 全部是静态结构校验（frontmatter 字段、wikilink 死链、占位符、demo-vault 目录），**零行为测试**——CI 无法回答「SKILL.md 改了一行，capture 行为是否退化」「v1.2 步骤 2.5 是否真的在正确场景触发」。
+
+**机制**：v1.3 引入 [microsoft/SkillOpt](https://github.com/microsoft/SkillOpt)（文本空间技能优化器，MIT，PyPI `skillopt`）作为行为评测 + 技能文本优化引擎：
+
+1. **自定义 benchmark `quickkb`**（`bench/quickkb/`）：把 14 个 SKILL.md 当作「被优化的权重」，遵循 SkillOpt 的 4 件套契约（SplitDataLoader + rollout helper + EnvAdapter + YAML config）
+2. **51 个 golden case**（`bench/cases/`）：
+   - 45 单点 case 覆盖 9 维度（source-routing / v1.2-polish / triggers / auto-detect / dedup / frontmatter / degradation / edge / feedback）
+   - 6 J 类端到端 case 串起 7 阶段流程（输入→沉淀→目标→执行→产出→索引→系统），fixture-based 验证相邻技能的数据契约
+3. **4 个评分器**（`bench/quickkb/scoring/`）：`routing.py`（路径）+ `frontmatter.py`（字段正则）+ `behavior.py`（润色/去重/注入）+ `flow.py`（流程契约）
+4. **nightly mock 后端 workflow**（`.github/workflows/skillopt.yml`）：non-blocking，永不阻塞 PR；产物 `bench/reports/<run-id>/` 保留 30 天
+
+**适用范围**：仅评测，**不自动部署**。SkillOpt 产出的 `best_skill.md` 永远经人工 review 后单独 commit。
+**不适用**：v1.3 不接入 SkillOpt-Sleep（夜间收割本地会话，隐私边界未定，留 v1.4+）。
+
+**与现有 CI 的关系**：
+
+| 维度 | v0.1–v1.2 CI（结构） | v1.3 SkillOpt 评测（行为） |
+|------|--------------------|--------------------------|
+| 检查对象 | 静态文件（frontmatter / wikilink / 占位符） | 模型按 SKILL.md 执行后的产物（路径 / 字段 / 反馈文本） |
+| 阻塞 merge | ✅ 阻塞 | ❌ 不阻塞（仅 nightly 信号） |
+| 频次 | 每次 PR | nightly + 手动 dispatch |
+| 后端 | Node.js 脚本 | SkillOpt + LLM（mock / chat / exec） |
+
+详见 ADR-017 + [`docs/dev/v1.3-skillopt-integration.md`](./dev/v1.3-skillopt-integration.md)。
+
+---
+
 ## 7. Agent 设计
 
 ### 7.1 quick-kb-manager-agent
@@ -923,6 +952,13 @@ npx skills add <github-user>/quick-knowledge
 - [x] `source.original_text` / `<!-- original: -->` 原文保存机制
 - [x] `kb.config.capture_ai` 配置段
 
+### v1.3 · SkillOpt 行为评测（已发布 2026-08-11）
+
+- [x] 自定义 SkillOpt benchmark `quickkb`（dataloader + rollout + adapter，ADR-017）
+- [x] 4 个评分器：routing / frontmatter / behavior / flow
+- [x] 51 个 golden case（45 单点 × 9 维度 + 6 J 类端到端流程）
+- [x] nightly mock 后端 workflow（non-blocking，`.github/workflows/skillopt.yml`）
+
 ---
 
 ## 14. 设计决策记录
@@ -1056,6 +1092,34 @@ npx skills add <github-user>/quick-knowledge
 **与 ADR-002 的关系**：ADR-002 决定「capture 阶段不分类」，本 ADR 决定「capture 阶段可选改写」。两者都强调「降低采集摩擦」——润色提议不改「采集零等待」原则，因为它是**异步可选**的（用户可一直选 [2] 走原流程）。
 
 **反馈来源**：用户在 v1.1 发布后的指令（2026-08-09）——「记录灵感、每日事务等用户输入项时，可以提供 AI 优化的描述（用户可以自定义选择是否优化），因为大部分时候用户输入的过于简单」。
+
+---
+
+### ADR-017 · 引入 SkillOpt 做行为评测（v1.3+）
+
+**情境**：v0.1–v1.2 全部 CI 都是静态结构校验（frontmatter 字段、wikilink 死链、占位符、demo-vault 目录）。SKILL.md 改一行就可能让 capture 行为退化（如 v1.2 加步骤 2.5），而 CI 完全察觉不到。需要行为评测补齐测试能力。
+
+**决策**：v1.3 引入 [microsoft/SkillOpt](https://github.com/microsoft/SkillOpt) 作为外部库（pip install skillopt），写自定义 benchmark `quickkb`：
+- 4 件套：`QuickkbDataLoader`（SplitDataLoader 子类）+ `run_batch`（rollout helper）+ `QuickkbAdapter`（EnvAdapter 子类）+ YAML config
+- 51 个 golden case：45 单点 × 9 维度 + 6 J 类端到端流程衔接
+- 4 个评分器：routing（路径）/ frontmatter（字段）/ behavior（润色/去重/注入）/ flow（流程契约）
+- nightly mock 后端 workflow，**永不阻塞 merge**
+
+**代价**：
+- 引入 Python 依赖（`requirements-bench.txt` 单独分离，主项目仍纯 Node.js + markdown）
+- SkillOpt 上游 API 漂移风险（v0.2 → v0.3 可能改 EnvAdapter 接口）→ 缓解：锁版本 `skillopt>=0.2.0,<0.3.0`
+- mock 后端测出的优化在真实环境可能失效 → 缓解：MVP 不自动部署，永远人工 review
+
+**否决的替代方案**：
+- 直接用 SkillOpt 内置 benchmark（DocVQA / ALFWorld / OfficeQA / SearchQA 等都是外部 QA 任务，无法验证「文件真的被写到对的地方」，语义不匹配）
+- 自己写测试框架（重复造轮子，且无法享受 SkillOpt 的 Reflect → Aggregate → Update 优化循环）
+- 把行为评测放进 PR 阻塞 CI（行为评测需要 LLM 调用，成本高 + 易抖动，应作信号而非 gate）
+
+**与 v1.2 的关系**：v1.2 的「AI 润色提议」是首个被 v1.3 行为评测显式覆盖的特性（B 类 8 个 case 验证润色触发 / 三选一 / 降级路径 / web-clip 优先级边界）。SkillOpt 让 v1.2 之后的所有 SKILL.md 改动有了回归测试网。
+
+**与 SkillOpt-Sleep 的边界**：v1.3 只用 SkillOpt 的「研究引擎」（train/eval），**不接入 SkillOpt-Sleep**（夜间收割本地会话）——Sleep 涉及读取本地 Claude Code/Codex 会话 JSONL，隐私边界需要单独 ADR-018 设计，留 v1.4+。
+
+**反馈来源**：用户在 v1.2 发布后的指令（2026-08-10）——「现在想要利用 SkillOpt 来完善当前技能库的测试」。
 
 ---
 

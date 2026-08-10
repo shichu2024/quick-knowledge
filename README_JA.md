@@ -95,6 +95,20 @@ KS = confidence × log2(1 + reuse) × impact
 | v1.0 release | ✅ | CONTRIBUTING/LICENSE + CI + demo-vault 公開 |
 | v1.1 flow-restructure | ✅ | トップレベル `NN_` 接頭辞 + 絶対パス硬制約（⚠️ BREAKING） |
 | v1.2 ai-polish | ✅ | capture / daily のユーザー手入力に対する AI 添削提案（3 択） |
+| v1.3 skillopt-integration | ✅ | 振る舞いテスト + スキルテキスト最適化（SkillOpt × 51 golden cases × 夜間 mock workflow） |
+
+---
+
+## 振る舞いテスト（v1.3+）
+
+v0.1–v1.2 の CI は純構造検査（frontmatter / wikilink / プレースホルダー）のみで、**「SKILL.md の1行変更が capture の振る舞いを退化させたか」に答えられませんでした**。v1.3 は [microsoft/SkillOpt](https://github.com/microsoft/SkillOpt) を振る舞いテストエンジンとして導入：
+
+- カスタム benchmark `bench/quickkb/`（dataloader + rollout + adapter + 4 scorers）
+- 51 個の golden case：45 単点 × 9 次元 + 6 J 类エンドツーエンドフロー遷移
+- 夜間 mock バックエンド workflow、**PR マージを絶対にブロックしない**（非ブロッキング・シグナル）
+- 自動デプロイしない——SkillOpt が出力した `best_skill.md` は人手 review 後に個別 commit
+
+詳細は [`docs/dev/v1.3-skillopt-integration.md`](./docs/dev/v1.3-skillopt-integration.md)。
 
 ---
 

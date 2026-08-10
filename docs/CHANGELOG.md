@@ -4,6 +4,63 @@
 
 ---
 
+## v1.3 · 2026-08-11 · skillopt-integration（行为评测与技能文本优化）
+
+**摘要**：引入 [microsoft/SkillOpt](https://github.com/microsoft/SkillOpt) 作为行为评测引擎，补齐 v0.1–v1.2 缺失的「行为测试」能力。CI 从「纯结构校验」扩展到「结构 + 行为」双层。**无 BREAKING CHANGE**——原 4 个 CI job 全保留，SkillOpt 评测作为 non-blocking nightly workflow 加入。
+
+### 新增能力
+
+- **自定义 SkillOpt benchmark `quickkb`**（`bench/quickkb/`）：
+  - `QuickkbDataLoader`（SplitDataLoader 子类，加载 golden case）
+  - `run_batch` rollout helper（chat_target 跑技能 + 持久化 conversation.json）
+  - `QuickkbAdapter`（EnvAdapter 子类，对接 SkillOpt 生命周期）
+- **4 个评分器**（`bench/quickkb/scoring/`）：
+  - `routing.py`：路径 glob 匹配（fnmatch）
+  - `frontmatter.py`：字段正则 + 禁止字段缺席
+  - `behavior.py`：润色菜单 / 去重提示 / prompt 注入防御
+  - `flow.py`：J 类端到端流程契约（fixture-based）
+- **51 个 golden case**（`bench/cases/`）：
+  - 45 单点 × 9 维度（source-routing 18 / v1.2-polish 8 / triggers 2 / auto-detect 3 / dedup 3 / frontmatter 4 / degradation 3 / edge 3 / feedback 1）
+  - 6 J 类端到端流程衔接（输入→沉淀→目标→执行→产出→索引→系统，单种子输入贯穿 7 阶段）
+  - split：30 train / 10 val / 11 test（J1-J6 全部 held-out 作系统级回归 gate）
+- **nightly mock 后端 workflow**（`.github/workflows/skillopt.yml`）：02:17 UTC 自动跑，mock smoke 不烧 API 配额，real-backend 仅在 `workflow_dispatch + split=test + secret set` 时触发；产物 `bench/reports/<run-id>/` 上传 30 天
+- **standalone evaluator**（`bench/run_eval.py`）：不依赖 SkillOpt registry，作为库直接消费 `chat_target` + `SplitDataLoader`
+
+### 设计
+
+- DESIGN §6.11（行为评测）+ §13 路线图 v1.3 行 + ADR-017（引入 SkillOpt 决策与边界）
+- 完整设计文档：[`docs/dev/v1.3-skillopt-integration.md`](./dev/v1.3-skillopt-integration.md)（13 节，含 51 case 完整清单 + 评分器映射 + split 划分）
+
+### 关键边界
+
+- **不修改任何 SKILL.md 的现有版本**（SkillOpt 产出的 `best_skill.md` 永远经人工 review 后单独 commit）
+- **不修改原 `.github/workflows/ci.yml`**（4 个结构校验 job 保持原样作 merge gate）
+- **不在 v1.3 接入 SkillOpt-Sleep**（隐私边界需要单独 ADR-018，留 v1.4+）
+- **不在 PR 上阻塞 merge**（行为评测是参考信号，不是 gate）
+- **主项目仍纯 Node.js + markdown**（Python 依赖隔离在 `requirements-bench.txt`，bench 是可选组件）
+
+### 文件清单
+
+| 类型 | 文件 |
+|------|------|
+| 新增 | `bench/quickkb/{dataloader,rollout,adapter}.py` |
+| 新增 | `bench/quickkb/scoring/{__init__,routing,frontmatter,behavior,flow}.py` |
+| 新增 | `bench/run_eval.py`（standalone 入口）|
+| 新增 | `bench/cases/{capture,flow}/items.json` + `bench/cases/_schema.json` |
+| 新增 | `bench/cases/flow/fixtures/J{1..6}-*.json` |
+| 新增 | `bench/configs/{capture-default,flow-default}.yaml` + `_base/skill-template.md` |
+| 新增 | `bench/harness/clone-vault.mjs`（exec 后端用）|
+| 新增 | `bench/quickkb/skills/capture-initial.md`（基线 snapshot）|
+| 新增 | `.github/workflows/skillopt.yml` |
+| 新增 | `requirements-bench.txt` |
+| 修改 | `.claude-plugin/plugin.json` + `marketplace.json`（1.2.0 → 1.3.0，phases 加 v1.3）|
+| 修改 | `docs/DESIGN.md`（§6.11 + §13 + ADR-017）|
+| 修改 | `docs/dev/README.md`（阶段表 v1.3 行更新为 51 case）|
+| 修改 | `README*.md` × 5 语种（加 SkillOpt 评测段）|
+| 修改 | `.gitignore`（bench/reports + .tmp-vault + Python hygiene）|
+
+---
+
 ## v1.2 · 2026-08-09 · ai-polish（AI 润色提议）
 
 **摘要**：capture / daily 写入前新增「AI 润色提议」步骤——AI 主动生成扩写版，用户三选一（用润色 / 保留原文 / 再改一版）。解决「用户输入过简、事后看不懂」问题。**无 BREAKING CHANGE**。

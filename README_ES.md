@@ -95,6 +95,20 @@ KS = confidence × log2(1 + reuse) × impact
 | v1.0 release | ✅ | CONTRIBUTING/LICENSE + CI + publicación demo-vault |
 | v1.1 flow-restructure | ✅ | Prefijo `NN_` en nivel superior + prohibición de rutas absolutas (⚠️ BREAKING) |
 | v1.2 ai-polish | ✅ | Propuesta de pulido por IA para entradas de capture / daily escritas por el usuario (3 opciones) |
+| v1.3 skillopt-integration | ✅ | Pruebas de comportamiento + optimización de texto de habilidades (SkillOpt × 51 casos golden × workflow nocturno mock) |
+
+---
+
+## Pruebas de comportamiento (v1.3+)
+
+El CI de v0.1–v1.2 era puramente estructural (frontmatter / wikilinks / placeholders) — **no podía responder "¿esta edición de SKILL.md regresionó el comportamiento de capture?"**. v1.3 introduce [microsoft/SkillOpt](https://github.com/microsoft/SkillOpt) como motor de pruebas de comportamiento:
+
+- Benchmark personalizado `bench/quickkb/` (dataloader + rollout + adapter + 4 scorers)
+- 51 casos golden: 45 casos puntuales × 9 dimensiones + 6 transiciones de flujo J end-to-end
+- Workflow nocturno con backend mock, **nunca bloquea el merge de PR** (señal no bloqueante)
+- Nunca auto-despliega — el `best_skill.md` de SkillOpt se revisa manualmente antes de cualquier commit
+
+Ver [`docs/dev/v1.3-skillopt-integration.md`](./docs/dev/v1.3-skillopt-integration.md).
 
 ---
 

@@ -154,8 +154,22 @@ quick-knowledge/
 | v1.0 | release | ✅ Done | CONTRIBUTING/COMMUNITY/LICENSE + CI + demo-vault release |
 | v1.1 | flow-restructure | ✅ Done | Top-level `NN_` prefix + absolute-path hard ban (⚠️ BREAKING) |
 | v1.2 | ai-polish | ✅ Done | AI polish proposal for user-typed capture / daily entries (3-way choice) |
+| v1.3 | skillopt-integration | ✅ Done | Behavior testing + skill-text optimization (SkillOpt × 51 golden cases × nightly mock workflow) |
 
 See [docs/](./docs/).
+
+---
+
+## Behavior Testing (v1.3+)
+
+v0.1–v1.2 CI was purely structural (frontmatter / wikilink / placeholder checks) — **it could not answer "did this SKILL.md edit regress capture behavior?"**. v1.3 introduces [microsoft/SkillOpt](https://github.com/microsoft/SkillOpt) as a behavior-testing engine to close that gap:
+
+- Custom benchmark `bench/quickkb/` (dataloader + rollout + adapter + 4 scorers)
+- 51 golden cases: 45 point cases × 9 dimensions + 6 J-class end-to-end flow transitions
+- Nightly mock-backend workflow, **never blocks PR merge** (non-blocking signal)
+- Never auto-deploys — SkillOpt's `best_skill.md` is human-reviewed before any commit
+
+See [`docs/dev/v1.3-skillopt-integration.md`](./docs/dev/v1.3-skillopt-integration.md).
 
 ---
 

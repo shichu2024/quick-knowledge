@@ -174,8 +174,22 @@ quick-knowledge/
 | v1.0 | release | ✅ 已完成 | CONTRIBUTING/COMMUNITY/LICENSE + CI + demo-vault 发布 |
 | v1.1 | flow-restructure | ✅ 已完成 | 顶层目录 `NN_` 前缀 + 路径硬约束（⚠️ BREAKING） |
 | v1.2 | ai-polish | ✅ 已完成 | capture / daily 用户手敲输入的 AI 润色提议（三选一） |
+| v1.3 | skillopt-integration | ✅ 已完成 | 行为评测 + 技能文本优化（SkillOpt × 51 golden cases × nightly mock workflow） |
 
 详见 [docs/](./docs/) 目录。
+
+---
+
+## 行为评测（Behavior Testing · v1.3+）
+
+v0.1–v1.2 的 CI 全是静态结构校验（frontmatter / wikilink / 占位符）——**无法回答「SKILL.md 改了一行，capture 行为是否退化」**。v1.3 引入 [microsoft/SkillOpt](https://github.com/microsoft/SkillOpt) 作为行为评测引擎补齐这一层：
+
+- 自定义 benchmark `bench/quickkb/`（dataloader + rollout + adapter + 4 scorers）
+- 51 个 golden case：45 单点 × 9 维度 + 6 J 类端到端流程衔接
+- nightly mock 后端 workflow，**永不阻塞 PR merge**（non-blocking 信号）
+- 永不自动部署优化产物——SkillOpt 产出的 `best_skill.md` 经人工 review 后单独 commit
+
+详见 [`docs/dev/v1.3-skillopt-integration.md`](./docs/dev/v1.3-skillopt-integration.md)。
 
 ---
 

@@ -95,6 +95,20 @@ KS = confidence × log2(1 + reuse) × impact
 | v1.0 release | ✅ | CONTRIBUTING/LICENSE + CI + demo-vault 공개 |
 | v1.1 flow-restructure | ✅ | 최상위 `NN_` 접두사 + 절대 경로 하드 제약 (⚠️ BREAKING) |
 | v1.2 ai-polish | ✅ | capture / daily 사용자 직접 입력에 대한 AI 윤문 제안 (3선택) |
+| v1.3 skillopt-integration | ✅ | 동작 테스트 + 스킬 텍스트 최적화 (SkillOpt × 51 golden cases × 야간 mock workflow) |
+
+---
+
+## 동작 테스트 (v1.3+)
+
+v0.1–v1.2의 CI는 순수 구조 검사(frontmatter / wikilink / placeholder)였습니다 — **"이 SKILL.md 편집이 capture 동작을 퇴화시켰는가?"에 답할 수 없었습니다**. v1.3은 [microsoft/SkillOpt](https://github.com/microsoft/SkillOpt)를 동작 테스트 엔진으로 도입합니다:
+
+- 커스텀 benchmark `bench/quickkb/` (dataloader + rollout + adapter + 4 scorers)
+- 51 golden cases: 45 단일 케이스 × 9 차원 + 6 J 클래스 엔드투엔드 흐름 전환
+- 야간 mock 백엔드 workflow, **PR 병합을 절대 차단하지 않음** (논블로킹 신호)
+- 자동 배포 안 함 — SkillOpt의 `best_skill.md`는 모든 커밋 전에 사람이 검토
+
+자세한 내용은 [`docs/dev/v1.3-skillopt-integration.md`](./docs/dev/v1.3-skillopt-integration.md).
 
 ---
 

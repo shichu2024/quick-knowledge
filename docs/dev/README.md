@@ -20,7 +20,7 @@
 | **v1.0** | `release` | 对外发布 | 完整文档/示例 + CONTRIBUTING/COMMUNITY + marketplace |
 | **v1.1** | `flow-restructure` | 目录流转制 + 路径硬约束 | 顶层目录 `NN_` 前缀 + source.url 绝对路径禁令（⚠️ BREAKING） |
 | **v1.2** | `ai-polish` | 用户手敲输入的 AI 润色提议 | capture 步骤 2.5 + daily 步骤 3.5 + 三选一确认 + 原文保存 |
-| **v1.3** | `skillopt-integration` | 行为评测与技能文本优化 | 自定义 SkillOpt benchmark `quickkb` + capture 20 golden cases + nightly mock 后端 |
+| **v1.3** | `skillopt-integration` | 行为评测与技能文本优化 | 自定义 SkillOpt benchmark `quickkb`（dataloader + rollout + adapter + 4 scorers）+ 51 golden cases（45 单点 + 6 J 类端到端）+ nightly mock 后端 workflow |
 
 ---
 
