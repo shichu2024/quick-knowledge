@@ -1,0 +1,20 @@
+{
+  "fixture_id": "J6-moc-and-atom",
+  "upstream_skill": "connect",
+  "upstream_products": [
+    {
+      "path": "06_wiki/mocs/rag-architecture.md",
+      "frontmatter": {"type": "moc"},
+      "content": "- [[rag-chunking]] chunk_size 经验\n"
+    },
+    {
+      "path": "02_areas/ai-engineering/rag-chunking.md",
+      "frontmatter": {"type": "concept", "maturity": "seedling", "updated_at": "2026-05-01"}
+    }
+  ],
+  "expected_downstream": {
+    "skill": "review",
+    "produce_path_glob": "05_outputs/reviews/weekly/*.md",
+    "produce_content_contains": ["maturity"]
+  }
+}

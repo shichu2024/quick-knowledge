@@ -1,0 +1,158 @@
+[
+  {
+    "id": "J1-flow-input-to-sediment",
+    "dimension": "flow",
+    "source_type": "flow",
+    "input": "[fixture-based] 上游：capture 写出 00_inbox/ideas/YYYYMMDD-HHMM-rag-chunking.md（capture_type=idea, title=rag chunking 大小影响检索召回, 正文含 chunk_size=512 经验）\n下游：运行 ingest，检查产物。",
+    "user_choice": null,
+    "expected": {
+      "should_trigger_capture": true,
+      "path_glob": "02_areas/ai-engineering/rag-chunking.md",
+      "frontmatter": {"type": "^concept$", "maturity": "^seedling$", "confidence": ".+"},
+      "frontmatter_forbidden": [],
+      "content_contains": ["chunk_size"],
+      "content_excludes": [],
+      "should_trigger_polish": false,
+      "feedback_contains": [],
+      "flow_upstream_file": "bench/cases/flow/fixtures/J1-capture-idea-rag-chunking.json",
+      "flow_downstream_check": {
+        "skill": "ingest",
+        "consume_field": "capture_type",
+        "produce_field": "type"
+      }
+    },
+    "category": "flow",
+    "references": ["capture §5 + ingest §3"],
+    "notes": "J1 输入→沉淀：capture 的 frontmatter 字段名/值被 ingest 正确消费"
+  },
+  {
+    "id": "J2-flow-sediment-to-goal",
+    "dimension": "flow",
+    "source_type": "flow",
+    "input": "[fixture-based] 上游：J1 产出的 atom 02_areas/ai-engineering/rag-chunking.md\n下游：运行 goal，建立 03_goals/learn-rag/_readme.md。",
+    "user_choice": null,
+    "expected": {
+      "should_trigger_capture": true,
+      "path_glob": "03_goals/learn-rag/_readme.md",
+      "frontmatter": {"references": ".*rag-chunking.*"},
+      "frontmatter_forbidden": [],
+      "content_contains": ["rag-chunking"],
+      "content_excludes": [],
+      "should_trigger_polish": false,
+      "feedback_contains": [],
+      "flow_upstream_file": "bench/cases/flow/fixtures/J2-atom-rag-chunking.json",
+      "flow_downstream_check": {
+        "skill": "goal",
+        "consume_field": "type",
+        "produce_field": "references"
+      }
+    },
+    "category": "flow",
+    "references": ["goal §4 + DESIGN §6.4"],
+    "notes": "J2 沉淀→目标：goal→atom 引用建立，atom 的 reuse 计数同步更新"
+  },
+  {
+    "id": "J3-flow-goal-to-execution",
+    "dimension": "flow",
+    "source_type": "flow",
+    "input": "[fixture-based] 上游：J2 的 goal + atom\n下游：运行 project，写 04_projects/rag-poc/decisions/YYYY-MM-DD-chunk-size.md。",
+    "user_choice": null,
+    "expected": {
+      "should_trigger_capture": true,
+      "path_glob": "04_projects/rag-poc/decisions/*chunk-size*.md",
+      "frontmatter": {"context": ".+"},
+      "frontmatter_forbidden": [],
+      "content_contains": ["goal", "atom"],
+      "content_excludes": [],
+      "should_trigger_polish": false,
+      "feedback_contains": [],
+      "flow_upstream_file": "bench/cases/flow/fixtures/J3-goal-and-atom.json",
+      "flow_downstream_check": {
+        "skill": "project",
+        "consume_field": "references",
+        "produce_field": "context"
+      }
+    },
+    "category": "flow",
+    "references": ["project §3 + DESIGN §6.6"],
+    "notes": "J3 目标→执行：project 决策链能追到 goal + atom，不丢失上下文"
+  },
+  {
+    "id": "J4-flow-execution-to-output",
+    "dimension": "flow",
+    "source_type": "flow",
+    "input": "[fixture-based] 上游：J3 的 decision\n下游：运行 daily，写 05_outputs/daily/YYYY/MM/YYYY-MM-DD.md。",
+    "user_choice": null,
+    "expected": {
+      "should_trigger_capture": true,
+      "path_glob": "05_outputs/daily/*/*.md",
+      "frontmatter": {},
+      "frontmatter_forbidden": [],
+      "content_contains": ["[[", "]]"],
+      "content_excludes": [],
+      "should_trigger_polish": false,
+      "feedback_contains": [],
+      "flow_upstream_file": "bench/cases/flow/fixtures/J4-decision-chunk-size.json",
+      "flow_downstream_check": {
+        "skill": "daily",
+        "consume_field": "context",
+        "produce_field": "wikilinks"
+      }
+    },
+    "category": "flow",
+    "references": ["daily §3 + SKILLS_SPEC §8"],
+    "notes": "J4 执行→产出：daily 识别 project 进展，wikilink 指向 project 或 decision"
+  },
+  {
+    "id": "J5-flow-output-to-index",
+    "dimension": "flow",
+    "source_type": "flow",
+    "input": "[fixture-based] 上游：J4 的 daily\n下游：运行 connect，更新 06_wiki/mocs/rag-architecture.md。",
+    "user_choice": null,
+    "expected": {
+      "should_trigger_capture": true,
+      "path_glob": "06_wiki/mocs/*rag*.md",
+      "frontmatter": {},
+      "frontmatter_forbidden": [],
+      "content_contains": ["[[", "]]"],
+      "content_excludes": [],
+      "should_trigger_polish": false,
+      "feedback_contains": [],
+      "flow_upstream_file": "bench/cases/flow/fixtures/J5-daily-rag.json",
+      "flow_downstream_check": {
+        "skill": "connect",
+        "consume_field": "wikilinks",
+        "produce_field": "moc_entries"
+      }
+    },
+    "category": "flow",
+    "references": ["connect §4 + query §3"],
+    "notes": "J5 产出→索引：MOC 自动维护 + query 跨目录检索不打断层"
+  },
+  {
+    "id": "J6-flow-index-to-system",
+    "dimension": "flow",
+    "source_type": "flow",
+    "input": "[fixture-based] 上游：J5 的 MOC + atom\n下游：运行 review/archive/stats 系统层扫描。",
+    "user_choice": null,
+    "expected": {
+      "should_trigger_capture": true,
+      "path_glob": "05_outputs/reviews/weekly/*.md",
+      "frontmatter": {},
+      "frontmatter_forbidden": [],
+      "content_contains": ["maturity"],
+      "content_excludes": [],
+      "should_trigger_polish": false,
+      "feedback_contains": [],
+      "flow_upstream_file": "bench/cases/flow/fixtures/J6-moc-and-atom.json",
+      "flow_downstream_check": {
+        "skill": "review",
+        "consume_field": "moc_entries",
+        "produce_field": "maturity_review"
+      }
+    },
+    "category": "flow",
+    "references": ["review §3 + archive §3 + stats §3"],
+    "notes": "J6 索引→系统：review/archive/stats 能扫到 MOC 收录的 atom，按规则降级"
+  }
+]

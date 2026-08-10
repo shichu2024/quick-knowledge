@@ -1,0 +1,22 @@
+{
+  "fixture_id": "J2-atom-rag-chunking",
+  "upstream_skill": "ingest",
+  "upstream_product": {
+    "path": "02_areas/ai-engineering/rag-chunking.md",
+    "frontmatter": {
+      "type": "concept",
+      "maturity": "seedling",
+      "confidence": 0.6,
+      "tags": ["rag", "chunking"],
+      "value": {"reuse": 0}
+    },
+    "content": "chunk_size=512 是召回与精度的甜区。"
+  },
+  "expected_downstream": {
+    "skill": "goal",
+    "produce_path": "03_goals/learn-rag/_readme.md",
+    "produce_frontmatter_contains": {
+      "references": "[[rag-chunking]]"
+    }
+  }
+}

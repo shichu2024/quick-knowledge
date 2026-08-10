@@ -1,0 +1,34 @@
+# bench/configs/flow-default.yaml
+# Config for J-class end-to-end flow tests (6 transitions across 7 stages).
+# ALL 6 cases are held-out test (no train/val); used as system-level regression gate.
+#
+# Run:
+#   python -m bench.run_eval --skill flow --split test
+
+env: quickkb_flow
+
+data:
+  data_root: bench/cases/flow/
+  split_mode: ratio
+  split_ratio: "0:0:6"         # all 6 cases → test
+  split_seed: 42
+  task_type: flow
+
+model:
+  backend: openai_chat
+  optimizer: claude-sonnet-4-6
+  target: claude-sonnet-4-6
+  max_completion_tokens: 4096
+
+train:
+  epochs: 0                    # no training; pure eval
+  batchsize: 6
+
+gate:
+  enabled: true
+  metric: hard
+  min_improvement: 0.0         # zero-tolerance: ANY flow regression fails gate
+
+output:
+  out_dir: bench/reports/
+  deploy_skill: false

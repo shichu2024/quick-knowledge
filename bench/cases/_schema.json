@@ -1,0 +1,105 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "quickkb Golden Case",
+  "description": "Schema for quick-knowledge SkillOpt benchmark cases (bench/cases/<skill>/items.json).",
+  "type": "object",
+  "required": ["id", "dimension", "input", "expected"],
+  "additionalProperties": true,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique case identifier. Convention: <dimension-prefix>.<seq>-<slug>, e.g. 'A1.1-idea-short-polish'."
+    },
+    "dimension": {
+      "type": "string",
+      "enum": [
+        "source-routing",
+        "v1.2-polish",
+        "triggers",
+        "auto-detect",
+        "dedup",
+        "frontmatter",
+        "degradation",
+        "edge",
+        "feedback",
+        "flow",
+        "unknown"
+      ]
+    },
+    "source_type": {
+      "type": "string",
+      "enum": ["idea", "meeting", "ai-dialog", "reading", "web-clip", "pdf", "flow", "idea"]
+    },
+    "input": {
+      "type": "string",
+      "description": "User-natural-language input. MUST NOT contain SKILL.md jargon or template words."
+    },
+    "user_choice": {
+      "description": "Polish menu selection: 1=accept polished, 2=keep original, 3=retry. null = not applicable.",
+      "oneOf": [
+        {"type": "integer", "enum": [1, 2, 3]},
+        {"type": "null"}
+      ]
+    },
+    "expected": {
+      "type": "object",
+      "required": ["should_trigger_capture"],
+      "properties": {
+        "should_trigger_capture": {"type": "boolean"},
+        "path_glob": {
+          "type": "string",
+          "description": "Glob pattern for the produced file path. Empty string means NO file should be produced."
+        },
+        "frontmatter": {
+          "type": "object",
+          "description": "Map of field-name → regex. Each value is matched (re.search) against the actual frontmatter field's string repr. Nested keys allowed via dot notation (e.g. 'source.url').",
+          "additionalProperties": {"type": "string"}
+        },
+        "frontmatter_forbidden": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Fields that MUST NOT appear in the produced frontmatter."
+        },
+        "content_contains": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Substrings that must appear in the produced content body."
+        },
+        "content_excludes": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Substrings that must NOT appear in the produced content body."
+        },
+        "should_trigger_polish": {
+          "type": "boolean",
+          "description": "Whether the v1.2 polish menu (with [1][2][3] markers) should appear in the reply."
+        },
+        "feedback_contains": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Substrings that must appear in the skill's feedback/reply text."
+        },
+        "flow_upstream_file": {
+          "type": "string",
+          "description": "J-class only. Path to a fixture JSON describing the upstream skill's produced state."
+        },
+        "flow_downstream_check": {
+          "type": "object",
+          "description": "J-class only. Metadata describing which downstream skill + fields are checked.",
+          "properties": {
+            "skill": {"type": "string"},
+            "consume_field": {"type": "string"},
+            "produce_field": {"type": "string"}
+          }
+        }
+      }
+    },
+    "category": {"type": "string"},
+    "references": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "Source-of-truth pointers (SKILL.md section numbers, ADR IDs)."
+    },
+    "notes": {"type": "string"}
+  }
+}

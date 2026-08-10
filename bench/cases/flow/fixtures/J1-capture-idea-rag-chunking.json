@@ -1,0 +1,23 @@
+{
+  "fixture_id": "J1-capture-idea-rag-chunking",
+  "upstream_skill": "capture",
+  "upstream_product": {
+    "path": "00_inbox/ideas/20260811-0930-rag-chunking.md",
+    "frontmatter": {
+      "title": "RAG chunking 大小影响检索召回",
+      "captured_at": "2026-08-11T09:30:00+08:00",
+      "capture_type": "idea",
+      "tags": ["rag", "chunking"]
+    },
+    "content": "chunk_size=512 + overlap=64 在中等规模语料上召回率最好；过小（128）丢失上下文，过大（1024）精度下降。"
+  },
+  "expected_downstream": {
+    "skill": "ingest",
+    "produce_path": "02_areas/ai-engineering/rag-chunking.md",
+    "produce_frontmatter_contains": {
+      "type": "concept",
+      "maturity": "seedling"
+    },
+    "consume_fields": ["capture_type", "title", "tags"]
+  }
+}

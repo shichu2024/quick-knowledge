@@ -1,0 +1,17 @@
+{
+  "fixture_id": "J4-decision-chunk-size",
+  "upstream_skill": "project",
+  "upstream_product": {
+    "path": "04_projects/rag-poc/decisions/2026-08-11-chunk-size.md",
+    "frontmatter": {
+      "type": "decision",
+      "context": "基于 [[rag-chunking]] atom 的经验值 512"
+    },
+    "content": "Decision: 采用 chunk_size=512 作为 RAG POC 默认值。"
+  },
+  "expected_downstream": {
+    "skill": "daily",
+    "produce_path_glob": "05_outputs/daily/2026/08/*.md",
+    "produce_content_contains": ["[[", "]]"]
+  }
+}

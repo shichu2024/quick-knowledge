@@ -1,0 +1,14 @@
+{
+  "fixture_id": "J5-daily-rag",
+  "upstream_skill": "daily",
+  "upstream_product": {
+    "path": "05_outputs/daily/2026/08/2026-08-11.md",
+    "frontmatter": {"type": "daily"},
+    "content": "今天确定 RAG POC 的 chunk_size=[[rag-chunking]] 经验值，决策见 [[2026-08-11-chunk-size]]。"
+  },
+  "expected_downstream": {
+    "skill": "connect",
+    "produce_path_glob": "06_wiki/mocs/*rag*.md",
+    "produce_content_contains": ["[[rag-chunking]]"]
+  }
+}

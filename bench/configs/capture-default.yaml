@@ -1,0 +1,36 @@
+# bench/configs/capture-default.yaml
+# MVP config for SkillOpt eval/train of quick-kb-capture skill.
+# Consumed by bench/run_eval.py (standalone) or skillopt-train (registered).
+#
+# Run:
+#   python -m bench.run_eval --skill capture --split val
+
+env: quickkb_capture
+
+data:
+  data_root: bench/cases/capture/
+  split_mode: ratio            # single items.json → auto-split
+  split_ratio: "3:1:1"         # train:val:test = 30:10:11 (over 51 cases, J-class held out separately)
+  split_seed: 42
+  task_type: capture
+
+model:
+  backend: openai_chat         # MVP: chat backend (set SKILLOPT_BACKEND in .env)
+  optimizer: claude-sonnet-4-6
+  target: claude-sonnet-4-6
+  max_completion_tokens: 4096
+
+train:
+  epochs: 3
+  batchsize: 8
+  learning_rate: 0.3
+  max_edit_tokens: 500
+
+gate:
+  enabled: true
+  metric: hard
+  min_improvement: 0.05        # ≥5% hard improvement over baseline, else rollback
+
+output:
+  out_dir: bench/reports/
+  deploy_skill: false          # NEVER auto-deploy; human review only

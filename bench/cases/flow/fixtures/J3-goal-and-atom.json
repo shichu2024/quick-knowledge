@@ -1,0 +1,21 @@
+{
+  "fixture_id": "J3-goal-and-atom",
+  "upstream_skill": "goal",
+  "upstream_products": [
+    {
+      "path": "03_goals/learn-rag/_readme.md",
+      "frontmatter": {"references": ["[[rag-chunking]]"]}
+    },
+    {
+      "path": "02_areas/ai-engineering/rag-chunking.md",
+      "frontmatter": {"type": "concept", "maturity": "seedling"}
+    }
+  ],
+  "expected_downstream": {
+    "skill": "project",
+    "produce_path_glob": "04_projects/rag-poc/decisions/*chunk-size*.md",
+    "produce_frontmatter_contains": {
+      "context": ".+"
+    }
+  }
+}
