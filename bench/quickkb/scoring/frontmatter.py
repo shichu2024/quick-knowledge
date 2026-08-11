@@ -42,6 +42,10 @@ def score(
         if actual_value is None:
             signals.append(0.0)
             continue
+        # Normalize Python bool to YAML-true/YAML-false so regex like
+        # `^true$` matches what users write in case frontmatter specs.
+        if isinstance(actual_value, bool):
+            actual_value = "true" if actual_value else "false"
         try:
             ok = bool(re.match(pattern, str(actual_value)))
         except re.error:
