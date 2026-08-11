@@ -1,0 +1,6 @@
+{
+  "case_id": "A6.1-pdf-file",
+  "model": "glm-5.2",
+  "user": "抓 /tmp/papers/transformer.pdf 关于 attention 机制",
+  "assistant": "文件不存在：`/tmp/papers/transformer.pdf` 找不到，整个 `/tmp/papers/` 目录也不存在。\n\n按 quick-kb-capture 的 PDF 失败降级路径，我有两种处理方式：\n\n**A. 拒绝采集**（推荐）—— 文件本身不存在，不属于\"解析失败\"，应当先让你确认路径，而不是写一条 `partial: true` 的空笔记污染 inbox。\n\n**B. 写 partial 笔记** —— 按规范走降级，记一条占位笔记，提示你补纯文本。\n\n我倾向 A。请确认：\n\n1. 路径是否写错？（Windows 下 `/tmp/` 实际指向 `%TEMP%`，我刚才扫过 `$TEMP` 根目录也没看到 `papers/` 子目录或任何 `transformer*.pdf`）\n2. PDF 是否在别处？方便的话给我正确路径，或直接把文件拖到 `01_resources/papers/` 下，我以相对路径引用\n3. 如果只是想先占位、稍后补正文，选 B，我就按 `partial: true` 写入 `00_inbox/reading/`\n\n你想走哪条？"
+}

@@ -192,6 +192,12 @@ def _format_user_message(item: dict) -> str:
     if choice in (1, 2, 3):
         parts.append("")
         parts.append(f"[simulated-user-choice] {choice}")
+    elif expected.get("should_trigger_polish"):
+        # P0-2 fix: single-turn eval has no human to reply to the polish menu.
+        # Simulate SKILL §2.5 降级 rule: no reply within timeout → auto-default
+        # to [2] 保留原文. This unblocks the menu and lets the model write the file.
+        parts.append("")
+        parts.append("[simulated-user-choice] 2 (auto-default: no human reply in single-turn eval)")
 
     return "\n".join(parts)
 
@@ -216,15 +222,23 @@ def _extract_frontmatter(reply: str) -> dict:
 
     Looks for the first ```yaml ... ``` block or a --- ... --- block
     in the reply, then parses it.
+
+    P0-1 fix: when the model emits a ```yaml block whose body already
+    contains `---` separators (the natural frontmatter shape), do NOT
+    wrap it again — that produces `---\\n---\\n...\\n---\\n---` which
+    the parser reads as an empty block.
     """
     if not reply:
         return {}
     # Try fenced yaml first
     fenced = re.search(r'```ya?ml\s*\n(.*?)\n```', reply, re.DOTALL)
     if fenced:
-        return fm_scorer.parse_frontmatter_text(
-            "---\n" + fenced.group(1) + "\n---"
-        )
+        body = fenced.group(1).strip()
+        if body.startswith("---"):
+            # Body is already a complete frontmatter block — parse as-is
+            return fm_scorer.parse_frontmatter_text(body)
+        # Body is raw YAML (no --- separators) — wrap it
+        return fm_scorer.parse_frontmatter_text("---\n" + body + "\n---")
     # Try bare ---
     bare = re.search(r'^---\s*\n(.*?)\n---\s*$', reply, re.DOTALL | re.MULTILINE)
     if bare:
