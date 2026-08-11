@@ -163,7 +163,7 @@
     "id": "A3.2-ai-dialog-with-roles",
     "dimension": "source-routing",
     "source_type": "ai-dialog",
-    "input": "User: RAG 怎么选？\nAssistant: 看 token 量，少的话直接 BM25，多就上向量\nUser: 那 pgvector 呢？\nAssistant: 中等规模合适",
+    "input": "保存这段对话：\nUser: RAG 怎么选？\nAssistant: 看 token 量，少的话直接 BM25，多就上向量\nUser: 那 pgvector 呢？\nAssistant: 中等规模合适",
     "user_choice": null,
     "expected": {
       "should_trigger_capture": true,
@@ -343,12 +343,12 @@
     "id": "A6.2-pdf-parse-fail",
     "dimension": "source-routing",
     "source_type": "pdf",
-    "input": "抓 /tmp/corrupted.pdf",
+    "input": "抓 01_resources/pdfs/corrupted.pdf",
     "user_choice": null,
     "expected": {
       "should_trigger_capture": true,
       "path_glob": "00_inbox/reading/*.md",
-      "frontmatter": {"capture_type": "^pdf$", "partial": "^true$"},
+      "frontmatter": {"capture_type": "^pdf$", "partial": "^true$", "source.raw": "01_resources/pdfs/corrupted.pdf"},
       "frontmatter_forbidden": [],
       "content_contains": [],
       "content_excludes": [],
@@ -356,8 +356,8 @@
       "feedback_contains": []
     },
     "category": "source-routing",
-    "references": ["SKILL.md §4 步骤 2c + §6"],
-    "notes": "解析失败 → partial: true + 提示用户提供纯文本"
+    "references": ["SKILL.md §4 步骤 2c + §6 + §路径约束"],
+    "notes": "解析失败 → partial: true + 提示用户提供纯文本；source.raw 用 vault 相对路径（禁绝对路径）"
   },
   {
     "id": "B1-polish-trigger-explicit-zh",
@@ -683,7 +683,7 @@
     "id": "F1-fm-required-fields",
     "dimension": "frontmatter",
     "source_type": "idea",
-    "input": "记一下 embedding 模型选型思考",
+    "input": "记一下 embedding 模型选型思考：维度、上下文长度、推理成本、中英文召回都要对比",
     "user_choice": null,
     "expected": {
       "should_trigger_capture": true,
@@ -696,8 +696,8 @@
       "feedback_contains": []
     },
     "category": "frontmatter",
-    "references": ["SKILL.md §4 步骤 5 + §8 自检"],
-    "notes": "必填字段检查：title + captured_at + capture_type"
+    "references": ["SKILL.md §4 步骤 5 + §8 自检 + §2.5 触发条件"],
+    "notes": "必填字段检查：title + captured_at + capture_type；输入含标点（、）+ 长度 > 50，按 §2.5 规则不触发 polish"
   },
   {
     "id": "F2-fm-forbidden-fields",
@@ -803,7 +803,7 @@
     "id": "G3-degrade-tags-infer-fail",
     "dimension": "degradation",
     "source_type": "idea",
-    "input": "嗯",
+    "input": "记一下今天脑子里冒出来的一些零散念头，没什么具体主题也不好归类，就是想先存下来",
     "user_choice": null,
     "expected": {
       "should_trigger_capture": true,
@@ -817,7 +817,7 @@
     },
     "category": "degradation",
     "references": ["SKILL.md §6"],
-    "notes": "tags 推断失败 fallback：suggested_tags 为空数组"
+    "notes": "tags 推断失败 fallback：长输入无具体领域线索 → suggested_tags 为空数组；输入 > 50 字符 + 含标点 → 不触发 polish"
   },
   {
     "id": "H1-edge-no-trigger",
