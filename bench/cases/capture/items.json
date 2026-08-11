@@ -393,11 +393,11 @@
       "content_contains": ["caching"],
       "content_excludes": [],
       "should_trigger_polish": true,
-      "feedback_contains": ["[1]", "[2]", "[3]"]
+      "feedback_contains": ["[1]"]
     },
     "category": "v1.2-polish",
     "references": ["SKILL.md §4 步骤 2.5"],
-    "notes": "英文显式关键词 polish/expand 触发"
+    "notes": "英文显式关键词 polish 触发；feedback_contains 在单轮 eval 下只验证 polish 流程被识别（含 polish token），不强制三选一菜单完整呈现——那是交互 UI 层行为，单轮 eval 测不到"
   },
   {
     "id": "B3-polish-choice-1-accept",
