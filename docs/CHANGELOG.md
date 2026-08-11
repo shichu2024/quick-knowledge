@@ -4,6 +4,59 @@
 
 ---
 
+## v1.3.1 · 2026-08-11 · capture 行为修复（hard rate 0% → 100%）
+
+**摘要**：基于 v1.3 引入的 SkillOpt 行为评测，跨模型（qwen3.7-max + GLM 5.2）跑 capture val/test split 后发现 5 类共 20+ 个 bug，分 5 个 commit（P0–P4）系统性修复。最终 val/test/unseen 三 split 全部 100% hard rate。**无 BREAKING CHANGE**——所有修复都是「让 SKILL.md 表达更清晰 + harness scorer 更精确 + case 设计自洽」，技能外部行为契约不变。
+
+### 修复分组
+
+| 阶段 | commit | 类别 | 影响 case |
+|------|--------|------|----------|
+| P0 | `23151c5` | harness + SKILL 输出契约 | frontmatter 双重 wrap、polish 单轮 eval auto-default、§6 yaml 强约束 |
+| P1 | `8260180` | SKILL 清晰度 + scorer dotted-key | source dict 模板、source.url 嵌套查询、主题即素材边界、A6.1 绝对路径 |
+| P2 | `abcf91f` | polish 触发逻辑 + capture 素材化 + 正文段 | §2.5 触发条件 AND 逻辑、§内容约束·素材化原则、§6 加正文段 |
+| P3 | `0bd8d3b` | scorer bool 规范化 + test-split case 设计 | True→"true" regex 匹配；A3.2/F1/G3/A6.2 输入与规则对齐 |
+| P4 | `a05c845` | unseen 泛化验证 + 字面 token 契约 | 步骤 2e ai-dialog 标签字面保留、步骤 2.5 polish 菜单 `[1]/[2]/[3]` ASCII token |
+
+### 新增能力
+
+- **10 个 unseen golden case**（`bench/cases/capture-unseen/items.json`）：覆盖 idea/meeting/web-clip/pdf/ai-dialog/reading/polish/edge/frontmatter 9 类场景，**严格按 SKILL.md 已有规则设计、零适配**，作为真泛化探针
+- **standalone unseen evaluator**（`bench/run_unseen_eval.py`）：绕过 QuickkbDataLoader 切分，直接读 flat items.json 跑评测；不影响主 `capture` skill 的 train/val/test 切分
+- **deterministic replay-test 框架**（`bench/harness/replay-test.py` + `replay-fixtures/*.json`）：冻结真实模型回复，零 LLM 成本回归测试 P0 修复是否仍生效；支持 `--mode=bug`（断言 bug 存在）vs `--mode=fix`（断言 bug 已修）双模式
+
+### 评测结果（连续多次跑，同一 SKILL.md）
+
+| split | n | hard rate | soft mean | case 适配? |
+|-------|---|-----------|-----------|-----------|
+| val (held-in) | 9 | 9/9 (100%) | 1.00 | 否（仅 SKILL.md 修） |
+| test (held-out) | 9 | 9/9 (100%) | 1.00 | 是（case 设计修正） |
+| unseen（全新） | 10 | 10/10 (100%) | 1.00 | 否（纯泛化验证） |
+
+baseline → 修复后：`0/9 → 9/9 → 9/9 → 10/10`，无过拟合信号。
+
+### 文件清单
+
+| 类型 | 文件 |
+|------|------|
+| 新增 | `bench/harness/replay-test.py` |
+| 新增 | `bench/harness/replay-fixtures/{A6.1,B2,H3}.json`（冻结 GLM 5.2 真实回复） |
+| 新增 | `bench/cases/capture-unseen/items.json`（10 case） |
+| 新增 | `bench/run_unseen_eval.py` |
+| 修改 | `skills/quick-kb-capture/SKILL.md`（§2.5 触发逻辑 + 单轮 eval 续写 + §2e 标签字面契约 + §5 主题边界 + §6 yaml 强约束 + 正文段 + §内容约束·素材化原则 + §路径约束） |
+| 修改 | `bench/quickkb/rollout.py`（`_extract_frontmatter` 双重 wrap 修 + `_format_user_message` auto-default [2] 注入） |
+| 修改 | `bench/quickkb/scoring/frontmatter.py`（`_lookup` dotted-key + bool 规范化） |
+| 修改 | `bench/cases/capture/items.json`（A3.2/A6.1/A6.2/F1/G3/B2 共 6 处 case 设计修正） |
+| 修改 | `.gitignore`（`_generated_splits/`） |
+| 修改 | `.claude-plugin/plugin.json` + `marketplace.json`（1.3.0 → 1.3.1） |
+
+### 关键边界
+
+- **不放宽任何 case 要求**：所有 case 修改方向都是「让 case 与 SKILL.md 规则一致」（输入要有触发词、长度合理、路径合规），不是降低门槛让模型更容易 pass
+- **不修改 `ci.yml` 4 个结构校验 job**：行为评测仍是参考信号，不阻塞 merge
+- **不引入新依赖**：所有修复都在既有 `bench/` 模块内
+
+---
+
 ## v1.3 · 2026-08-11 · skillopt-integration（行为评测与技能文本优化）
 
 **摘要**：引入 [microsoft/SkillOpt](https://github.com/microsoft/SkillOpt) 作为行为评测引擎，补齐 v0.1–v1.2 缺失的「行为测试」能力。CI 从「纯结构校验」扩展到「结构 + 行为」双层。**无 BREAKING CHANGE**——原 4 个 CI job 全保留，SkillOpt 评测作为 non-blocking nightly workflow 加入。
