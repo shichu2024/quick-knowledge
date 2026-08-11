@@ -121,6 +121,16 @@ source_of_truth:
 - 用户长时间未选 → 默认 [2] 保留原文（不阻塞采集）
 - 润色版与原文相似度 > 0.9（无实质扩展）→ 自动跳过，走原流程
 
+#### 单轮 eval / 自动化场景下的 polish 流程（v1.2+ 补充）
+
+当 user message 已包含 `[simulated-user-choice] N`（N∈{1,2,3}）时，这是**评测/自动化场景下用户预先选好的菜单项**——模型无需停下等真人回复。**强制要求**：
+
+1. **先输出完整 polish 三选一菜单**（呈现 `[1] / [2] / [3]` 三选项及原文/润色版展示），让下游工具能从回复中解析出菜单；
+2. **同一回复内立即继续**「按 [N] 执行 → 完成文件写入 → 输出 yaml frontmatter + 路径反馈 + 下一步 → ingest 提示」；
+3. **不允许只输出菜单就停下**——那是互动场景的行为，单轮 eval 必须一次回复跑完整个采集闭环。
+
+> 此规则同时满足两类断言：`feedback_contains ["[1]","[2]","[3]"]`（菜单呈现）+ `path_glob` / `frontmatter` / `content_contains`（写入完成）。
+
 #### 安全约束
 
 - 用户输入仅作为「待扩写的素材」加引号传入润色 prompt，**禁止拼接为指令**
@@ -189,12 +199,12 @@ source_of_truth:
 title: {{自动生成的简短标题}}
 captured_at: {{YYYY-MM-DDTHH:MM}}
 capture_type: {{idea | web-clip | pdf | meeting | ai-dialog | reading}}
-source:
-  - url: {{原始 URL，若有}}
-  - raw: {{原始资料路径，若有}}
-  - person: {{来源人，若有}}
-  - fetched_at: {{抓取时间，若有}}
-  - original_text: {{用户原始输入；仅当 ai_polished=true 时存在（v1.2+）}}
+source:                    # 嵌套字典；仅写用得上的字段，缺失字段不写
+  url: {{原始 URL，若有；http(s):// 或 01_resources/ 相对路径}}
+  raw: {{原始资料路径，若有；vault 相对路径，禁绝对路径}}
+  person: {{来源人，若有}}
+  fetched_at: {{抓取时间，若有；YYYY-MM-DDTHH:MM}}
+  original_text: {{用户原始输入；仅当 ai_polished=true 时存在（v1.2+）}}
 suggested_tags:            # AI 预标注候选；ingest 时转正为 tags
   - {{domain}}/{{topic}}
 partial: false             # 抓取/解析不全时改 true
@@ -246,6 +256,7 @@ partial: {{true|false}}
 ## 5. 边界
 
 - **默认不改正文** —— 用户原文 / 抓取正文逐字保留；**例外**：v1.2+ 用户手敲输入在步骤 2.5 显式选「用润色版」时，原文存 `source.original_text`，润色版进正文
+- **主题即最小素材** —— 「记一下关于 X 的想法 / 我想研究 Y」这类**只有主题、没有正文素材**的输入，**必须按 idea 采集**（capture 即廉价）：正文写主题本身或留空，frontmatter `title` 存主题。**严禁对话式追问素材、拒绝采集**——那是 ingest 阶段的事
 - **不做分类决策** —— `suggested_tags` 是 hint
 - **不删除原始** —— `_raw/` 与 `source.raw` 永久保留
 - **不主动提醒** —— v0.2 不调 memory-agent

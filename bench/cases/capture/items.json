@@ -323,12 +323,12 @@
     "id": "A6.1-pdf-file",
     "dimension": "source-routing",
     "source_type": "pdf",
-    "input": "抓 /tmp/papers/transformer.pdf 关于 attention 机制",
+    "input": "抓 01_resources/papers/transformer.pdf 关于 attention 机制",
     "user_choice": null,
     "expected": {
       "should_trigger_capture": true,
       "path_glob": "00_inbox/reading/*.md",
-      "frontmatter": {"capture_type": "^pdf$"},
+      "frontmatter": {"capture_type": "^pdf$", "source.raw": "01_resources/papers/transformer.pdf"},
       "frontmatter_forbidden": [],
       "content_contains": ["attention"],
       "content_excludes": [],
@@ -336,8 +336,8 @@
       "feedback_contains": []
     },
     "category": "source-routing",
-    "references": ["SKILL.md §4 步骤 2c"],
-    "notes": "PDF 解析走 reading 目录；source.raw 存原始路径"
+    "references": ["SKILL.md §4 步骤 2c · §路径约束"],
+    "notes": "PDF 解析走 reading 目录；source.raw 存 vault 相对路径（禁绝对路径）"
   },
   {
     "id": "A6.2-pdf-parse-fail",
