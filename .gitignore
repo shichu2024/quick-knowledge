@@ -23,6 +23,7 @@ system/config/kb.config.local.yaml
 bench/reports/*
 !bench/reports/.gitkeep
 bench/.tmp-vault/
+_generated_splits/
 
 # Python (bench/quickkb)
 __pycache__/

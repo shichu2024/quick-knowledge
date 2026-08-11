@@ -208,11 +208,21 @@ ai_polished: false         # v1.2+ · 用户采纳润色版时改 true（默认�
 
 ### 步骤 6 · 反馈输出
 
+**输出格式（强约束）**：回复必须包含一段 ```` ```yaml ```` 代码块、内含完整 frontmatter（用 `---` 分隔符包裹），供下游 ingest 机器解析。不允许用「标题：/ 标签：」等纯文本表格替代——会破坏 ingest 链路。
+
 ```
 ✓ 已采集（{{source_type}} · 00_inbox/{{dir}}/20260809-1430-<slug>.md）
-  标题：{{生成的标题}}
-  候选标签：{{suggested_tags}}
-  partial: {{true|false}}
+
+```yaml
+---
+title: {{生成的简短标题}}
+captured_at: {{YYYY-MM-DDTHH:MM}}
+capture_type: {{source_type}}
+suggested_tags: [{{domain}}/{{topic}}]
+partial: {{true|false}}
+---
+```
+
   下一步：
     → quick-kb-ingest 00_inbox/{{dir}}/20260809-1430-<slug>.md
 ```

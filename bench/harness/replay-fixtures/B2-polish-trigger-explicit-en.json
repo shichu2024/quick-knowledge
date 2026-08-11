@@ -1,0 +1,6 @@
+{
+  "case_id": "B2-polish-trigger-explicit-en",
+  "model": "glm-5.2",
+  "user": "polish: save my idea about caching",
+  "assistant": "需要先知道你的想法具体内容才能采集/润色。\"caching\" 只是主题，不是想法本身。\n\n请用一两句话写下你的 caching 想法（例如：「Redis 缓存应该分层，热点 key 单独走 LRU」），我会：\n\n1. 落到 `00_inbox/ideas/` 作为 inbox 笔记\n2. 生成润色版（保留原意 + 扩展细节），给你三选一：**[1] 用润色版 / [2] 保留原文 / [3] 再改一版**\n\n或者你也可以直接说「就用 caching 这个词当原始素材，自由扩写」——我就基于主题生成一版供你挑选。"
+}
