@@ -1,0 +1,202 @@
+[
+  {
+    "id": "U1-idea-question-long",
+    "dimension": "source-routing",
+    "source_type": "idea",
+    "input": "记一下：为什么 monorepo 比 polyrepo 更适合小团队？想从代码复用、CI 复杂度、依赖管理三个角度整理思路",
+    "user_choice": null,
+    "expected": {
+      "should_trigger_capture": true,
+      "path_glob": "00_inbox/ideas/*.md",
+      "frontmatter": {"capture_type": "^idea$"},
+      "frontmatter_forbidden": [],
+      "content_contains": ["monorepo"],
+      "content_excludes": [],
+      "should_trigger_polish": false,
+      "feedback_contains": []
+    },
+    "category": "source-routing",
+    "references": ["SKILL.md §2 步骤 2a"],
+    "notes": "unseen：长 idea + 问句 + 多个标点（？、逗号），不触发 polish"
+  },
+  {
+    "id": "U2-idea-multiline-code",
+    "dimension": "source-routing",
+    "source_type": "idea",
+    "input": "快记这段代码思路：\n```python\ndef cache_get(key, loader):\n    if key in memo:\n        return memo[key]\n    val = loader(key)\n    memo[key] = val\n    return val\n```\n这是简化的 memoize 模式",
+    "user_choice": null,
+    "expected": {
+      "should_trigger_capture": true,
+      "path_glob": "00_inbox/ideas/*.md",
+      "frontmatter": {"capture_type": "^idea$"},
+      "frontmatter_forbidden": [],
+      "content_contains": ["memo", "cache_get"],
+      "content_excludes": [],
+      "should_trigger_polish": false,
+      "feedback_contains": []
+    },
+    "category": "source-routing",
+    "references": ["SKILL.md §2 步骤 2a"],
+    "notes": "unseen：多行 + 代码块 + 含标点，不触发 polish；正文需逐字保留代码"
+  },
+  {
+    "id": "U3-meeting-decision",
+    "dimension": "source-routing",
+    "source_type": "meeting",
+    "input": "保存会议决定：下周开始用 pnpm 替代 npm，迁移期 2 周；CI 要同步改 cache 策略；package.json 的 scripts 兼容性由前端组负责检查",
+    "user_choice": null,
+    "expected": {
+      "should_trigger_capture": true,
+      "path_glob": "00_inbox/meetings/*.md",
+      "frontmatter": {"capture_type": "^meeting$"},
+      "frontmatter_forbidden": [],
+      "content_contains": ["pnpm"],
+      "content_excludes": [],
+      "should_trigger_polish": false,
+      "feedback_contains": []
+    },
+    "category": "source-routing",
+    "references": ["SKILL.md §2 步骤 2d"],
+    "notes": "unseen：meeting 决定类，含具体行动项"
+  },
+  {
+    "id": "U4-web-clip-tech-blog",
+    "dimension": "source-routing",
+    "source_type": "web-clip",
+    "input": "抓 https://overreacted.io/things-i-dont-know/",
+    "user_choice": null,
+    "expected": {
+      "should_trigger_capture": true,
+      "path_glob": "00_inbox/clips/*.md",
+      "frontmatter": {"capture_type": "^web-clip$", "source.url": "^https://"},
+      "frontmatter_forbidden": [],
+      "content_contains": [],
+      "content_excludes": [],
+      "should_trigger_polish": false,
+      "feedback_contains": []
+    },
+    "category": "source-routing",
+    "references": ["SKILL.md §2 步骤 2b + §路径约束"],
+    "notes": "unseen：web-clip 知名博客 URL；抓取可能失败 → partial: true 也算通过"
+  },
+  {
+    "id": "U5-pdf-relative-path",
+    "dimension": "source-routing",
+    "source_type": "pdf",
+    "input": "抓 01_resources/papers/rag-survey.pdf 关于 RAG 综述部分",
+    "user_choice": null,
+    "expected": {
+      "should_trigger_capture": true,
+      "path_glob": "00_inbox/reading/*.md",
+      "frontmatter": {"capture_type": "^pdf$", "source.raw": "01_resources/papers/rag-survey.pdf"},
+      "frontmatter_forbidden": [],
+      "content_contains": ["RAG"],
+      "content_excludes": [],
+      "should_trigger_polish": false,
+      "feedback_contains": []
+    },
+    "category": "source-routing",
+    "references": ["SKILL.md §2 步骤 2c + §路径约束"],
+    "notes": "unseen：pdf + vault 相对路径，参照 A6.1 修后行为"
+  },
+  {
+    "id": "U6-ai-dialog-short",
+    "dimension": "source-routing",
+    "source_type": "ai-dialog",
+    "input": "保存对话：\nUser: transformer 为啥比 RNN 强？\nAssistant: 主要两点——自注意力捕捉长程依赖，并行化训练更快",
+    "user_choice": null,
+    "expected": {
+      "should_trigger_capture": true,
+      "path_glob": "00_inbox/ai-dialogs/*.md",
+      "frontmatter": {"capture_type": "^ai-dialog$"},
+      "frontmatter_forbidden": [],
+      "content_contains": ["User:", "Assistant:"],
+      "content_excludes": [],
+      "should_trigger_polish": false,
+      "feedback_contains": []
+    },
+    "category": "source-routing",
+    "references": ["SKILL.md §2 步骤 2e"],
+    "notes": "unseen：ai-dialog 短对话 + 显式保存前缀"
+  },
+  {
+    "id": "U7-reading-booknote",
+    "dimension": "source-routing",
+    "source_type": "reading",
+    "input": "记一下读《Designing Data-Intensive Applications》第 3 章笔记：存储引擎 LSM 树适合写多读少，B-Tree 适合读多写少；两种索引在压缩和写放大上有本质权衡",
+    "user_choice": null,
+    "expected": {
+      "should_trigger_capture": true,
+      "path_glob": "00_inbox/reading/*.md",
+      "frontmatter": {"capture_type": "^reading$"},
+      "frontmatter_forbidden": [],
+      "content_contains": ["LSM", "B-Tree"],
+      "content_excludes": [],
+      "should_trigger_polish": false,
+      "feedback_contains": []
+    },
+    "category": "source-routing",
+    "references": ["SKILL.md §2 步骤 2f"],
+    "notes": "unseen：reading 类带书本出处"
+  },
+  {
+    "id": "U8-edge-mixed-lang-ip",
+    "dimension": "edge",
+    "source_type": "idea",
+    "input": "Save: 调试 docker 网络问题，发现 bridge 模式默认网段是 172.17.0.0/16，自定义网络用 172.18.0.0/16 起步；容器间通信走 docker0 网桥",
+    "user_choice": null,
+    "expected": {
+      "should_trigger_capture": true,
+      "path_glob": "00_inbox/ideas/*.md",
+      "frontmatter": {"capture_type": "^idea$"},
+      "frontmatter_forbidden": [],
+      "content_contains": ["docker", "172.17"],
+      "content_excludes": [],
+      "should_trigger_polish": false,
+      "feedback_contains": []
+    },
+    "category": "edge",
+    "references": ["SKILL.md §2 步骤 2a + §5 边界"],
+    "notes": "unseen：中英混合 + IP 地址 + 冒号 → 不触发 polish（含标点 + 长度 > 50）"
+  },
+  {
+    "id": "U9-polish-explicit-userchoice2",
+    "dimension": "v1.2-polish",
+    "source_type": "idea",
+    "input": "polish: rag 优化",
+    "user_choice": 2,
+    "expected": {
+      "should_trigger_capture": true,
+      "path_glob": "00_inbox/ideas/*.md",
+      "frontmatter": {"capture_type": "^idea$"},
+      "frontmatter_forbidden": [],
+      "content_contains": ["rag"],
+      "content_excludes": [],
+      "should_trigger_polish": true,
+      "feedback_contains": ["[1]"]
+    },
+    "category": "v1.2-polish",
+    "references": ["SKILL.md §2 步骤 2.5 触发条件 B + 单轮 eval 续写规则"],
+    "notes": "unseen：显式 polish 关键词 + 用户选 [2] 保留原文；按 P1-2 应输出菜单 + 续写"
+  },
+  {
+    "id": "U10-frontmatter-typed",
+    "dimension": "frontmatter",
+    "source_type": "idea",
+    "input": "记一下 today I learned: postgres 的 EXPLAIN ANALYZE 比 EXPLAIN 多了实际执行时间统计，能看到 loops 实际次数、内存排序实际用量",
+    "user_choice": null,
+    "expected": {
+      "should_trigger_capture": true,
+      "path_glob": "00_inbox/ideas/*.md",
+      "frontmatter": {"title": ".+", "captured_at": ".+", "capture_type": "^idea$"},
+      "frontmatter_forbidden": [],
+      "content_contains": ["EXPLAIN"],
+      "content_excludes": [],
+      "should_trigger_polish": false,
+      "feedback_contains": []
+    },
+    "category": "frontmatter",
+    "references": ["SKILL.md §5 步骤 5 + §8 自检"],
+    "notes": "unseen：长 + 含标点 → 不触发 polish；测必填字段 title/captured_at/capture_type"
+  }
+]
