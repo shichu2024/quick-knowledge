@@ -38,7 +38,7 @@ def score(
 
     # Required: present + regex match
     for name, pattern in required_fields.items():
-        actual_value = actual_fm.get(name)
+        actual_value = _lookup(actual_fm, name)
         if actual_value is None:
             signals.append(0.0)
             continue
@@ -57,6 +57,28 @@ def score(
     hard = 1.0 if all(s >= 1.0 for s in signals) else 0.0
     soft = sum(signals) / len(signals)
     return (hard, soft)
+
+
+def _lookup(fm: dict, dotted: str):
+    """Look up a (possibly dotted) key path in a nested dict.
+
+    Top-level keys (no dot) use a direct .get(). Dotted paths like
+    ``source.url`` walk nested dicts. Returns None if any segment is
+    absent or non-dict mid-path.
+    """
+    if not dotted or not isinstance(fm, dict):
+        return None
+    if "." not in dotted:
+        return fm.get(dotted)
+    cur = fm
+    for part in dotted.split("."):
+        if isinstance(cur, dict):
+            cur = cur.get(part)
+        else:
+            return None
+        if cur is None:
+            return None
+    return cur
 
 
 def parse_frontmatter_text(text: str) -> dict:
