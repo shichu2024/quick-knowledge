@@ -31,7 +31,7 @@ source_of_truth:
 | 参数 | 必填 | 默认 | 说明 |
 |------|------|------|------|
 | `language` | 否 | `zh` | 模板语言：`zh` / `en`（v0.1 仅铺设 `zh`） |
-| `domains` | 否 | `["general"]` | 初始领域列表，用于创建 `02_areas/<domain>/` 子目录 |
+| `domains` | 否 | `["general"]` | 初始领域列表，用于创建 `02_areas/<domain>/` 子目录；条目可含 `/` 表达嵌套（如 `programming/python`），init 会建多层目录 |
 | `obsidian` | 否 | 自动探测 | 是否生成 `.obsidian/` 基础配置（v0.1 不处理，留给 v0.2） |
 | `vault_root` | 否 | 当前工作目录 | vault 根路径；不传则在 CWD 创建 |
 
@@ -84,7 +84,8 @@ source_of_truth:
 
 02_areas/
 └── <domain>/              # 对每个用户输入 domain 创建；至少 general
-    └── _moc.md            # 领域 MOC 占位（含模板头）
+                          # v1.4+ · domain 可含 "/"（如 programming/python）→ 建多层目录
+    └── _moc.md            # 领域 MOC 占位（含模板头；仅建在最深层）
 
 07_principles/
 ├── principles/
@@ -145,6 +146,9 @@ domains:                           # 已注册领域（与 02_areas/ 子目录�
 #   confidence_decay_months: 6
 # proactive_reminders:             # v0.3 启用
 #   enabled: true
+# domain_taxonomy:                 # v1.4 启用（嵌套领域分类树，选填）
+#   programming: [python, go, rust]
+#   ai-engineering: [rag, agent, eval]
 ```
 
 #### 3.2 `99_system/templates/zh/` 下铺设 4 个 v0.1 模板

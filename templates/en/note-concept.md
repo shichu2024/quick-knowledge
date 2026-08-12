@@ -12,7 +12,7 @@ updated: {{date}}                      # required
 tags:                                  # required · controlled, domain/topic form
   - {{domain}}/{{topic}}
 status: active                         # required · inbox/draft/active/done/cancelled/archived
-domain: {{domain}}                     # optional
+domain: {{domain}}                     # optional · may contain "/" for nesting (e.g. programming/python); decided by ingest against kb.config.yaml.domain_taxonomy
 confidence: 50                         # optional · 0-100 · single 40/multi 60+/primary 80+
 relations:                             # required structure · typed relations (DESIGN §6.7)
   supports:

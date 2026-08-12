@@ -12,7 +12,7 @@ updated: {{date}}                      # required
 tags:                                  # required · 受控标签 domain/topic
   - {{domain}}/{{topic}}
 status: active                         # required · inbox/draft/active/done/cancelled/archived
-domain: {{domain}}                     # optional
+domain: {{domain}}                     # optional · 可含 "/" 表达嵌套（如 programming/python），由 ingest 按 kb.config.yaml.domain_taxonomy 决定
 confidence: 50                         # optional · 0-100 · 单源40/多源60+/一手80+
 relations:                             # required 结构 · 类型化关系（DESIGN §6.7）
   supports:                            #   本笔记支持/被某笔记支撑（对称）

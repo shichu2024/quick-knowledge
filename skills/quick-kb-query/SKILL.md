@@ -50,7 +50,7 @@ source_of_truth:
 | 参数 | 必填 | 默认 | 说明 |
 |------|------|------|------|
 | `question` | ✓ | — | 自然语言问题 |
-| `scope` | 否 | 全库 | 领域 / 标签 / 全库 |
+| `scope` | 否 | 全库 | 领域 / 标签 / 全库；领域可含 `/` 嵌套（v1.4+，如 `programming/python`，扫叶子目录；单层 `programming` 扫全子树） |
 | `mode` | 否 | `strict` | `strict`（必须引用）/ `hybrid`（库内 + 推测分段） |
 
 ---

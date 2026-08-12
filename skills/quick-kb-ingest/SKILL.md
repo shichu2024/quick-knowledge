@@ -73,18 +73,25 @@ source_of_truth:
 research_agent.extract_atoms(
   payload: {
     text: {{inbox 笔记正文}},
-    hint: { domain: {{用户指定或推荐}}, known_tags: {{kb.config.yaml tags_vocabulary}} }
+    hint: {
+      domain: {{用户指定或推荐}},
+      known_tags: {{kb.config.yaml tags_vocabulary}},
+      taxonomy: {{kb.config.yaml domain_taxonomy}}    # v1.4+ · 选填，命中则推荐嵌套 domain
+    }
   },
   options: { max_atoms: 5 }
 ) → {
   found: [
     {
       note_type: "concept" | "resource",
-      title, body, tags, confidence, source_excerpt
+      title, body, tags, confidence, source_excerpt,
+      domain: {{单层或嵌套，如 "programming/python"}}
     }, ...
   ]
 }
 ```
+
+> **嵌套 domain 决策（v1.4+）**：当 `domain_taxonomy` 命中顶层 key 且能从 tags/title 推断子域 → 返回嵌套 domain（`key/sub`）；未配置 taxonomy 或未命中 → 返回单层（向后兼容）。
 
 #### 2.3 原子化拆分
 
@@ -95,9 +102,11 @@ research_agent.extract_atoms(
 
 | 观点类型 | 目标目录 | 模板 |
 |---------|---------|------|
-| concept | `02_areas/<domain>/<slug>.md` | [`templates/zh/note-concept.md`](../../templates/zh/note-concept.md) |
+| concept | `02_areas/<domain>/<slug>.md`（`<domain>` 可含 `/` 嵌套，如 `programming/python`） | [`templates/zh/note-concept.md`](../../templates/zh/note-concept.md) |
 | resource | `01_resources/<category>/<slug>.md` | [`templates/zh/note-resource.md`](../../templates/zh/note-resource.md) |
 | idea（仍不够结构化） | 留 `00_inbox/ideas/`，更新 `status: draft` | 不创建新文件 |
+
+> **嵌套路径示例**：`domain: programming/python` → `02_areas/programming/python/threading.md`。建中间目录（`mkdir -p` 语义）。slug 保持不变 → slug-based wikilink 不断。
 
 > v0.2 不产出 decision/goal/project/principle/belief/pattern/experience/moc/review/daily 类型。
 

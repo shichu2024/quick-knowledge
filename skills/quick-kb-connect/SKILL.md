@@ -61,6 +61,7 @@ source_of_truth:
 解析 `scope`：
 
 - 领域名（如 `ai-engineering`）→ 扫描 `02_areas/<scope>/` 全部笔记
+- **嵌套领域（v1.4+）**：`scope=programming` 扫描 `02_areas/programming/` 全子树（含 `python/`、`go/` 等所有子目录）；`scope=programming/python` 只扫该叶子目录
 - 某条笔记路径 → 扫描该笔记 + 同 domain 的候选池
 - 某标签 → 扫描全库含该标签的笔记
 
@@ -178,6 +179,8 @@ manager_agent.build_moc(
 ### 5.2 MOC 路径
 
 `06_wiki/mocs/<domain>-moc.md`
+
+> **嵌套 domain（v1.4+）**：`scope` 含 `/` 时，MOC 文件名用 `-` 连接：`scope=programming/python` → `06_wiki/mocs/programming-python-moc.md`。
 
 ### 5.3 Canvas 路径
 
