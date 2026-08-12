@@ -712,12 +712,12 @@
       "frontmatter_forbidden": ["type", "status", "maturity", "relations", "context", "value", "confidence"],
       "content_contains": [],
       "content_excludes": [],
-      "should_trigger_polish": false,
+      "should_trigger_polish": true,
       "feedback_contains": []
     },
     "category": "frontmatter",
-    "references": ["SKILL.md §4 步骤 5「严禁」段"],
-    "notes": "ingest 阶段字段禁止提前写入"
+    "references": ["SKILL.md §4 步骤 5「严禁」段 · §4 步骤 2.5 polish 决策表"],
+    "notes": "ingest 阶段字段禁止提前写入；输入短/无标点/无换行 → 按 §2.5 Step 3 触发 polish（与 A3.1 同型）"
   },
   {
     "id": "F3-fm-ai-polished-consistency",

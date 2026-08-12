@@ -212,7 +212,9 @@ def _extract_path(reply: str) -> str:
     if not reply:
         return ""
     # Match vault-relative paths ending in .md
-    pattern = r'(?:[\w\-]+/)+[\w\-]+\.md'
+    # Slug body allows dots (e.g. `transformer-attention.pdf.md`, `v1.2-release.md`)
+    # but must start with a word/dash char (not a dot) and end with `.md`.
+    pattern = r'(?:[\w\-]+/)+[\w\-][\w\-.]*\.md'
     matches = re.findall(pattern, reply)
     return matches[0] if matches else ""
 
