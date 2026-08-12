@@ -1,12 +1,12 @@
 ---
 name: quick-kb-normalize
 description: |
-  批量规整历史笔记。补全 frontmatter、归一标签（对照受控词表）、related→relations 迁移、标题规范化（kebab-case 文件名）。
+  批量规整历史笔记。补全 frontmatter、归一标签（对照受控词表）、related→relations 迁移、标题规范化（kebab-case 文件名）、嵌套 domain 重组（v1.4+ regroup）。
   幂等（多次运行结果一致）+ 可解释（每条改动带 why）+ 可回滚（写 diff 到 _normalize_log/）+ dry-run 预览。
-  触发词（中文）：规整笔记 / normalize / 批量修复 / 迁移 related
-  Triggers (EN): normalize notes / batch fix frontmatter / migrate related field
-version: v0.4
-phase: v0.4
+  触发词（中文）：规整笔记 / normalize / 批量修复 / 迁移 related / 重组领域
+  Triggers (EN): normalize notes / batch fix frontmatter / migrate related field / regroup domains
+version: v1.4
+phase: v1.4
 applies_to: 读写 frontmatter（不改正文）· 跨 inbox / areas / principles
 source_of_truth:
   - docs/DESIGN.md §4.2 / §6.7
@@ -41,6 +41,7 @@ source_of_truth:
 - 归一标签（对照 `kb.config.yaml` tags_vocabulary）
 - **`related` → `relations` 迁移**（V2 关键）
 - 标题规范化（文件名 kebab-case）
+- **`regroup` action**（v1.4+）：按 `kb.config.yaml.domain_taxonomy` 把 flat-domain 笔记迁到嵌套结构
 - 写入 `_normalize_log/<YYYY-MM-DD>-<scope>.diff.md`
 - 支持 `dry-run` 预览
 
@@ -57,7 +58,7 @@ source_of_truth:
 | 参数 | 必填 | 默认 | 说明 |
 |------|------|------|------|
 | 范围 `scope` | 否 | `all` | `all` / `<domain>` / `legacy`（仅 v0.1 旧笔记） |
-| 操作 `action` | 否 | `run` | `run` / `dry-run`（仅预览不写入） / `rollback`（按 log 回滚） |
+| 操作 `action` | 否 | `run` | `run` / `dry-run`（仅预览不写入） / `rollback`（按 log 回滚） / `regroup`（v1.4+ · 按 domain_taxonomy 重组嵌套路径） |
 | 项 `items` | 否 | — | 指定具体笔记路径（逗号分隔），覆盖 scope |
 | 跳过 `skip` | 否 | — | 跳过的检查项：`tags / relations / fields / filename` |
 
@@ -112,6 +113,72 @@ source_of_truth:
    - 扫描数 / 修改数 / 跳过数 / 失败数
    - Top-N 改动类型分布
    - 待用户确认的不确定项（如不在词表的标签）
+```
+
+---
+
+## 4.5. regroup action（v1.4+ · 嵌套 domain 重组）
+
+> 把 flat-domain 笔记（`02_areas/<domain>/<slug>.md`）迁到嵌套结构（`02_areas/<domain>/<sub>/<slug>.md`），由 `kb.config.yaml.domain_taxonomy` 驱动。
+
+### 契约
+
+```
+quick-kb-normalize scope=<domain|all> action=regroup [dry-run=true]
+```
+
+### 前置条件
+
+- `kb.config.yaml.domain_taxonomy` 必须存在且非空；缺省 → 报错「regroup 需要 domain_taxonomy 配置；编辑 99_system/config/kb.config.yaml 添加」并终止
+
+### 步骤
+
+1. **读 taxonomy**：`domain_taxonomy: { <key>: [<sub>, ...], ... }`
+2. **扫描候选**：
+   - `scope=<key>` → 扫 `02_areas/<key>/*.md`（顶层 flat 文件）
+   - `scope=all` → 扫所有 taxonomy key 对应的顶层
+   - 已在子目录（`02_areas/<key>/<sub>/`）下的笔记跳过
+3. **对每条候选推断子域**：
+   - 读取 `tags` / `title` / 正文首段
+   - 匹配 `taxonomy[<key>]`：若 tag.topic 或 title 命中某 sub → 选定
+   - 多匹配 → 取 tags 中第一个匹配，记 `needs_review: true` 到 diff log
+   - 零匹配 → 保留在 flat 路径，记 `unclassified: true` 到 diff log
+4. **计算新路径**：`02_areas/<key>/<sub>/<slug>.md`。**slug 保持不变**（关键约束：slug-based wikilink 不断）
+5. **dry-run**：只输出拟移动清单到 `_normalize_log/<date>-regroup.preview.md`，结束
+6. **非 dry-run 执行**（每条）：
+   - `mkdir -p` 新目录（含中间层）
+   - `mv` 文件到新路径
+   - 更新 frontmatter：`domain: <key>` → `domain: <key>/<sub>`
+   - Grep 全库 path-qualified wikilink `[[02_areas/<key>/<slug>]]` → Edit 重写为 `[[02_areas/<key>/<sub>/<slug>]]`（slug-based `[[<slug>]]` wikilink 无需改动）
+   - 若所在 domain 的 `_moc.md` 含该笔记路径引用 → 同步更新
+7. **写 diff log**：`_normalize_log/<date>-regroup.diff.md`，含每条的旧/新路径 + 推断依据
+8. **post-check**：调 `scripts/check-links.mjs`（若存在）扫死链；若失败 → 输出回滚命令并标记 `status: needs_rollback`
+
+### 风险与缓解
+
+| 风险 | 缓解 |
+|------|------|
+| Path-qualified wikilink 漏改 | Grep 全库 `[[02_areas/` 前缀；post-check 跑 check-links.mjs |
+| taxonomy 冲突（一条笔记可属于多子域） | 取 tags 第一个匹配 + `needs_review: true`，不阻塞 |
+| 用户中途反悔 | dry-run 先看 diff；rollback 沿用现有 normalize rollback（diff log 驱动） |
+| _moc.md 引用过期 | 步骤 6 显式更新；connect action=moc 可重建兜底 |
+
+### 输出示例
+
+```
+✅ regroup 完成（scope=programming，taxonomy 命中 4 sub）
+
+📊 统计：
+   - 扫描 flat 笔记：12 条
+   - 迁移成功：9 条（python 4 / go 3 / rust 2）
+   - needs_review：2 条（多匹配，取 tags 首选）
+   - unclassified：1 条（无 sub 命中，保留 flat）
+
+📝 diff：_normalize_log/2026-08-12-regroup.diff.md
+🔗 post-check：check-links.mjs → 0 死链
+
+⚠ 待人工确认：
+   - [[async-patterns]] tags 同时含 python/async + rust/async → 取 python（待 review）
 ```
 
 ---
@@ -234,6 +301,7 @@ source_of_truth:
 - [ ] rollback 能完整恢复
 - [ ] 幂等：第二次运行无改动
 - [ ] 失败笔记不阻塞整体流程
+- [ ] **regroup**：domain_taxonomy 缺失时报错终止；slug 不变；path-qualified wikilink 全库扫描重写；post-check 跑 check-links.mjs
 
 ---
 
