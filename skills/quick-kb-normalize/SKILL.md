@@ -152,6 +152,7 @@ quick-kb-normalize scope=<domain|all> action=regroup [dry-run=true]
    - Grep 全库 path-qualified wikilink `[[02_areas/<key>/<slug>]]` → Edit 重写为 `[[02_areas/<key>/<sub>/<slug>]]`（slug-based `[[<slug>]]` wikilink 无需改动）
    - 若所在 domain 的 `_moc.md` 含该笔记路径引用 → 同步更新
 7. **写 diff log**：`_normalize_log/<date>-regroup.diff.md`，含每条的旧/新路径 + 推断依据
+   - ⚠ **diff log 内严禁出现 `[[...]]` 字面量**：`check-links.mjs` 会把方括号语法当真 wikilink 扫描。需要示例 wikilink 形态时用行内代码 `` `[[slug]]` `` 或描述性措辞（如「slug-based wikilink」），**不要**写裸 `[[xxx]]`
 8. **post-check**：调 `scripts/check-links.mjs`（若存在）扫死链；若失败 → 输出回滚命令并标记 `status: needs_rollback`
 
 ### 风险与缓解
