@@ -26,6 +26,18 @@ domains:
   - devops
   # ... 用户可扩展
 
+# ─── 领域分类树（v1.4 · 选填）─────────────────────
+# 缺省时 ingest 退为单层 domain（向后兼容）；填写后：
+#   - ingest 时 research-agent 从 taxonomy 推荐嵌套路径
+#   - normalize action=regroup 按此把旧 flat 笔记迁到嵌套结构
+#   - 不在 taxonomy 的 domain 视为 leaf，仍单层
+domain_taxonomy:
+  programming: [python, go, rust, javascript, typescript]
+  ai-engineering: [rag, agent, eval, prompt]
+  systems: [linux, network, database]
+  # key = 顶层 domain；value = 子域数组；子域仍是 kebab-case
+  # 路径示例：domain: programming/python → 02_areas/programming/python/<slug>.md
+
 # ─── 受控标签词表 ─────────────────────────────────
 tags_vocabulary:
   - concept/rag
@@ -125,6 +137,7 @@ capture_ai:
 | `language` | 枚举 `zh` / `en` | 默认 `zh` + 警告 |
 | `memory_agent.weights.*` | 4 项和 = 1.0 | 不修正 + 警告（用默认） |
 | `tags_vocabulary` | 列表唯一 | 去重 + 警告 |
+| `domain_taxonomy` | key 必须在 `domains` 数组中；value 唯一 kebab-case | 忽略非法项 + 警告 |
 | `proactive_reminders.suppress` | 枚举值合法 | 忽略非法项 + 警告 |
 | `review.orphan_threshold` | 范围 [0, 1] | 默认 0.15 + 警告 |
 | `memory_agent.min_notes` | 整数 ≥ 0 | 默认 50 |
@@ -139,8 +152,8 @@ capture_ai:
 | 技能 / Agent | 读取段 | 关键字段 |
 |-------------|--------|---------|
 | `quick-kb-capture` | `language` | 默认模板语言 |
-| `quick-kb-ingest` | `language` / `tags_vocabulary` | 模板 + 标签归一 |
-| `quick-kb-normalize` | `tags_vocabulary` / `version` | 标签归一 + legacy 识别 |
+| `quick-kb-ingest` | `language` / `tags_vocabulary` / `domain_taxonomy` | 模板 + 标签归一 + 嵌套路径决策 |
+| `quick-kb-normalize` | `tags_vocabulary` / `version` / `domain_taxonomy` | 标签归一 + legacy 识别 + regroup 目标 |
 | `quick-kb-connect` | `wikilink.strict_dead_link` | 死链处理策略 |
 | `quick-kb-query` | `wikilink.strict_dead_link` / `workflows.query_log` | 严格模式 + 日志 |
 | `quick-kb-advisor` | `memory_agent.*` | 召回参数 |

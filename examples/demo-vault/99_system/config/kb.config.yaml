@@ -7,3 +7,9 @@ default_domain: ai-engineering
 domains:
   - ai-engineering
   - general
+
+# domain_taxonomy（v1.4+ · 选填）
+# 缺省时 ingest 退为单层 domain；填写后 ingest 用嵌套路径，normalize action=regroup 按此迁移旧笔记
+# domain_taxonomy:
+#   ai-engineering: [rag, agent, eval, prompt]
+#   general: [meta, tooling]

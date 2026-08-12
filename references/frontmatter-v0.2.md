@@ -40,7 +40,7 @@ supersedes: references/frontmatter-v0.1.md（v0.1 子集仍兼容，v0.2 起技�
 | `tags` | ✓ | string[] | 受控标签 | §6.1 |
 | `status` | ✓ | enum | inbox/draft/active/done/cancelled/archived（v0.2 完整 6 态，因引入归档概念） | §6.3 |
 | `source` | 可选 | list of `{url?, note?}` | 原始来源 | §6.1 |
-| `domain` | 可选 | string | 所属领域 | §6.1 |
+| `domain` | 可选 | string | 所属领域；可含 `/` 表达嵌套（如 `programming/python`、`ai-engineering/rag`）。嵌套规则由 `kb.config.yaml.domain_taxonomy` 约束，缺省时退为单层 kebab-case。路径段全部小写 kebab-case，深度建议 ≤ 3。 | §6.1 |
 | `confidence` | 可选 | number 0-100 | ingest 时初值；用户可改 | §6.5 |
 | **`relations`** | ✓（结构存在，子键可空） | object | 类型化关系（见 §3） | §6.7 |
 | **`context`** | 可选 | string | 自由文本适用上下文 | §6.8 |

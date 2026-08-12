@@ -49,6 +49,12 @@
 npx skills add shichu2024/quick-knowledge
 ```
 
+默认安装全部技能（免逐个选中）：
+
+```bash
+npx skills add shichu2024/quick-knowledge --skill '*'
+```
+
 ### 方式 2 · Claude Code marketplace
 
 在 Claude Code 里：

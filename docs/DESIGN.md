@@ -194,9 +194,12 @@ vault 根目录采用 **PARA + 系统层** 混合模型，并加两位数字前�
 | 文件名 | kebab-case，无空格、无中文 | `rag-architecture.md` |
 | 顶层目录 | 两位数字前缀 + 下划线 + kebab-case | `02_areas/`、`99_system/` |
 | 子目录 | kebab-case，单数，无前缀 | `02_areas/ai-engineering/` |
+| 嵌套 domain 子目录 | 同子目录规则；允许在 `02_areas/<顶层>/` 下再嵌套，深度建议 ≤ 3；嵌套结构由 `kb.config.yaml.domain_taxonomy` 约束 | `02_areas/programming/python/threading.md` |
 | 日期 | ISO 8601 | `2026-08-08` |
 | 子目录年月 | `YYYY/MM` | `05_outputs/daily/2026/08/` |
 | Inbox 临时文件 | 时间戳前缀 | `20260808-1430-想法.md` |
+
+> **嵌套 domain 规则（v1.4+）**：`domain` frontmatter 字段可含 `/`（如 `programming/python`）。ingest 时若 `kb.config.yaml.domain_taxonomy` 命中顶层 key 且能从 tags/title 推断子域，落盘到 `02_areas/<key>/<sub>/<slug>.md`；未配置 taxonomy 或未命中时退为单层 `02_areas/<domain>/<slug>.md`（向后兼容）。旧 flat 笔记可通过 `quick-kb-normalize action=regroup` 批量升级。
 
 ### 4.2 kb.config.yaml
 

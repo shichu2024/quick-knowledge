@@ -21,6 +21,18 @@ updated: 2026-08-09
 
 文档中所有路径形如 `00_inbox/ideas/`、`02_areas/<domain>/`，均为相对 vault 根目录。技能运行时通过 runtime 提供的当前工作目录或显式 vault 路径解析。顶层目录加两位数字前缀实现流转可视化（见 ADR-015）。
 
+### 嵌套 domain（v1.4+）
+
+`domain` 字段可含 `/` 表达层级（如 `programming/python`），对应物理路径 `02_areas/programming/python/<slug>.md`。三个 skill 的统一处理：
+
+| Skill | 嵌套行为 |
+|-------|---------|
+| `quick-kb-ingest` | 写 concept 时，若 `kb.config.yaml.domain_taxonomy` 命中顶层 key 且能从 tags/title 推断子域 → 嵌套落盘；未配置或未命中 → 单层（向后兼容） |
+| `quick-kb-connect` | `scope` 接受嵌套路径段：`scope=programming` 扫全子树，`scope=programming/python` 只扫叶子；MOC 路径 `06_wiki/mocs/programming-python-moc.md`（`/` → `-`） |
+| `quick-kb-normalize` | 新增 `action=regroup`：按 `domain_taxonomy` 把旧 flat-domain 笔记批量迁到嵌套结构（slug 保持不变 → slug-based wikilink 不断链） |
+
+> `domain_taxonomy` 缺省时全部退为 v1.3 行为，零破坏。Obsidian 默认 wikilink 是 slug-based（`[[threading]]`），文件移动只要 slug 不变就不断链；path-qualified wikilink（`[[02_areas/programming/threading]]`）由 regroup 全库扫描重写。
+
 ### 输出反馈格式
 
 每次写入后向用户报告：
