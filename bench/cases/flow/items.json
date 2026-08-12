@@ -7,7 +7,7 @@
     "user_choice": null,
     "expected": {
       "should_trigger_capture": true,
-      "path_glob": "02_areas/ai-engineering/rag-chunking.md",
+      "path_glob": "02_areas/ai-engineering/*rag-chunking*.md",
       "frontmatter": {"type": "^concept$", "maturity": "^seedling$", "confidence": ".+"},
       "frontmatter_forbidden": [],
       "content_contains": ["chunk_size"],
@@ -29,12 +29,12 @@
     "id": "J2-flow-sediment-to-goal",
     "dimension": "flow",
     "source_type": "flow",
-    "input": "[fixture-based] 上游：J1 产出的 atom 02_areas/ai-engineering/rag-chunking.md\n下游：运行 goal，建立 03_goals/learn-rag/_readme.md。",
+    "input": "[fixture-based] 上游：J1 产出的 atom 02_areas/ai-engineering/rag-chunking.md\n下游：运行 goal，建立 03_goals/learn-rag/goal.md（含「学习路径」「相关笔记」段）。",
     "user_choice": null,
     "expected": {
       "should_trigger_capture": true,
-      "path_glob": "03_goals/learn-rag/_readme.md",
-      "frontmatter": {"references": ".*rag-chunking.*"},
+      "path_glob": "03_goals/learn-rag/goal.md",
+      "frontmatter": {},
       "frontmatter_forbidden": [],
       "content_contains": ["rag-chunking"],
       "content_excludes": [],
@@ -44,12 +44,12 @@
       "flow_downstream_check": {
         "skill": "goal",
         "consume_field": "type",
-        "produce_field": "references"
+        "produce_field": "学习路径"
       }
     },
     "category": "flow",
-    "references": ["goal §4 + DESIGN §6.4"],
-    "notes": "J2 沉淀→目标：goal→atom 引用建立，atom 的 reuse 计数同步更新"
+    "references": ["goal §4 工作流·create + §8 输出示例"],
+    "notes": "J2 沉淀→目标：goal.md 含「学习路径」段 wikilinks；goal SKILL 不产 frontmatter references 字段，引用通过正文 wikilinks 表达"
   },
   {
     "id": "J3-flow-goal-to-execution",
@@ -60,9 +60,9 @@
     "expected": {
       "should_trigger_capture": true,
       "path_glob": "04_projects/rag-poc/decisions/*chunk-size*.md",
-      "frontmatter": {"context": ".+"},
+      "frontmatter": {"outcome": ".+"},
       "frontmatter_forbidden": [],
-      "content_contains": ["goal", "atom"],
+      "content_contains": ["goal"],
       "content_excludes": [],
       "should_trigger_polish": false,
       "feedback_contains": [],
@@ -70,12 +70,12 @@
       "flow_downstream_check": {
         "skill": "project",
         "consume_field": "references",
-        "produce_field": "context"
+        "produce_field": "outcome"
       }
     },
     "category": "flow",
-    "references": ["project §3 + DESIGN §6.6"],
-    "notes": "J3 目标→执行：project 决策链能追到 goal + atom，不丢失上下文"
+    "references": ["project §3 init + §4 archive Decision Ledger"],
+    "notes": "J3 目标→执行：project decisions/*.md 是 Decision Ledger 个体记录（含 outcome 字段）；context 字段属于项目 _readme.md，不在 decision 文件里"
   },
   {
     "id": "J4-flow-execution-to-output",
@@ -122,12 +122,12 @@
       "flow_downstream_check": {
         "skill": "connect",
         "consume_field": "wikilinks",
-        "produce_field": "moc_entries"
+        "produce_field": "moc"
       }
     },
     "category": "flow",
-    "references": ["connect §4 + query §3"],
-    "notes": "J5 产出→索引：MOC 自动维护 + query 跨目录检索不打断层"
+    "references": ["connect §4 步骤 3 MOC 生成 + §4 步骤 6 反馈输出"],
+    "notes": "J5 产出→索引：connect 产 06_wiki/mocs/<domain>-moc.md，正文为该领域 atom 的 wikilinks 聚类清单；moc_entries 不是 frontmatter 字段，契约通过正文 wikilinks `[[ ]]` 验证"
   },
   {
     "id": "J6-flow-index-to-system",
@@ -137,10 +137,10 @@
     "user_choice": null,
     "expected": {
       "should_trigger_capture": true,
-      "path_glob": "05_outputs/reviews/weekly/*.md",
+      "path_glob": "05_outputs/reviews/*/*.md",
       "frontmatter": {},
       "frontmatter_forbidden": [],
-      "content_contains": ["maturity"],
+      "content_contains": ["健康"],
       "content_excludes": [],
       "should_trigger_polish": false,
       "feedback_contains": [],
@@ -148,11 +148,11 @@
       "flow_downstream_check": {
         "skill": "review",
         "consume_field": "moc_entries",
-        "produce_field": "maturity_review"
+        "produce_field": "health_report"
       }
     },
     "category": "flow",
-    "references": ["review §3 + archive §3 + stats §3"],
-    "notes": "J6 索引→系统：review/archive/stats 能扫到 MOC 收录的 atom，按规则降级"
+    "references": ["review §4 步骤 3 四维度分析 + §5.2 报告结构"],
+    "notes": "J6 索引→系统：review 产 05_outputs/reviews/weekly/YYYY-Wxx.md，正文含「健康指标表 + 维度详情 + 待办清单」；review SKILL v0.2 显式禁用 maturity（自检清单要求无 maturity 出现），改测健康指标"
   }
 ]
