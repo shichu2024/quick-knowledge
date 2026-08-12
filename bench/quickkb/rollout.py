@@ -85,6 +85,11 @@ def _rollout_one(
     extra_context: str = "",
 ) -> dict:
     """Run one case through the skill, score it, persist trajectory."""
+    # Flow (J-class) cases: dispatch to the downstream skill named in
+    # ``flow_downstream_check.skill`` (e.g. ingest/goal/project/daily/
+    # connect/review). Falls back to the caller-supplied skill_content
+    # (capture) if the downstream SKILL.md is missing.
+    skill_content = _maybe_override_skill(item, skill_content)
     system = (extra_context + "\n\n" + skill_content).strip()
     user = _format_user_message(item)
 
@@ -98,7 +103,7 @@ def _rollout_one(
         reply = f"[rollout-failed] {type(exc).__name__}: {exc}"
 
     # Parse what the skill claims to have produced
-    parsed_path = _extract_path(reply)
+    parsed_path = _extract_path(reply, exclude_from=user)
     parsed_fm = _extract_frontmatter(reply)
 
     # Score
@@ -170,6 +175,63 @@ def _rollout_one(
     }
 
 
+_REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+_FLOW_METADATA_KEYS = frozenset({"skill", "consume_field", "produce_field"})
+
+
+def _maybe_override_skill(item: dict, default_skill_content: str) -> str:
+    """For J-class flow cases, load the downstream skill's SKILL.md.
+
+    Reads ``expected.flow_downstream_check.skill`` (e.g. "ingest") and
+    loads ``skills/quick-kb-<skill>/SKILL.md``. Returns the default
+    skill content unchanged if no override applies or the file is absent.
+    """
+    expected = item.get("expected", {}) or {}
+    fc = expected.get("flow_downstream_check") or {}
+    downstream_skill = fc.get("skill") or item.get("downstream_skill")
+    if not downstream_skill:
+        return default_skill_content
+    skill_file = _REPO_ROOT / "skills" / f"quick-kb-{downstream_skill}" / "SKILL.md"
+    if not skill_file.exists():
+        return default_skill_content
+    return skill_file.read_text(encoding="utf-8")
+
+
+def _inline_flow_fixture(parts: list[str], expected: dict) -> None:
+    """For flow cases, inline the upstream fixture content into the prompt.
+
+    Chat backends can't read files, so the fixture JSON (upstream product
+    frontmatter + body) must be embedded directly in the user message.
+    Handles both single-upstream (``upstream_product``) and multi-upstream
+    (``upstream_products``) fixture shapes.
+    """
+    fixture_path = expected.get("flow_upstream_file")
+    if not fixture_path:
+        return
+    fixture = flow_scorer.load_upstream_fixture(str(_REPO_ROOT / fixture_path))
+    if not fixture:
+        parts.append(f"[fixture] (could not load: {fixture_path})")
+        return
+
+    parts.append("[fixture] upstream product(s) — treat these as already-written vault files:")
+    products = fixture.get("upstream_products") or ([fixture["upstream_product"]] if fixture.get("upstream_product") else [])
+    for i, prod in enumerate(products, 1):
+        parts.append(f"  [upstream-{i}] path: {prod.get('path', '?')}")
+        fm = prod.get("frontmatter") or {}
+        if fm:
+            parts.append(f"  [upstream-{i}] frontmatter:")
+            parts.append("```yaml")
+            parts.append(json.dumps(fm, ensure_ascii=False, indent=2))
+            parts.append("```")
+        content = prod.get("content")
+        if content:
+            parts.append(f"  [upstream-{i}] content:")
+            parts.append(content)
+
+    parts.append("")
+    parts.append("Based on the upstream product(s) above, run YOUR skill's workflow on the input below and produce the downstream artifact (path + yaml frontmatter + body).")
+
+
 def _format_user_message(item: dict) -> str:
     """Build the user turn.
 
@@ -179,11 +241,9 @@ def _format_user_message(item: dict) -> str:
     parts: list[str] = []
     expected = item.get("expected", {})
 
-    # Flow cases: include upstream fixture content as context
+    # Flow cases: inline upstream fixture content so chat backend can see it
     if expected.get("flow_upstream_file"):
-        parts.append(f"[fixture] upstream file: {expected['flow_upstream_file']}")
-        parts.append("Based on this upstream note, produce the downstream product.")
-        parts.append("")
+        _inline_flow_fixture(parts, expected)
 
     parts.append(item.get("input", ""))
 
@@ -202,21 +262,34 @@ def _format_user_message(item: dict) -> str:
     return "\n".join(parts)
 
 
-def _extract_path(reply: str) -> str:
+def _extract_path(reply: str, exclude_from: str = "") -> str:
     """Extract the file path the skill claims to have written.
 
     Looks for patterns like:
         00_inbox/ideas/20260810-1015-cache-bug.md
         ✓ 已采集（idea · 00_inbox/ideas/20260810-1015-cache-bug.md）
+
+    Two filters, in order:
+    1. Drops any path that also appears in ``exclude_from`` (typically the
+       user message). Flow/J-class prompts inline the upstream fixture path;
+       the model often restates it in its reply, and such restatements are
+       references rather than new artifacts.
+    2. Among the remaining candidates, picks the deepest (most '/'
+       segments) — downstream artifacts tend to live under multi-segment
+       vault prefixes like ``02_areas/ai-engineering/...`` while
+       relative fragments like ``decisions/foo.md`` are shallower.
     """
     if not reply:
         return ""
-    # Match vault-relative paths ending in .md
-    # Slug body allows dots (e.g. `transformer-attention.pdf.md`, `v1.2-release.md`)
-    # but must start with a word/dash char (not a dot) and end with `.md`.
     pattern = r'(?:[\w\-]+/)+[\w\-][\w\-.]*\.md'
     matches = re.findall(pattern, reply)
-    return matches[0] if matches else ""
+    if not matches:
+        return ""
+    if exclude_from:
+        matches = [m for m in matches if m not in exclude_from]
+    if not matches:
+        return ""
+    return max(matches, key=lambda p: p.count("/"))
 
 
 def _extract_frontmatter(reply: str) -> dict:

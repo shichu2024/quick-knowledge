@@ -41,7 +41,14 @@ def score(
     signals: list[float] = []
     content_lc = (downstream_product_content or "").lower()
 
+    # Metadata keys used by the harness for skill dispatch / documentation;
+    # not frontmatter check directives. Skip them so they don't generate
+    # spurious zero signals.
+    _METADATA_KEYS = frozenset({"skill", "consume_field", "produce_field"})
+
     for key, spec in (downstream_check or {}).items():
+        if key in _METADATA_KEYS:
+            continue
         if key == "_content_contains":
             for kw in spec:
                 signals.append(1.0 if kw.lower() in content_lc else 0.0)
