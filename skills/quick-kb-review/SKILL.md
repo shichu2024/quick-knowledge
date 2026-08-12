@@ -123,7 +123,15 @@ manager_agent.refresh_value(
 
 ### 步骤 4 · 生成健康报告
 
-写入 `05_outputs/reviews/<period>/YYYY-Wxx.md`（weekly）/ `YYYY-MM.md`（monthly）/ 以此类推。
+写入 `05_outputs/reviews/<period>/` 下，文件名规则：
+- **新建**：`<date-token>-<summary>.md`，其中 summary 由 LLM 从报告主线主题提炼 2-5 词 kebab-case（如 `rag-focus-week` / `q3-stabilization`）
+  - weekly → `YYYY-Wxx-<summary>.md`
+  - monthly → `YYYY-MM-<summary>.md`
+  - quarterly → `YYYY-Qx-<summary>.md`
+  - yearly → `YYYY-<summary>.md`
+  - adhoc → `YYYY-MM-DD-<summary>.md`
+- **旧文件优先**：同周期若已存在任何形式的报告（纯日期 / 已带 summary）→ **编辑既有文件，不重新提炼 summary，不改名**（与 daily §步骤 1 同样的稳定性约束）
+- summary 不可提炼（数据稀疏 / 主题分散）→ 退为纯日期 / 纯周期 token
 
 #### 健康指标表
 
@@ -197,11 +205,13 @@ manager_agent.refresh_value(
 
 ### 5.1 报告路径
 
-- weekly：`05_outputs/reviews/weekly/YYYY-Wxx.md`
-- monthly：`05_outputs/reviews/monthly/YYYY-MM.md`
-- quarterly：`05_outputs/reviews/quarterly/YYYY-Qx.md`
-- yearly：`05_outputs/reviews/yearly/YYYY.md`
-- adhoc：`05_outputs/reviews/adhoc/YYYY-MM-DD.md`
+- weekly：`05_outputs/reviews/weekly/YYYY-Wxx-<summary>.md`
+- monthly：`05_outputs/reviews/monthly/YYYY-MM-<summary>.md`
+- quarterly：`05_outputs/reviews/quarterly/YYYY-Qx-<summary>.md`
+- yearly：`05_outputs/reviews/yearly/YYYY-<summary>.md`
+- adhoc：`05_outputs/reviews/adhoc/YYYY-MM-DD-<summary>.md`
+
+> `<summary>` 由 LLM 从报告主线提炼 2-5 词 kebab-case；同周期已存在旧文件 → 编辑不改名（详见 §步骤 4）。
 
 ### 5.2 报告结构
 

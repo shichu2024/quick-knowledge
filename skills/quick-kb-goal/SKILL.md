@@ -129,9 +129,12 @@ source_of_truth:
 1. 校验：03_goals/<slug>/ 存在
 
 2. 追加进展：
-   - progress/<YYYY-MM-DD>.md（结构：完成 / 学到 / 想法 / 卡点）
+   - progress/<YYYY-MM-DD>-<summary>.md（结构：完成 / 学到 / 想法 / 卡点）
+     - `<summary>` 由 LLM 从本次进展内容提炼 2-5 词 kebab-case（如 `chunk-eval-baseline` / `api-stabilization`）
+     - 同日已有 `progress/<YYYY-MM-DD>*.md` → 编辑既有文件，不重新提炼 summary，不改名
+     - 内容不可提炼 → 退为纯 `progress/<YYYY-MM-DD>.md`
    - 更新 goal.md 的 updated 字段
-   - 在 goal.md「进度记录」段添加 [[progress/YYYY-MM-DD]]
+   - 在 goal.md「进度记录」段添加 wikilink（用实际文件 basename：`[[progress/YYYY-MM-DD-<summary>]]` 或 `[[progress/YYYY-MM-DD]]`）
 
 3. 里程碑更新：
    - 询问用户：本次进展完成哪个里程碑？

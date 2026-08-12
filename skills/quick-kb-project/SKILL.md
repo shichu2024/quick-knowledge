@@ -123,7 +123,10 @@ source_of_truth:
 1. 校验：04_projects/<slug>/ 存在
 
 2. 追加进展：
-   - progress/<YYYY-MM-DD>.md（用 daily 模板简化版）
+   - progress/<YYYY-MM-DD>-<summary>.md（用 daily 模板简化版）
+     - `<summary>` 由 LLM 从本次进展提炼 2-5 词 kebab-case（如 `auth-bug-fix` / `demo-dry-run`）
+     - 同日已有 `progress/<YYYY-MM-DD>*.md` → 编辑既有文件，不重新提炼 summary，不改名
+     - 内容不可提炼 → 退为纯 `progress/<YYYY-MM-DD>.md`
    - 含：完成 / 卡点 / 下一步
 
 3. 更新 _readme.md：

@@ -196,8 +196,11 @@ vault 根目录采用 **PARA + 系统层** 混合模型，并加两位数字前�
 | 子目录 | kebab-case，单数，无前缀 | `02_areas/ai-engineering/` |
 | 嵌套 domain 子目录 | 同子目录规则；允许在 `02_areas/<顶层>/` 下再嵌套，深度建议 ≤ 3；嵌套结构由 `kb.config.yaml.domain_taxonomy` 约束 | `02_areas/programming/python/threading.md` |
 | 日期 | ISO 8601 | `2026-08-08` |
+| 日期类文件 | `<date-token>-<summary>.md`，summary 由 LLM 从内容提炼 2-5 词 kebab-case（限 30 字符）；同日期已有旧文件 → 编辑不改名（稳定性约束）；不可提炼 → 退为纯日期 | `2026-08-12-rag-eval-debug.md`、`2026-W32-stability.md` |
 | 子目录年月 | `YYYY/MM` | `05_outputs/daily/2026/08/` |
 | Inbox 临时文件 | 时间戳前缀 | `20260808-1430-想法.md` |
+
+> **日期类文件命名适用范围**：daily 日志、review 报告（weekly/monthly/quarterly/yearly/adhoc）、goal 与 project 的 `progress/` 子目录文件。stats 报告保留 `stats-YYYY-MM-DD.md` 形态不变。
 
 > **嵌套 domain 规则（v1.4+）**：`domain` frontmatter 字段可含 `/`（如 `programming/python`）。ingest 时若 `kb.config.yaml.domain_taxonomy` 命中顶层 key 且能从 tags/title 推断子域，落盘到 `02_areas/<key>/<sub>/<slug>.md`；未配置 taxonomy 或未命中时退为单层 `02_areas/<domain>/<slug>.md`（向后兼容）。旧 flat 笔记可通过 `quick-kb-normalize action=regroup` 批量升级。
 

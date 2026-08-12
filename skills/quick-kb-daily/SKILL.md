@@ -30,7 +30,7 @@ source_of_truth:
 
 ### 做
 
-- 加载/创建 `05_outputs/daily/YYYY/MM/YYYY-MM-DD.md`
+- 加载/创建 `05_outputs/daily/YYYY/MM/YYYY-MM-DD-<summary>.md`（新建带 summary；同日已有旧文件 → 编辑不改名，详见 §步骤 1）
 - 4 段拆分：做了什么 / 学到什么 / 想法 / 卡点
 - **反问机制**（最多 2 轮，不变成问卷）
 - wikilinks 自动抽取（识别已有笔记标题）
@@ -58,7 +58,10 @@ source_of_truth:
 
 ### 步骤 1 · 加载或创建日志文件
 
-- 路径：`05_outputs/daily/YYYY/MM/YYYY-MM-DD.md`
+- **新建路径**：`05_outputs/daily/YYYY/MM/YYYY-MM-DD-<summary>.md`
+  - `<summary>` 由 LLM 从用户当日 content 提炼 2-5 个词 kebab-case（限 30 字符），如 `rag-eval-debug` / `launch-prep` / `interview-cycle`
+  - 内容空 / 不可提炼（如纯「记一下今天」）→ 退为纯日期 `YYYY-MM-DD.md`
+- **旧文件优先**：同一天若已存在任何形式的文件（`YYYY-MM-DD.md` 或 `YYYY-MM-DD-*.md`）→ **加载既有文件编辑，不重新提炼 summary，不创建新文件**（文件名稳定性硬约束，避免 wikilink 断）
 - 月份子目录不存在 → 创建（含 `.gitkeep`）
 - 文件不存在 → 基于 [`templates/zh/daily.md`](../../templates/zh/daily.md) 创建
 - 文件已存在 → 加载现有内容；`append=true` 时追加，`false` 时提示是否覆盖（默认不覆盖）
@@ -226,7 +229,7 @@ frontmatter 加 `ai_polished_entries: [1, 2]`（被润色条目的编号列表�
 
 ### 5.1 路径
 
-`05_outputs/daily/YYYY/MM/YYYY-MM-DD.md`
+`05_outputs/daily/YYYY/MM/YYYY-MM-DD-<summary>.md`（新建；summary 由 LLM 从内容提炼 2-5 词 kebab-case；同日已存在旧文件则编辑不改名；详见 §步骤 1）
 
 ### 5.2 frontmatter
 

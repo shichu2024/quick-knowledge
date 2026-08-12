@@ -33,6 +33,20 @@ updated: 2026-08-09
 
 > `domain_taxonomy` 缺省时全部退为 v1.3 行为，零破坏。Obsidian 默认 wikilink 是 slug-based（`[[threading]]`），文件移动只要 slug 不变就不断链；path-qualified wikilink（`[[02_areas/programming/threading]]`）由 regroup 全库扫描重写。
 
+### 日期类文件命名（v1.4+）
+
+daily 日志 / review 报告 / goal·project progress 文件名采用 `<date-token>-<summary>.md` 形态，summary 由各 skill 的 LLM 从内容提炼 2-5 词 kebab-case（限 30 字符）。
+
+| Skill | date-token | 示例 |
+|-------|-----------|------|
+| `quick-kb-daily` | `YYYY-MM-DD` | `2026-08-12-rag-eval-debug.md` |
+| `quick-kb-review` (weekly) | `YYYY-Wxx` | `2026-W32-stability.md` |
+| `quick-kb-review` (monthly) | `YYYY-MM` | `2026-08-stabilization.md` |
+| `quick-kb-review` (adhoc) | `YYYY-MM-DD` | `2026-08-12-drift-check.md` |
+| `quick-kb-goal` / `quick-kb-project` progress | `YYYY-MM-DD` | `progress/2026-08-12-chunk-baseline.md` |
+
+**稳定性硬约束**：同日期/同周期若已存在任何形式的文件（纯日期 or 已带 summary）→ 加载既有文件编辑，**不重新提炼 summary，不改名**——避免 wikilink 断。内容空/不可提炼 → 退为纯日期。stats 报告（`stats-YYYY-MM-DD.md`）保留原形态不变。
+
 ### 输出反馈格式
 
 每次写入后向用户报告：
