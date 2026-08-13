@@ -174,6 +174,13 @@ domains:                           # 已注册领域（与 02_areas/ 子目录�
 
 两种语言各 12 个文件，共 24 个。**已存在同名文件则跳过，不覆盖。**
 
+#### 3.2.1 `99_system/config/frontmatter-schema.json`（v1.5 WP3 起）
+
+将仓库 `references/frontmatter-schema-v1.json` 复制到 vault 的 `99_system/config/frontmatter-schema.json`。
+
+- 作用：所有技能产出的笔记由 normalize `schema_check` 子动作按此 schema 校验
+- **已存在同名文件则跳过，不覆盖**（upgrade 场景由 §3.7 比对版本）
+
 #### 3.3 模板路径三级回退
 
 模板文件按以下顺序探测，命中即复制（每语言独立探测，混合命中合法）：
@@ -351,6 +358,7 @@ runtime_hint: claude-code
   创建目录：N 个（含 .gitkeep）
   系统文件：
     - 99_system/config/kb.config.yaml
+    - 99_system/config/frontmatter-schema.json（v1.5 WP3）
     - 99_system/templates/{zh,en}/ × 12 each（共 24 个）
     - 06_wiki/_index.md
     - 00_inbox/_readme.md
@@ -410,6 +418,7 @@ runtime_hint: claude-code
 - [ ] vault 根含 `.kb-initialized` 与 `_readme.md`
 - [ ] `99_system/config/kb.config.yaml` 存在且 `language` 字段有效
 - [ ] `99_system/templates/zh/` 与 `99_system/templates/en/` 各含 12 个模板文件（共 24 个）
+- [ ] `99_system/config/frontmatter-schema.json` 存在（v1.5 WP3，normalize schema_check 依赖）
 - [ ] `00_inbox/`、`02_areas/`、`01_resources/`、`07_principles/`、`06_wiki/`、`05_outputs/`、`03_goals/`、`04_projects/`、`98_archive/`、`99_system/` 顶层目录齐全
 - [ ] 每个空叶子目录含 `.gitkeep`
 - [ ] 每个领域至少一个 `_moc.md`

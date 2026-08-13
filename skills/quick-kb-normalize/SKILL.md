@@ -58,7 +58,7 @@ source_of_truth:
 | 参数 | 必填 | 默认 | 说明 |
 |------|------|------|------|
 | 范围 `scope` | 否 | `all` | `all` / `<domain>` / `legacy`（仅 v0.1 旧笔记） |
-| 操作 `action` | 否 | `run` | `run` / `dry-run`（仅预览不写入） / `rollback`（按 log 回滚） / `regroup`（v1.4+ · 按 domain_taxonomy 重组嵌套路径） |
+| 操作 `action` | 否 | `run` | `run` / `dry-run`（仅预览不写入） / `rollback`（按 log 回滚） / `regroup`（v1.4+ · 按 domain_taxonomy 重组嵌套路径） / `schema_check`（v1.5 WP3 · 只校验不修改） |
 | 项 `items` | 否 | — | 指定具体笔记路径（逗号分隔），覆盖 scope |
 | 跳过 `skip` | 否 | — | 跳过的检查项：`tags / relations / fields / filename` |
 
@@ -77,7 +77,8 @@ source_of_truth:
        - type 缺失 → 推断（按路径：00_inbox/→idea, 07_principles/→按子目录）
        - status 缺失 → inbox / draft（按位置）
        - created / updated 缺失 → 取文件 mtime
-       - confidence 缺失 → 50（默认）
+       - confidence 缺失 → 50（默认 · 0-100 量纲，见 frontmatter-v0.2.md §2）
+       - confidence 存在且 0 < x ≤ 1 → 视为 0-1 量纲误写，× 100 取整 + 写入 diff log「⚠ 量纲迁移 0.{x} → {x*100}」（v1.5 WP2）
        - maturity 缺失 → captured（v0.3+ 笔记）
        - value 缺失 → { reuse: 0, impact: 3, uniqueness: 3 }
        - relations 缺失 → { supports: [], contradicts: [], evolves: [], supersedes: [] }
@@ -114,6 +115,58 @@ source_of_truth:
    - Top-N 改动类型分布
    - 待用户确认的不确定项（如不在词表的标签）
 ```
+
+### 4.4 schema_check action（v1.5 WP3 · 只校验不修改）
+
+> 按 `99_system/config/frontmatter-schema.json`（由 init 铺设，源文件 `references/frontmatter-schema-v1.json`）校验 vault 内笔记的 frontmatter 合规性。**只输出违规清单，不修改任何文件**——是 `run` 的 dry 对照面，也是 CI/健康检查的原子动作。
+
+#### 契约
+
+```
+quick-kb-normalize action=schema_check [scope=<domain|all|legacy>] [items=<paths>]
+```
+
+#### 检查项
+
+| # | 检查 | 失败示例 |
+|---|------|---------|
+| 1 | 必填字段缺失（title / type / created / updated / tags / status） | 笔记无 `status` 字段 |
+| 2 | `type` 不在枚举内 | `type: note`（非枚举） |
+| 3 | `confidence` 非 integer 或越界 [0,100] | `confidence: 0.85`（v1.5 WP2 应为 85）/ `confidence: 150` |
+| 4 | `relations` 非 dict 格式（list 格式属违规） | `relations: [{type, target}]` |
+| 5 | `relations` 子键含非 list 值 | `supports: "[[X]]"`（应为 `["[[X]]"]`） |
+| 6 | `source` schema 不统一（含废弃字段 `kind` / `original_path` / `imported_at`） | 旧 import 笔记 |
+| 7 | `tags` 非 YAML list（字符串格式违规） | `tags: ai/rag, eng` |
+| 8 | `outcome` 非 success/failure/mixed（Decision Ledger / experience 专用） | `outcome: 成功` |
+| 9 | `derived_from` / `derived_to` 非 list（v1.5 WP4） | `derived_from: "[[X]]"`（应为 list） |
+
+#### 输出格式
+
+```markdown
+## schema_check 报告（{{date}} · scope={{scope}}）
+
+- 扫描：N 条
+- 合规：X 条
+- 违规：Y 条
+
+### 违规清单
+
+| 文件 | 违规字段 | 当前值 | 修复建议 |
+|------|---------|--------|---------|
+| [[note-a]] | confidence | 0.85 | × 100 → 85（v1.5 WP2 量纲迁移） |
+| [[note-b]] | relations | list 格式 | 改为 dict：`{supports: [...]}` |
+| [[note-c]] | source.kind | 'obsidian' | 迁移到 `source: {type: import, from: 'obsidian'}` |
+```
+
+#### 幂等
+
+- 不修改文件 → 天然幂等
+- 违规清单可重复产生相同输出
+
+#### 与 `run` 的关系
+
+- `schema_check` 是只读探针，**不自动修复**——修复走 `action=run`
+- 建议工作流：先 `schema_check` 看违规面，再 `run` 或 `dry-run` 决定修复策略
 
 ---
 
@@ -367,6 +420,9 @@ quick-kb-normalize scope=<domain|all> action=regroup [dry-run=true]
 - [ ] 幂等：第二次运行无改动
 - [ ] 失败笔记不阻塞整体流程
 - [ ] **regroup**：domain_taxonomy 缺失时报错终止；slug 不变；path-qualified wikilink 全库扫描重写；post-check 跑 check-links.mjs
+- [ ] **schema_check**：只读不改；违规清单字段齐全（文件 / 字段 / 当前值 / 修复建议）
+- [ ] **schema_check**：confidence 0-1 量纲误写能识别（v1.5 WP2）
+- [ ] **run**：confidence 存在且 0 < x ≤ 1 时 × 100 取整 + 写 diff log（v1.5 WP2 量纲迁移）
 
 ---
 

@@ -128,12 +128,14 @@ source_of_truth:
        - created / updated: 从原笔记或文件 mtime
        - captured_at: <import date>（标识为导入）
        - status: 原 status 若有效则保留，否则 inbox（type 确定则 draft）
-       - confidence: 原 confidence 若在 [0,1] 保留；若在 (1,100] 则除以 100 归一；缺失默认 0.5
+       - confidence: 全局统一 **0-100 整数量纲**（见 `references/frontmatter-v0.2.md` §2）
+         · 原 confidence 若在 [0,100] → 保留（取整）
+         · 若在 (0,1] → 视为 0-1 量纲，× 100 取整（如 0.85 → 85）
+         · 缺失 → 默认 50
        - tags: 原 tags 直接迁移
        - domain: 缺失（待 ingest 时填）
-       - source.kind: <obsidian|notion|logseq>
-       - source.original_path: <原路径>
-       - source.imported_at: <date>
+       - source: 统一 schema `{ type: import, from: <obsidian|notion|logseq>, path: <原路径>, captured_at: <date> }`
+         （v1.5 统一 source schema，废弃 kind / original_path / imported_at 旧字段）
 
    3.3 重复检测（两级）：
 

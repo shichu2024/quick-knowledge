@@ -41,7 +41,7 @@ supersedes: references/frontmatter-v0.1.md（v0.1 子集仍兼容，v0.2 起技�
 | `status` | ✓ | enum | inbox/draft/active/done/cancelled/archived（v0.2 完整 6 态，因引入归档概念） | §6.3 |
 | `source` | 可选 | list of `{url?, note?}` | 原始来源 | §6.1 |
 | `domain` | 可选 | string | 所属领域；可含 `/` 表达嵌套（如 `programming/python`、`ai-engineering/rag`）。嵌套规则由 `kb.config.yaml.domain_taxonomy` 约束，缺省时退为单层 kebab-case。路径段全部小写 kebab-case，深度建议 ≤ 3。 | §6.1 |
-| `confidence` | 可选 | number 0-100 | ingest 时初值；用户可改 | §6.5 |
+| `confidence` | 可选 | integer 0-100 | ingest 时初值；用户可改。**全局统一 0-100 整数量纲**（v1.5 WP2 定档）。历史 0-1 小数写法由 normalize 自动迁移。 | §6.5 |
 | **`relations`** | ✓（结构存在，子键可空） | object | 类型化关系（见 §3） | §6.7 |
 | **`context`** | 可选 | string | 自由文本适用上下文 | §6.8 |
 | **`value`** | ✓（结构存在，子键可空） | object | 价值维度（见 §4） | §6.6 |
@@ -91,6 +91,29 @@ relations:
 - 反向键由 connect 技能在写入正向键时自动补全（详见 `skills/quick-kb-connect/SKILL.md` §5.2.1）。
 - 补全幂等——已存在不重复追加。
 - 反向键为可选字段，结构不存在时视为空（不强制要求 4 键齐全）。
+
+### 3.0.2 derived_from / derived_to（v1.5 WP4 · 支持多对一派生）
+
+Decision Ledger 派生 experience 时使用。**强制 YAML list of wikilink**（不支持单字符串），以支持「多个 decision → 一条 experience」的多对一场景。
+
+```yaml
+# experience 笔记
+relations:
+  derived_from:
+    - "[[04_projects/<slug>/decisions/2026-08-13-auth]]"
+    - "[[04_projects/<slug>/decisions/2026-08-14-token]]"   # 多对一：两条 decision 合并派生
+  source_of: []                                             # 反向键（被派生时填）
+
+# 对应 decision 笔记
+relations:
+  derived_to:
+    - "[[07_principles/experiences/2026-08-15-auth-token-lesson]]"
+```
+
+**规则**：
+- 派生判定（project SKILL §6 step 3.1）：同 domain + 同 lesson 主题词 → 合并既有 experience，`derived_from` 追加
+- 反向键 `source_of` 由 connect/project 自动补全，幂等
+- 格式违规（单字符串）由 normalize `schema_check` 拦截
 
 ### 3.1 v0.2 写入时机
 

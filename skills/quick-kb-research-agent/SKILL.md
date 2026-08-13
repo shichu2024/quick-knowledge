@@ -88,7 +88,7 @@ research_agent(
 2. **保留可独立成立的论点**：依赖上下文的细节并入主观点
 3. **类型推断**：每条原子笔记判断 type（v0.2 仅 concept/resource）
 4. **tag 推断**：基于 hint.domain 与正文关键词
-5. **confidence 初值**：
+5. **confidence 初值**（0-100 整数量纲 · v1.5 WP2 全局统一）：
    - 单一非一手来源 → 30-40
    - 多源佐证 → 60-75
    - 含一手实验/官方文档 → 80-95
@@ -105,7 +105,7 @@ research_agent(
       title: "...",
       body: "完整章节正文",
       tags: ["ai/rag", "eng/architecture"],
-      confidence: 60,
+      confidence: 60,                    // 0-100 量纲
       source_excerpt: "抽取自原文的依据片段"
     },
     ...

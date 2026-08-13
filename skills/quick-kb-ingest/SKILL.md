@@ -111,7 +111,7 @@ tags:                               # 由 suggested_tags 转正，对照 kb.conf
   - {{domain}}/{{topic}}
 status: active                      # 默认 active；字段不全 → draft
 domain: {{domain}}
-confidence: {{初值}}                # 单源 30-40 / 多源 60-75 / 一手 80-95（AGENTS_SPEC §2.2）
+confidence: {{初值}}                # 0-100 整数 · 单源 30-40 / 多源 60-75 / 一手 80-95（AGENTS_SPEC §2.2）
 relations:                          # v0.2 启用 · 见 §2.7
   supports: []
   contradicts: []

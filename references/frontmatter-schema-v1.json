@@ -1,0 +1,100 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://quick-knowledge/schemas/frontmatter-v1.json",
+  "title": "quick-knowledge frontmatter v1.5",
+  "description": "全局 frontmatter 校验 schema · 由 references/frontmatter-v0.2.md 派生 · v1.5 WP3 引入。所有技能产出的笔记必须通过本 schema。",
+  "type": "object",
+  "required": ["title", "type", "created", "updated", "tags", "status"],
+  "additionalProperties": true,
+  "properties": {
+    "title": { "type": "string", "minLength": 1 },
+    "type": {
+      "type": "string",
+      "enum": ["concept", "resource", "idea", "daily", "moc", "review",
+               "principle", "belief", "pattern", "experience", "decision",
+               "goal", "project"]
+    },
+    "created": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+    "updated": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "status": {
+      "type": "string",
+      "enum": ["inbox", "draft", "active", "done", "cancelled", "archived"]
+    },
+    "domain": { "type": "string" },
+    "confidence": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "0-100 整数量纲（v1.5 WP2 全局统一）"
+    },
+    "maturity": {
+      "type": "string",
+      "enum": ["captured", "understood", "validated", "applied", "teachable", "deprecated"]
+    },
+    "source": {
+      "type": "object",
+      "description": "统一 source schema（v1.5 WP3）",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["web", "pdf", "book", "meeting", "ai_dialog", "reading", "import"]
+        },
+        "from": {
+          "type": "string",
+          "enum": ["obsidian", "notion", "logseq"],
+          "description": "仅 source.type=import 时填"
+        },
+        "url": { "type": "string" },
+        "path": { "type": "string", "description": "原文件路径（import 场景）或本地路径" },
+        "note": { "type": "string", "description": "来源说明自由文本" },
+        "captured_at": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" }
+      }
+    },
+    "relations": {
+      "type": "object",
+      "description": "类型化关系（dict 格式 · frontmatter-v0.2.md §3）",
+      "properties": {
+        "supports":      { "type": "array", "items": { "type": "string" } },
+        "contradicts":   { "type": "array", "items": { "type": "string" } },
+        "evolves":       { "type": "array", "items": { "type": "string" } },
+        "supersedes":    { "type": "array", "items": { "type": "string" } },
+        "evolved_by":    { "type": "array", "items": { "type": "string" } },
+        "superseded_by": { "type": "array", "items": { "type": "string" } },
+        "derived_from":  {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "派生来源（v1.5 WP4 · YAML list 支持多对一）"
+        },
+        "derived_to": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "派生去向（v1.5 WP4 · YAML list）"
+        },
+        "source_of":  { "type": "array", "items": { "type": "string" } },
+        "refines":    { "type": "array", "items": { "type": "string" } },
+        "refined_by": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "context": { "type": "string" },
+    "value": {
+      "type": "object",
+      "properties": {
+        "reuse":      { "type": "integer", "minimum": 0 },
+        "impact":     { "type": "integer", "minimum": 0, "maximum": 10 },
+        "uniqueness": { "type": "integer", "minimum": 0, "maximum": 10 },
+        "ks":         { "type": "number", "description": "Knowledge Score（manager-agent 计算）" }
+      }
+    },
+    "outcome": {
+      "type": "string",
+      "enum": ["success", "failure", "mixed"],
+      "description": "Decision Ledger / experience 专用（v1.5 WP4）"
+    },
+    "lesson": { "type": "string", "description": "Decision Ledger 专用（v1.5 WP4）" },
+    "deadline": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" }
+  }
+}

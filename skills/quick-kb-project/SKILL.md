@@ -153,10 +153,12 @@ source_of_truth:
    - 提示用户：「以下决策尚未补 actual/lesson，是否在归档前补齐？」
 
 1.5 归档前置门控（未回填 Decision Ledger 拦截）：
-   若步骤 1 扫描到 actual: "" 或 lesson: "" 的 Decision Ledger 条目：
+   若步骤 1 扫描到以下任一情况的 Decision Ledger 条目（v1.5 WP4 · 字段缺失与空字符串等价）：
+   - actual 字段缺失 OR actual == "" OR actual == null
+   - lesson 字段缺失 OR lesson == "" OR lesson == null
    - ⛔ 中止归档，输出警告：
      「⚠ 以下 Decision Ledger 尚未回填 actual/lesson：
-       - DEC-00X（<title>）actual: "" lesson: ""
+       - DEC-00X（<title>）actual: <状态> lesson: <状态>
        ...
       请先补齐，或对无需回填的决策填写 lesson: skipped，
       或使用 --force 强制归档。」
@@ -168,32 +170,43 @@ source_of_truth:
 2. 决策闭环（对每条 Decision Ledger）：
    2.1 补 actual（如未填）：与用户交互询问「实际结果如何？」
    2.2 补 lesson（如未填）：与用户交互询问「从这次决策中学到什么？」
-   2.3 计算 outcome（基于 actual vs expected）：
-       - actual 显著好于 expected OR 关键字命中成功 → success
-       - actual 显著差于 expected OR 命中失败 → failure
-       - 部分 OK 部分 miss → mixed
+   2.3 计算 outcome（基于 actual vs expected · v1.5 WP4 关键字清单明示）：
+       - success：actual 显著好于 expected，OR actual 文本命中关键字
+         「超预期 / 显著好于 / 提前完成 / 优于 expected / 顺利 / 一次过 / 已落地」
+       - failure：actual 显著差于 expected，OR actual 文本命中关键字
+         「未达成 / 显著差于 / 回滚 / 失败 / 延期严重 / 放弃 / 重做」
+       - mixed：actual 文本命中「部分 OK / 部分 miss / 混合 / 一半 / 局部」，OR 部分 expected 达成部分未达成
+       - 多个候选关键字命中冲突时：failure 优先（保守判定）
 
-3. lesson 派生 experience（V2 关键）：
+3. lesson 派生 experience（V2 关键 · v1.5 WP4 支持多对一）：
    对每条 Decision Ledger 的 lesson：
-   3.1 在 07_principles/experiences/<YYYY-MM-DD>-<topic>.md 创建新笔记
-       （用 experience.md 模板）
-   3.2 填充关键字段：
+   3.1 派生判定（v1.5 WP4 · 多对一合并）：
+       对当前 decision 的 lesson，先判定是否与已派生的某条 experience 主题重合：
+       - 重合条件：同 domain AND lesson 含相同主题词（如「认证」「选型」「重试」）
+       - 重合 → 并入既有 experience：
+         · experience 文件「事件经过」段追加本 decision 摘要
+         · experience.relations.derived_from 追加本 decision wikilink（list 追加，幂等）
+         · outcome 若与既有 experience 的 outcome 冲突 → experience 升级为 mixed
+       - 不重合 → 走 3.2 新建流程
+   3.2 新建 experience（不重合时）：
+       在 07_principles/experiences/<YYYY-MM-DD>-<topic>.md 创建新笔记（用 experience.md 模板）
+   3.3 填充关键字段（无论新建还是并入，确保以下字段齐全）：
        - title: <事件一句话 · 含时间/项目>
        - context: <原 decision 的 problem + 项目 context>
        - 事件经过: <原 decision 的 options/chosen/reason 摘要>
        - 结果: <原 decision 的 actual>
        - 教训: <原 decision 的 lesson>  ← 核心派生
-       - derived_from: [[04_projects/<slug>/decisions/<原 decision>]]
+       - relations.derived_from: [<原 decision wikilink>, ...]   ← v1.5 WP4 · 必为 YAML list
        - outcome: step 2.3 计算结果
        - source.note: [[<原 decision>]]
        - tags: [experience/<topic>, project/<slug>]
-   3.3 在原 Decision Ledger 中：
-       - 添加 derived_to: [[07_principles/experiences/<新笔记>]]（双向引用）
+   3.4 在原 Decision Ledger 中：
+       - 添加 relations.derived_to: [<新 experience wikilink>]（双向引用 · v1.5 WP4 · 必为 YAML list）
        - status: active → archived
-   3.4 检查可升格：lesson 中是否含可抽象的 principle/pattern 候选
+   3.5 检查可升格：lesson 中是否含可抽象的 principle/pattern 候选
        - 若用户确认 → 在 07_principles/principles/ 或 07_principles/patterns/ 新建
        - relations.evolves: [[<派生 experience>]]
-   3.5 contradicts 消解扫描（保守启发式 · 宁可漏消解不误消解）：
+   3.6 contradicts 消解扫描（保守启发式 · 宁可漏消解不误消解）：
        遍历本项目 Decision Ledger 的所有 lesson，对每条 lesson：
        a) 全库扫描 frontmatter relations.contradicts 对，收集现存矛盾对列表
        b) 对每对矛盾（笔记 A ↔ 笔记 B），检查 lesson 文本是否同时提及
@@ -329,10 +342,13 @@ source_of_truth:
 ### archive
 
 - [ ] 归档前置门控：未回填 Decision Ledger 存在时中止归档（除非 --force 或 lesson: skipped）
+- [ ] **字段缺失与空字符串等价拦截**（v1.5 WP4 · actual/lesson 缺失 OR == "" OR == null）
 - [ ] 所有 Decision Ledger 的 actual/lesson 补全
-- [ ] 每条 lesson 派生为独立 experience 笔记
-- [ ] 派生 experience 含 derived_from + outcome + source.note
-- [ ] 原 Decision Ledger 含 derived_to（双向引用）
+- [ ] **Decision Ledger 文件名统一为 `<YYYY-MM-DD>-<topic>.md`**（v1.5 WP4 · 禁用 NNN 序号制）
+- [ ] 每条 lesson 派生为独立 experience 笔记 OR 并入同主题既有 experience（v1.5 WP4 · 多对一）
+- [ ] 派生 experience 的 `relations.derived_from` **必为 YAML list**（v1.5 WP4）
+- [ ] 原 Decision Ledger 的 `relations.derived_to` **必为 YAML list**
+- [ ] outcome 计算关键字命中冲突时 failure 优先（保守判定 · v1.5 WP4）
 - [ ] contradicts 消解扫描：lesson 同时命中双方才标记 resolved_by；仅命中一方不动
 - [ ] resolved_by 双向写入 + context.conflict_note 标注
 - [ ] 项目目录迁移到 98_archive/projects/

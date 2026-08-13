@@ -64,11 +64,11 @@ source_of_truth:
 | 各 status 分布 | 按 status 计数 | frontmatter.status |
 | 孤立笔记率 | (无入链 AND 无出链) / 总数 | wikilink 图谱 |
 | frontmatter 缺失率 | 缺失必填字段的笔记数 / 总数 | 详见 §4.1 |
-| 置信度分布 | 直方图（0-30 / 31-60 / 61-85 / 86-100） | frontmatter.confidence |
+| 置信度分布 | 直方图（0-30 / 31-60 / 61-85 / 86-100 · 0-100 量纲） | frontmatter.confidence |
 | maturity 6 态分布 | captured/understood/validated/applied/teachable/deprecated 计数 | frontmatter.maturity |
 | Knowledge Score Top 10 | 按 KS 降序前 10 | frontmatter.value.ks（或实时计算） |
-| 高价值低置信清单 | KS ≥ 中位数 AND confidence < 60 | KS + confidence |
-| 低复用高占用清单 | confidence ≥ 70 AND value.reuse = 0 | confidence + value.reuse |
+| 高价值低置信清单 | KS ≥ 中位数 AND confidence < 60（0-100 量纲） | KS + confidence |
+| 低复用高占用清单 | confidence ≥ 70（0-100 量纲） AND value.reuse = 0 | confidence + value.reuse |
 | inbox 周转时长 | 平均 captured_at → status 离开 inbox 的天数 | frontmatter.captured_at + 历史 |
 | 死链数 | 找不到对应文件的 [[X]] 数 | wikilink 扫描 |
 | MOC 数 | 06_wiki/mocs/ 下文件数 | 文件路径 |
