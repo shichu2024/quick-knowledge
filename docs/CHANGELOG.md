@@ -18,7 +18,7 @@
 | B-WP4a | archive 冲突消解回写（lesson 解决的 contradicts 对自动加 resolved_by） | project/SKILL.md + archive/SKILL.md |
 | B-WP4b | normalize 提示刷新 MOC（迁移后扫描 06_wiki/mocs/ 列出过期引用） | normalize/SKILL.md |
 | B-WP4c | query 归档标注（命中 98_archive/ 追加 📄 已归档） + include_archived 参数 | query/SKILL.md |
-| B-WP4d | advisor 降级召回扩展（memory-agent 不可用时扫 07_principles/ + 05_outputs/daily/） | advisor/SKILL.md |
+| B-WP4d | advisor 降级召回扩展（quick-kb-memory-agent 不可用时扫 07_principles/ + 05_outputs/daily/） | advisor/SKILL.md |
 | B-WP4e | project Decision Ledger 回填检查（update 提示 + archive 前置门控） | project/SKILL.md |
 | B-WP5 | references 公开 counting-rules/scoring/polish-rules + 各技能「下一步」提示 + Windows 中文路径段 | 3 新文件 + 4 SKILL.md + user-guide.md |
 
@@ -319,7 +319,7 @@ baseline → 修复后：`0/9 → 9/9 → 9/9 → 10/10`，无过拟合信号。
 
 ## v0.3 · 2026-08-09 · assistant（个人助手）
 
-**摘要**：从「带引用的 RAG」升级为「个人决策助手」。引入 memory-agent + 认知资产层 + Decision Ledger 派生闭环。**核心差异化阶段**。
+**摘要**：从「带引用的 RAG」升级为「个人决策助手」。引入 quick-kb-memory-agent + 认知资产层 + Decision Ledger 派生闭环。**核心差异化阶段**。
 
 ### 新增 Agent
 
@@ -334,7 +334,7 @@ baseline → 修复后：`0/9 → 9/9 → 9/9 → 10/10`，无过拟合信号。
 
 - `quick-kb-advisor` —— 决策辅助（三段输出：你的历史/你的原则/建议路径）
 - `quick-kb-project` —— 项目全生命周期（archive 含 lesson 派生 experience）
-- `quick-kb-goal` —— 目标管理（含 research-agent 学习路径 + memory 召回）
+- `quick-kb-goal` —— 目标管理（含 quick-kb-research-agent 学习路径 + memory 召回）
 
 ### 新增模板（中英 14 个）
 
@@ -351,9 +351,9 @@ baseline → 修复后：`0/9 → 9/9 → 9/9 → 10/10`，无过拟合信号。
 ### 升级
 
 - `frontmatter`：maturity（6 态）+ value.impact/uniqueness + 14 type 枚举（含 4 类认知资产）
-- `manager-agent`：v0.2→v0.3，新增 `detect_structure_drift` + KS 排序 refresh_value
+- `quick-kb-manager-agent`：v0.2→v0.3，新增 `detect_structure_drift` + KS 排序 refresh_value
 - `KS 公式`：`KS = confidence × log2(1 + reuse) × impact`（仅 maturity ≥ applied 参与 Top-N）
-- `memory-agent 排序`：`score = sim^0.45 × recency^0.20 × impact^0.15 × conf^0.20` + 类型加权 + 失败加权
+- `quick-kb-memory-agent 排序`：`score = sim^0.45 × recency^0.20 × impact^0.15 × conf^0.20` + 类型加权 + 失败加权
 
 ---
 
@@ -376,7 +376,7 @@ baseline → 修复后：`0/9 → 9/9 → 9/9 → 10/10`，无过拟合信号。
 
 - `frontmatter`：新增 relations/context/value.reuse
 - `capture`：扩展 PDF/meeting/AI dialog/reading + defuddle
-- `ingest`：用 research-agent 替代内置 LLM；冲突检测（manager-agent 降级）
+- `ingest`：用 quick-kb-research-agent 替代内置 LLM；冲突检测（quick-kb-manager-agent 降级）
 - `templates`：5 个英文版本同步
 
 ### 新增文档
@@ -417,7 +417,7 @@ baseline → 修复后：`0/9 → 9/9 → 9/9 → 10/10`，无过拟合信号。
 
 ## V2 · 2026-08-09 · 知识冲突 / Decision Ledger / Memory Agent 规格 / 主动提醒
 
-**摘要**：补齐 V1 的四个结构性缺口 —— 知识冲突管理、决策闭环、memory-agent 详细规格、事件驱动的主动提醒机制。
+**摘要**：补齐 V1 的四个结构性缺口 —— 知识冲突管理、决策闭环、quick-kb-memory-agent 详细规格、事件驱动的主动提醒机制。
 
 ### 变更明细
 
@@ -426,25 +426,25 @@ baseline → 修复后：`0/9 → 9/9 → 9/9 → 10/10`，无过拟合信号。
 - **§6.1 标准字段**：`related` 升级为类型化 `relations`（supports/contradicts/evolves/supersedes），新增可选 `context` 字段。
 - **§6.4 maturity**：`deprecated` 强制关联 `supersedes`/`contradicts` 至少一项。
 - **新增 §6.7 关系类型化**、**§6.8 上下文字段**，原 §6.7 顺延为 §6.9。
-- **§7.3 memory-agent**：能力表加"冲突感知"与"失败案例优先"；引用 AGENTS_SPEC。
+- **§7.3 quick-kb-memory-agent**：能力表加"冲突感知"与"失败案例优先"；引用 AGENTS_SPEC。
 - **§7.4**：引用 AGENTS_SPEC。
 - **新增 §7.6 主动提醒机制**：7 类事件 → 触发 agent → 提醒示例。
 - **§8.3 concept 模板**：`related` → `relations` + `context`。
 - **新增 §8.4 Decision Ledger 模板**：problem/options/chosen/reason/rejected/expected/actual/lesson 闭环；lesson 派生为 experience。
 - **§11 仓库结构**：加入 AGENTS_SPEC/VERSIONING/CHANGELOG/archive。
-- **新增 ADR-011**（关系类型化与冲突管理）、**ADR-012**（Decision Ledger 强化）、**ADR-013**（主动提醒机制）、**ADR-014**（memory-agent 详细规格独立成文）。
+- **新增 ADR-011**（关系类型化与冲突管理）、**ADR-012**（Decision Ledger 强化）、**ADR-013**（主动提醒机制）、**ADR-014**（quick-kb-memory-agent 详细规格独立成文）。
 
 #### SKILLS_SPEC.md
 
 - **§2 capture**：工作流加"主动提醒"步（命中 belief/pattern/contradicts 苗头时）。
 - **§3 ingest**：工作流加"关系类型化"与"冲突检测与主动提醒"步；输出示例 frontmatter 升级为 `relations` + `context`。
-- **§6 advisor**：明确引用 AGENTS_SPEC §3 的 memory-agent 契约。
+- **§6 advisor**：明确引用 AGENTS_SPEC §3 的 quick-kb-memory-agent 契约。
 - **§10 project(init)**：新增"主动相似项目召回"步与"决策骨架"步；archive 工作流新增"Decision Ledger 闭环 + lesson 派生 experience"。
 - **附录 A**：新增"主动提醒"与"派生"两行；引用 AGENTS_SPEC。
 
 #### 新增文件
 
-- **docs/AGENTS_SPEC.md**（V1）：三个 agent 的输入/输出契约、降级路径；memory-agent 召回排序公式 `similarity × recency × impact × confidence` + 类型加权；冲突呈现规则；主动提醒协议与限流。
+- **docs/AGENTS_SPEC.md**（V1）：三个 agent 的输入/输出契约、降级路径；quick-kb-memory-agent 召回排序公式 `similarity × recency × impact × confidence` + 类型加权；冲突呈现规则；主动提醒协议与限流。
 
 ### 变更原因
 
@@ -491,7 +491,7 @@ V1 完整快照见 `docs/archive/V1/`。
 |--------|---------|
 | 缺少知识生命周期模型 | 拆分 `status`/`maturity` 为正交双字段，maturity 收敛为 6 态 |
 | 缺少个人认知模型 | 新增 `principles/` 根目录 + 4 类认知资产 type |
-| Agent 设计偏弱 | 新增 memory-agent；Knowledge Architect 能力并入 manager |
+| Agent 设计偏弱 | 新增 quick-kb-memory-agent；Knowledge Architect 能力并入 manager |
 | Query 需要升级 | 不替换 query，并列新增 quick-kb-advisor |
 | 缺少知识评分体系 | 引入价值维度，自动化优先；拒绝手填三分数 |
 

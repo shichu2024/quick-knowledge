@@ -22,7 +22,7 @@ relations:
   supersedes: []
 context: {{event background: team size, stage, tech stack, constraints}}
 value:
-  reuse: 0                     # experience reuse usually higher (recalled by memory-agent)
+  reuse: 0                     # experience reuse usually higher (recalled by quick-kb-memory-agent)
   impact: 4                    # failure lessons usually higher impact
   uniqueness: 4
 source:
@@ -30,7 +30,7 @@ source:
 derived_from: "[[{{source Decision Ledger}}]]"  # v0.3 derivation relation field
 # no domain (cognitive assets are cross-cutting)
 event_date: {{event date}}     # optional · distinguish from created
-outcome: success | failure | mixed   # result type · failure weighted ×1.2 in memory-agent recall
+outcome: success | failure | mixed   # result type · failure weighted ×1.2 in quick-kb-memory-agent recall
 ---
 
 # {{event in one sentence}}

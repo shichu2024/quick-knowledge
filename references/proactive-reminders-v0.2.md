@@ -11,7 +11,7 @@ source_of_truth:
 
 # v0.2 主动提醒机制 · manager 事件子集实现说明
 
-> 本文件汇总 v0.2 阶段在 capture / ingest / review 三技能中插入的 manager 事件主动提醒。memory 事件（4 类）推迟到 v0.3，由 memory-agent 接入后补齐。
+> 本文件汇总 v0.2 阶段在 capture / ingest / review 三技能中插入的 manager 事件主动提醒。memory 事件（4 类）推迟到 v0.3，由 quick-kb-memory-agent 接入后补齐。
 
 ---
 
@@ -37,7 +37,7 @@ DESIGN §7.6 定义 7 类事件：
 
 ### 2.1 capture（v0.2 不调 memory）
 
-- **不产主动提醒** —— v0.2 capture 不调 memory-agent
+- **不产主动提醒** —— v0.2 capture 不调 quick-kb-memory-agent
 - 仅在反馈输出中提示「下一步 → ingest」（非提醒，是工作流引导）
 
 ### 2.2 ingest（v0.2 manager 事件 · ingest_new）
@@ -123,7 +123,7 @@ proactive_reminders:
 
 | 偏差点 | 原因 | 真相源 |
 |--------|------|-------|
-| 仅 manager 事件（3 类），不做 memory 事件（4 类） | memory-agent 在 v0.3 | dev/v0.2-loops.md WP10 |
+| 仅 manager 事件（3 类），不做 memory 事件（4 类） | quick-kb-memory-agent 在 v0.3 | dev/v0.2-loops.md WP10 |
 | 长期未触碰基于 updated 时间而非 maturity/applied | maturity 字段未启用（v0.3） | DESIGN §6.4 |
 | suppress / max_per_session 配置项推迟 v0.3 | v0.2 仅做最基础的开关 | 实现简化，不偏离设计 |
 | review 高价值低置信提示基于 reuse + confidence（非 KS） | KS 依赖 maturity（v0.3） | frontmatter-v0.2.md §4.2 |

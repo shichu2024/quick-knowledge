@@ -34,7 +34,7 @@ source_of_truth:
 
 ### 做
 
-- init：建目录 + README + Decision Ledger 骨架 + memory-agent 主动召回
+- init：建目录 + README + Decision Ledger 骨架 + 调 `quick-kb-memory-agent` 召回相似项目经验
 - update：追加进展到 `progress/`，更新 _moc.md
 - **archive 闭环（核心）**：
   1. 扫 `decisions/`，补全每条 Decision Ledger 的 `actual` 与 `lesson`
@@ -45,7 +45,7 @@ source_of_truth:
 
 ### 不做（v0.4+）
 
-- 不调 research-agent 做项目立项调研（外部资料由 capture/ingest 先入库）
+- 不做项目立项调研（外部资料由 capture/ingest 先入库）
 - 不写 review 周报（归 review 技能）
 
 ---
@@ -82,18 +82,11 @@ source_of_truth:
    - relations.supports: [<关联 goal>]
    - 留空：经验复用建议（待 step 5 填）
 
-4. 主动召回（核心 · 触发 memory 事件 new_project_init）：
-   memory_agent.proactive_suggest({
-     event_type: "new_project_init",
-     current_context: <description>,
-     constraints: <team/tech stack if known>
-   })
-   → suggestions: [
-       { related_notes: [...相似 04_projects/experiences], message: "..." }
-     ]
+4. 主动召回（核心 · 调 `quick-kb-memory-agent` intent=`proactive_suggest`，event_type=`new_project_init`）：
+   - memory-agent 内部候选集限 type∈{project, experience}，按 §3.5 score 公式排序（experience 失败案例权重提升，prefer_failures=true）
+   - 限流：库内 < 50 条时关闭；同事件去重
 
 5. 把召回结果写入 _readme.md 的「经验复用建议」段：
-   ## 经验复用建议（来自 memory-agent）
    ### 高相关 experience
    - [[experience/xxx]] · 相关点：<why>
    ### 可应用 pattern
@@ -230,7 +223,7 @@ source_of_truth:
    |------|---------|--------|------|---------------------|
    | [[decisions/001]] | ... | ... | ±X% | [[experience/...]] |
 
-7. 引用清理（manager-agent.repair_deadlinks 可后续做）：
+7. 引用清理（调 `quick-kb-manager-agent` intent=`repair_deadlinks` 可后续做）：
    - 顶层 _moc.md 移除项目入口或迁到 archive 区
    - goal 的「关联项目」段标注「已归档」
 ```
@@ -247,7 +240,7 @@ source_of_truth:
    - _moc.md（索引骨架）
    - notes/ decisions/ progress/ refs/（空目录）
 
-🧠 memory-agent 召回（new_project_init 事件）：
+🧠 经验召回（new_project_init 事件 · 由 quick-kb-memory-agent 按 §3 规则执行）：
    - 高相关 experience: 2 条
    - 可应用 pattern: 1 条
    - 失败教训: 1 条
@@ -300,8 +293,9 @@ source_of_truth:
 
 | 缺失依赖 | 降级行为 |
 |---------|---------|
-| memory-agent 不可用（init） | 跳过「经验复用建议」段，标注「⚠ 未启用记忆召回」 |
-| 库内 < 50 条（init） | memory-agent.proactive_suggest 自动关闭（限流）；README 段留空 |
+| `07_principles/` 目录不存在（init） | 跳过「经验复用建议」段，标注「⚠ 未启用认知资产层」 |
+| 库内 < 50 条（init） | 主动召回关闭（限流）；README 段留空 |
+| 无 embedding 服务 | similarity 降为「标签 Jaccard + 标题关键词重叠」 |
 | `07_principles/experiences/` 目录不存在（archive） | 自动创建（v0.3 已建） |
 | Decision Ledger 模板缺失 | 报错并指引用户先运行 quick-kb-init 同步模板 |
 
@@ -313,7 +307,7 @@ source_of_truth:
 
 - [ ] 04_projects/<slug>/ 创建完整子目录结构
 - [ ] _readme.md 含 frontmatter（type: project, status: active）
-- [ ] memory-agent 被调用（new_project_init 事件）
+- [ ] 扫描 `07_principles/` 完成经验召回（new_project_init 事件）
 - [ ] 召回结果写入「经验复用建议」段（按 experience/pattern/principle 分类）
 - [ ] 失败教训显式 ⚠ 标注
 - [ ] 关联 goal 双向 wikilink
@@ -345,6 +339,6 @@ source_of_truth:
 | 偏差点 | 原因 | 真相源 |
 |--------|------|-------|
 | 新增 `update` 工作流的 progress/ 子目录 | SKILLS_SPEC §10 工作流只列 init/archive；但 DESIGN §8.4 提及项目应有进展记录 | docs/DESIGN.md §8.4 |
-| 派生 experience 自动计算 outcome | SKILLS_SPEC §10 工作流第 2 步只说「派生 experience」，未指定 outcome；但 memory-agent 排序依赖 outcome（失败加权） | docs/AGENTS_SPEC.md §3.5 类型加权 |
+| 派生 experience 自动计算 outcome | SKILLS_SPEC §10 工作流第 2 步只说「派生 experience」，未指定 outcome；但召回排序依赖 outcome（失败加权） | docs/AGENTS_SPEC.md §3.5 类型加权 |
 | `_moc.md` 项目内索引页 | SKILLS_SPEC §10 工作流第 4 步明确要求 | docs/SKILLS_SPEC.md §10 |
-| 不调 research-agent 做立项调研 | 项目立项的外部资料应先 capture/ingest 入库；advisor 阶段也不调外部 | docs/DESIGN.md §7 边界 |
+| 不做项目立项调研 | 项目立项的外部资料应先 capture/ingest 入库；advisor 阶段也不调外部 | docs/DESIGN.md §7 边界 |

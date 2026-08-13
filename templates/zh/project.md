@@ -41,7 +41,7 @@ value:
 
 ## 经验复用建议
 
-> 由 quick-kb-project create 调 memory-agent 生成；按 AGENTS_SPEC §3.5 排序
+> 由 quick-kb-project create 调 quick-kb-memory-agent 生成；按 AGENTS_SPEC §3.5 排序
 
 ### 高相关 experience
 - [[experience/xxx]] · 相关点：{{}}

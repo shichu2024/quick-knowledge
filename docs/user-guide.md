@@ -32,9 +32,9 @@
 ```
 
 技能会：
-1. 调 research-agent 抽取**原子观点**（一笔记一观点）
+1. 调 quick-kb-research-agent 抽取**原子观点**（一笔记一观点）
 2. 推断 type / domain / 初始 confidence
-3. 检测与既有笔记的关系（manager-agent / memory-agent）
+3. 检测与既有笔记的关系（quick-kb-manager-agent / quick-kb-memory-agent）
 4. 移到对应目录
 
 **进阶**：
@@ -115,12 +115,12 @@ KB 体检           # ad-hoc
    ▼
 quick-kb-* 技能
    │
-   ├──▶ manager-agent  （库内结构：关系、孤立、死链、KS）
-   ├──▶ research-agent （外部资料：URL/PDF 抽取）
-   └──▶ memory-agent   （库内认知资产：experience/pattern/principle/belief）
+   ├──▶ quick-kb-manager-agent  （库内结构：关系、孤立、死链、KS）
+   ├──▶ quick-kb-research-agent （外部资料：URL/PDF 抽取）
+   └──▶ quick-kb-memory-agent   （库内认知资产：experience/pattern/principle/belief）
 ```
 
-**核心差异化**：memory-agent 让 quick-knowledge 不是「带引用的 RAG」，而是「个人助手」——它调取你的历史经验，而不是通用文档。
+**核心差异化**：quick-kb-memory-agent 让 quick-knowledge 不是「带引用的 RAG」，而是「个人助手」——它调取你的历史经验，而不是通用文档。
 
 详见 [`AGENTS_SPEC.md`](./AGENTS_SPEC.md)。
 
@@ -179,7 +179,7 @@ lesson:    # 学到什么（待补）
 3. **每条 lesson 派生为独立 experience 笔记**到 `07_principles/experiences/`
 4. 原 decision 建立 `derived_to`，新 experience 建立 `derived_from`
 
-→ 此后这些 experience 可被 memory-agent 召回，影响你的未来决策。**这是 quick-knowledge 区别于通用 Wiki 工具的关键机制**。
+→ 此后这些 experience 可被 quick-kb-memory-agent 召回，影响你的未来决策。**这是 quick-knowledge 区别于通用 Wiki 工具的关键机制**。
 
 ---
 
@@ -251,7 +251,7 @@ proactive_reminders:
 
 ### Q：库内 < 50 条时很多功能不工作？
 
-A：memory-agent / 主动提醒在 < 50 条时关闭（避免噪音）。可手动覆盖：
+A：quick-kb-memory-agent / 主动提醒在 < 50 条时关闭（避免噪音）。可手动覆盖：
 
 ```yaml
 memory_agent:
@@ -270,7 +270,7 @@ A：`quick-kb-normalize scope=legacy`，自动迁移 `related → relations` + �
 
 ### Q：归档的笔记还能被召回吗？
 
-A：能。memory-agent 默认排除 `98_archive/`，但可通过 `proactive_reminders` 或显式 query 找回。
+A：能。quick-kb-memory-agent 默认排除 `98_archive/`，但可通过 `proactive_reminders` 或显式 query 找回。
 
 ### Q：与 nuwa-skill / 其他 skills 的关系？
 

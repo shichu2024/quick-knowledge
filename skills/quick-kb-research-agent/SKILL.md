@@ -1,11 +1,14 @@
 ---
 name: quick-kb-research-agent
 description: |
-  quick-knowledge 研究员。面向外部资料（URL/PDF/长文），提取原子观点、生成摘要卡、交叉验证。被 quick-kb-capture / quick-kb-ingest / quick-kb-goal 内部调用，不直接面向用户。
-  v0.2 实现全部 4 个 intent：process_resource / extract_atoms / cross_verify / summarize。
+  研究员（技能化封装）。面向外部资料（URL/PDF/长文），提取原子观点、生成摘要卡、交叉验证。
+  能力：process_resource / extract_atoms / cross_verify / summarize。
+  可被 capture / ingest / goal 通过 Skill 工具调用，也可由用户直接调用。
+  触发词（中文）：处理资料 / 抽原子观点 / 摘要 / 交叉验证 / 研究这个
+  Triggers (EN): process resource / extract atoms / cross verify / summarize / research this
 version: v0.2
 phase: v0.2
-role: agent
+applies_to: 只读外部资料（URL / PDF / 长文）· 不读库内已有笔记
 source_of_truth:
   - docs/DESIGN.md §7.2
   - docs/AGENTS_SPEC.md §2
@@ -14,7 +17,7 @@ source_of_truth:
 
 # quick-kb-research-agent（v0.2）
 
-> **角色**：研究员。**只读外部资料**，不读库内已有笔记（memory-agent 域）。
+> **角色**：研究员。**只读外部资料**，不读库内已有笔记（quick-kb-memory-agent 域）。
 >
 > 替换 v0.1 ingest 的内置 LLM 抽取，提供更强的原子化与长文处理能力。
 
@@ -184,7 +187,7 @@ research_agent(
 
 | 缺失依赖 | 降级行为 |
 |---------|---------|
-| research-agent 完全不可用 | ingest 回退为「模板套用 + 字段填充」，不抽原子观点；多观点素材作为单条入库，待人工拆分 |
+| 本技能完全不可用 | ingest 回退为「模板套用 + 字段填充」，不抽原子观点；多观点素材作为单条入库，待人工拆分 |
 | 抓取失败（404/付费墙） | 仅基于已有正文片段生成摘要，标 `partial: true` |
 | PDF 解析失败 | 提示用户提供纯文本版；标 `partial: true` |
 | defuddle 不可用 | 用基础 HTML→MD |
@@ -193,7 +196,7 @@ research_agent(
 
 ## 6. 不变性
 
-- **只读外部资料**：不读库内已有笔记（避免与 memory-agent 域重叠）
+- **只读外部资料**：不读库内已有笔记（避免与 quick-kb-memory-agent 域重叠）
 - **保留原始**：source.raw 永久指向原始素材
 - **不提升 confidence 至 81+**：除非确证为一手实验/官方文档
 - **可解释**：每条原子笔记附 `source_excerpt`
@@ -214,4 +217,8 @@ research_agent(
 
 ## 8. 与设计文档的偏差说明
 
-无偏差。AGENTS_SPEC §2 全部能力在 v0.2 实现，不推迟。
+| 偏差点 | 原因 | 真相源 |
+|--------|------|-------|
+| 作为独立技能而非内部 agent | 跨 runtime 契约统一以 skill 形式分发；随 npx 安装自动可用 | 本技能定位调整 |
+
+其余无偏差。AGENTS_SPEC §2 全部能力在 v0.2 实现，不推迟。

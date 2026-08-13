@@ -100,7 +100,7 @@ updated: 2026-08-09
 | **Capture** | 把网页/PDF/聊天/灵感低摩擦放入 00_inbox | `quick-kb-capture` | URL、文件、文本、语音转写 | 00_inbox 原始素材 | 00_inbox 周转时长（应 < 7 天） |
 | **Ingest** | 保留原始资料，生成结构化笔记 | `quick-kb-ingest` | 00_inbox 素材 | 02_areas/01_resources/04_projects 下的正式笔记 | 入库笔记平均 frontmatter 完整度 |
 | **Normalize** | 统一标题、标签、日期、来源字段 | `quick-kb-ingest` / `quick-kb-normalize` | 已入库但字段不全的笔记 | 规范化后的笔记 | frontmatter 缺失率（应 < 5%） |
-| **Connect** | 建立双链、主题索引、知识地图 | `quick-kb-connect` + manager-agent | 规范化笔记 | MOC、wikilinks、canvas | 孤立笔记率（应 < 15%） |
+| **Connect** | 建立双链、主题索引、知识地图 | `quick-kb-connect` + quick-kb-manager-agent | 规范化笔记 | MOC、wikilinks、canvas | 孤立笔记率（应 < 15%） |
 | **Query** | 回答时必须引用已有笔记或原始来源 | `quick-kb-query` | 自然语言问题 | 带引用的答案 | 引用命中率（应 > 80%） |
 | **Review** | 检查孤立笔记、重复、死链、过期结论 | `quick-kb-review` | 全库快照 | 健康报告 + 待办清单 | Review 闭环完成率 |
 
@@ -174,8 +174,7 @@ vault 根目录采用 **PARA + 系统层** 混合模型，并加两位数字前�
 │   └── materials/                  #   过期素材
 │
 └── 99_system/                      # 系统与工具 · 底层支撑
-    ├── skills/                     #   知识库技能（本框架本体）
-    ├── agents/                     #   知识库 agent
+    ├── skills/                     #   知识库技能（本框架本体，含 manager/memory/research 三类 agent 以 skill 形式分发）
     ├── templates/                  #   笔记/wiki/目标/项目模板（中英双语）
     │   ├── zh/
     │   └── en/
@@ -554,7 +553,7 @@ Ingest 时由 AI 补齐其余字段。
 
 **职责**：长期记忆调取者，偏「旧经验」（面向库内已有笔记）。
 
-> 这是 quick-knowledge 作为「个人 AI 助手」而非「带引用的 RAG」的关键。research-agent 读新资料，memory-agent 调旧记忆。两者正交。
+> 这是 quick-knowledge 作为「个人 AI 助手」而非「带引用的 RAG」的关键。quick-kb-research-agent 读新资料，quick-kb-memory-agent 调旧记忆。两者正交。
 
 | 能力 | 说明 |
 |------|------|
@@ -573,25 +572,27 @@ Ingest 时由 AI 补齐其余字段。
 
 ### 7.4 Agent 文件位置
 
+agent 以**独立 skill** 形式分发，随 `npx skills add` 一起安装到 `skills/` 目录：
+
 ```
-system/agents/
-├── quick-kb-manager-agent.md
-├── quick-kb-research-agent.md
-└── quick-kb-memory-agent.md
+skills/
+├── quick-kb-manager-agent/SKILL.md
+├── quick-kb-research-agent/SKILL.md
+└── quick-kb-memory-agent/SKILL.md
 ```
 
-每个 agent 文件含：角色定义、可用工具、输入输出契约、调用示例。不绑定特定 runtime，任何支持 Agent Skills 的 runtime 都能加载。
+每个 agent skill 文件含：角色定义、可用工具、输入输出契约、调用示例。不绑定特定 runtime，任何支持 Agent Skills 的 runtime 都能加载。其他技能（advisor / ingest / connect 等）通过 Skill 工具按 intent 显式调用这三个 agent skill。
 
 > 完整的输入/输出契约、排序公式、降级路径见 [`AGENTS_SPEC.md`](./AGENTS_SPEC.md)。
 
 ### 7.5 Agent 协作模型
 
 ```
-外部资料 ──▶ research-agent ──▶ 新知识入库
+外部资料 ──▶ quick-kb-research-agent ──▶ 新知识入库
                                        │
-当前任务 ──▶ memory-agent  ──▶ 旧经验召回
+当前任务 ──▶ quick-kb-memory-agent  ──▶ 旧经验召回
                                        │
-结构演化 ◀── manager-agent ◀── 全库状态
+结构演化 ◀── quick-kb-manager-agent ◀── 全库状态
 ```
 
 三个 agent 角色不重叠：
@@ -605,13 +606,13 @@ system/agents/
 
 | 事件 | 触发 agent | 提醒示例 |
 |------|-----------|---------|
-| 新建项目（`quick-kb-project/init`） | memory-agent | 「你过去有 3 个类似项目：[[BI 插件体系]]、[[工作流引擎]]、[[MCP 工具设计]]，是否复用经验？」 |
-| 新建目标（`quick-kb-goal/create`） | memory-agent | 「该目标关联领域 [[前端工程]] 有 2 条原则、1 个失败教训，建议先看」 |
-| Capture 某主题素材 | memory-agent | 「这条素材与你 [[2024 RAG 实践]] 相关；注意 [[2025 RAG 失败教训]] 与之冲突」 |
-| Ingest 新笔记 | manager-agent | 「新笔记与 [[既有笔记 X]] 语义相似度 0.88，建议建立 `supports`/`evolves` 关系」 |
-| Ingest 检测冲突 | memory-agent | 「新结论与 [[2024 微服务最优论]] 在 `context: 创业团队` 下冲突，建议加 `contradicts` 并各自声明 context」 |
-| Review 完成 | manager-agent | 「3 条高价值低置信笔记待验证；MCP 子领域建议升格独立」 |
-| 长期未触碰某 `applied` 笔记 | manager-agent | 「[[某经验]] 已 6 个月未触碰，是否仍 `applied`？或降为 `deprecated`？」 |
+| 新建项目（`quick-kb-project/init`） | quick-kb-memory-agent | 「你过去有 3 个类似项目：[[BI 插件体系]]、[[工作流引擎]]、[[MCP 工具设计]]，是否复用经验？」 |
+| 新建目标（`quick-kb-goal/create`） | quick-kb-memory-agent | 「该目标关联领域 [[前端工程]] 有 2 条原则、1 个失败教训，建议先看」 |
+| Capture 某主题素材 | quick-kb-memory-agent | 「这条素材与你 [[2024 RAG 实践]] 相关；注意 [[2025 RAG 失败教训]] 与之冲突」 |
+| Ingest 新笔记 | quick-kb-manager-agent | 「新笔记与 [[既有笔记 X]] 语义相似度 0.88，建议建立 `supports`/`evolves` 关系」 |
+| Ingest 检测冲突 | quick-kb-memory-agent | 「新结论与 [[2024 微服务最优论]] 在 `context: 创业团队` 下冲突，建议加 `contradicts` 并各自声明 context」 |
+| Review 完成 | quick-kb-manager-agent | 「3 条高价值低置信笔记待验证；MCP 子领域建议升格独立」 |
+| 长期未触碰某 `applied` 笔记 | quick-kb-manager-agent | 「[[某经验]] 已 6 个月未触碰，是否仍 `applied`？或降为 `deprecated`？」 |
 
 **设计原则**：
 - **提醒是建议，不是阻塞** —— 用户可忽略、可关闭某类提醒（`kb.config.yaml` 配置）。
@@ -859,10 +860,6 @@ quick-knowledge/
 │   ├── quick-kb-daily/SKILL.md
 │   ├── quick-kb-goal/SKILL.md
 │   └── quick-kb-project/SKILL.md
-├── agents/                         # 知识库 agent
-│   ├── quick-kb-manager-agent.md
-│   ├── quick-kb-research-agent.md
-│   └── quick-kb-memory-agent.md
 ├── templates/                      # 双语模板
 │   ├── zh/
 │   └── en/
@@ -921,7 +918,7 @@ npx skills add <github-user>/quick-knowledge
 ### v0.2 · 闭环完整（2 周）
 
 - [ ] `quick-kb-connect` + `quick-kb-query` + `quick-kb-review`
-- [ ] manager-agent + research-agent
+- [ ] quick-kb-manager-agent + quick-kb-research-agent
 - [ ] Obsidian-skills 集成（降级路径）
 - [ ] 英文模板
 
@@ -1012,22 +1009,22 @@ npx skills add <github-user>/quick-knowledge
 
 **背景**：个人知识库与通用 Wiki 的本质区别在于「记的是谁的、谁的判断」。
 **决策**：新增 `principles/` 根目录，承载 principle/belief/pattern/experience 四类认知资产，作为独立 type 枚举。它们横切领域、无 `domain`，但允许领域目录覆盖（领域专属原则）。
-**代价**：用户需区分"客观概念"与"个人判断"；好处是 advisor/memory-agent 能基于"这个人相信什么、犯过什么错"提供个性化决策。
+**代价**：用户需区分"客观概念"与"个人判断"；好处是 advisor/quick-kb-memory-agent 能基于"这个人相信什么、犯过什么错"提供个性化决策。
 **反馈来源**：外部评审「问题 2 · 缺少个人认知模型」（采纳）。
 
 ### ADR-008 · 价值维度自动化优先
 
 **背景**：单 `confidence` 不够（一条永远用不到的高置信笔记价值为零）；但让用户手填 reuse/impact/uniqueness 违反"采集零摩擦"。
-**决策**：`value.reuse` 由 manager-agent 在 Review 时自动计算（入链数 + 查询命中数）；`impact`/`uniqueness` 可选手动，未填走默认值。综合 Knowledge Score 用于排序，不强制写入笔记。
+**决策**：`value.reuse` 由 quick-kb-manager-agent 在 Review 时自动计算（入链数 + 查询命中数）；`impact`/`uniqueness` 可选手动，未填走默认值。综合 Knowledge Score 用于排序，不强制写入笔记。
 **代价**：reuse 需要查询日志支撑（早期 vault 数值偏低）；好处是零额外摩擦。
 **反馈来源**：外部评审「问题 5 · 缺少知识评分体系」（部分采纳，拒绝手填三分数）。
 
 ### ADR-009 · Memory Agent 与 Research Agent 正交
 
 **背景**：是否需要一个"调旧经验"的 agent？
-**决策**：新增 memory-agent。research-agent 读外部新资料（产新笔记），memory-agent 调库内旧经验（防重复犯错、关联提醒）。两者输入域不重叠。
+**决策**：新增 quick-kb-memory-agent。quick-kb-research-agent 读外部新资料（产新笔记），quick-kb-memory-agent 调库内旧经验（防重复犯错、关联提醒）。两者输入域不重叠。
 **代价**：库内笔记 < 50 条时 memory 召回价值有限，需降级提示；好处是 quick-knowledge 从「带引用的 RAG」升级为「个人决策助手」。
-**反馈来源**：外部评审「问题 3 · Agent 设计偏弱」（采纳 memory-agent；将 Knowledge Architect 能力并入 manager 而非单列）。
+**反馈来源**：外部评审「问题 3 · Agent 设计偏弱」（采纳 quick-kb-memory-agent；将 Knowledge Architect 能力并入 manager 而非单列）。
 
 ### ADR-010 · query 与 advisor 并列而非替换
 
@@ -1053,15 +1050,15 @@ npx skills add <github-user>/quick-knowledge
 ### ADR-013 · 主动提醒机制
 
 **背景**：V1 是"用户调用 → 系统响应"的被动模型；个人助手的关键差异是"知识主动找人"。
-**决策**：不新增提醒技能，而是引入**事件驱动的主动提醒机制**（§7.6）—— 在 project/init、goal/create、capture、ingest、review 等技能工作流的关键节点，由 memory-agent/manager-agent 主动推送提醒（相似经验、冲突警告、结构演化建议等）。
+**决策**：不新增提醒技能，而是引入**事件驱动的主动提醒机制**（§7.6）—— 在 project/init、goal/create、capture、ingest、review 等技能工作流的关键节点，由 quick-kb-memory-agent/quick-kb-manager-agent 主动推送提醒（相似经验、冲突警告、结构演化建议等）。
 **代价**：需要限流与去重避免噪音；好处是用户无需主动检索即可受益于历史经验。
 **权衡**：提醒是建议非阻塞；可在 `kb.config.yaml` 关闭某类提醒；库内笔记 < 50 条时关闭。
 **反馈来源**：外部评审「问题 4 · 缺少主动提醒机制」（采纳为机制而非新技能）。
 
 ### ADR-014 · Memory Agent 详细规格独立成文
 
-**背景**：V1 在 DESIGN §7.3 给了 memory-agent 能力表，但无输入/输出/排序公式等详细规格；advisor 调用它却无契约，存在退化成普通 RAG 的风险。
-**决策**：新建 `docs/AGENTS_SPEC.md`，规格化 manager/research/memory 三 agent，重点是 memory-agent 的召回排序公式 `similarity × recency × impact × confidence` 与降级路径。
+**背景**：V1 在 DESIGN §7.3 给了 quick-kb-memory-agent 能力表，但无输入/输出/排序公式等详细规格；advisor 调用它却无契约，存在退化成普通 RAG 的风险。
+**决策**：新建 `docs/AGENTS_SPEC.md`，规格化 manager/research/memory 三 agent，重点是 quick-kb-memory-agent 的召回排序公式 `similarity × recency × impact × confidence` 与降级路径。
 **代价**：多一个文档维护；好处是 agent 行为可预期、可被任意技能按契约调用。
 **反馈来源**：外部评审「问题 3 · Memory Agent 需要更详细设计」（完全采纳）。
 

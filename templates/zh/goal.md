@@ -35,7 +35,7 @@ value:
 
 ## 学习路径
 
-> 由 quick-kb-goal create 调 research-agent 生成；库内已有笔记优先关联
+> 由 quick-kb-goal create 调 quick-kb-research-agent 生成；库内已有笔记优先关联
 
 1. 基础概念（X 周） → [[已有 concept 1]] / [建议 Capture 缺口]
 2. 进阶主题（X 周） → [[已有 concept 2]]

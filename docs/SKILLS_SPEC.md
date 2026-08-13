@@ -133,7 +133,7 @@ daily 日志 / review 报告 / goal·project progress 文件名采用 `<date-tok
 5. **AI 预标注**（可选）：根据内容猜测 1-3 个候选 tag，但**不**写入正式 tag 字段，而是写 `suggested_tags`，留给 Ingest 决定。
 6. **文件命名**：`00_inbox/<type>/YYYYMMDD-HHMM-<slug>.md`。
 7. **去重检测**：与 inbox 近 7 天内容比对相似度，>0.85 时提示「疑似重复：[文件名]，是否合并？」
-8. **主动提醒**（V2 新增 · 见 DESIGN §7.6）：若素材主题命中已有 `belief`/`pattern`/`experience`，调用 memory-agent 提示「这与你的 [[某原则]] 相关」；若与既有笔记存在 `contradicts` 苗头，提示「注意：与 [[某笔记]] 似乎冲突，Ingest 时建议声明各自 context」。提醒非阻塞，库内 < 50 条笔记时关闭。
+8. **主动提醒**（V2 新增 · 见 DESIGN §7.6）：若素材主题命中已有 `belief`/`pattern`/`experience`，调用 quick-kb-memory-agent 提示「这与你的 [[某原则]] 相关」；若与既有笔记存在 `contradicts` 苗头，提示「注意：与 [[某笔记]] 似乎冲突，Ingest 时建议声明各自 context」。提醒非阻塞，库内 < 50 条笔记时关闭。
 
 ### 输出
 
@@ -180,7 +180,7 @@ capture_type: web-clip   # idea | web-clip | pdf | meeting | ai-dialog | reading
 ### 工作流
 
 1. **扫描候选**：列出 target 内的 inbox 笔记，按 captured_at 排序。
-2. **逐条处理**（可并行，由 research-agent 承担）：
+2. **逐条处理**（可并行，由 quick-kb-research-agent 承担）：
    1. **抽取原子观点**：一笔记一观点；多条观点拆成多条笔记。
    2. **分类去向**：concept → 02_areas/、resource → 01_resources/、decision → 05_outputs/decisions/（用 Decision Ledger 模板，见 DESIGN §8.4）。
    3. **补全 frontmatter**：依据 DESIGN 第 6 节填全部字段（含 `relations`、`context`）。
@@ -190,7 +190,7 @@ capture_type: web-clip   # idea | web-clip | pdf | meeting | ai-dialog | reading
    7. **关系类型化**：扫描已存在笔记，按 DESIGN §6.7 分类写入 `relations.{supports/contradicts/evolves/supersedes}`，并尝试从正文提取 `context`。
 3. **冲突检测与主动提醒**（V2 关键）：
    - 与已入库笔记相似度 >0.85：提示合并或建立 `evolves`/`supersedes`。
-   - 与已入库笔记语义对立（如"X 适合" vs "X 不适合"）：调用 memory-agent 判定冲突，**主动**建议建立 `contradicts` 关系并各自声明 `context`（见 DESIGN §7.6 触发表）。
+   - 与已入库笔记语义对立（如"X 适合" vs "X 不适合"）：调用 quick-kb-memory-agent 判定冲突，**主动**建议建立 `contradicts` 关系并各自声明 `context`（见 DESIGN §7.6 触发表）。
 4. **写入并反馈**：每条笔记的写入位置、类型、置信度、关系、context。
 
 ### 输出（单条 concept 笔记示例）
@@ -233,7 +233,7 @@ domain: ai-engineering
 
 - **原始素材永不删除** —— inbox 文件原地保留，Review 闭环统一清理。
 - **不提升 maturity** —— Ingest 后 `maturity` 默认 `understood`、`status` 为 `active`，需 Review/实践才能升到 `validated` 及以上。
-- **降级**：research-agent 不可用时，回退为「字段填充 + 模板套用」，不抽原子观点。
+- **降级**：quick-kb-research-agent 不可用时，回退为「字段填充 + 模板套用」，不抽原子观点。
 
 ---
 
@@ -259,7 +259,7 @@ domain: ai-engineering
 2. **双链补全**（`action=links`）：
    - 找出每条笔记的 `related` 字段，自动创建反向 wikilink（Obsidian 双链语义）。
    - 检测标题共现、标签共现，推荐 3-5 个候选连接，由用户确认。
-3. **MOC 生成**（`action=moc`）：调用 manager-agent，按主题聚类，生成 `06_wiki/mocs/<domain>-moc.md`。
+3. **MOC 生成**（`action=moc`）：调用 quick-kb-manager-agent，按主题聚类，生成 `06_wiki/mocs/<domain>-moc.md`。
 4. **知识地图**（`action=canvas`）：调用 json-canvas 技能，生成 `06_wiki/maps/<domain>.canvas`。
 5. **更新 _index.md**：将新 MOC 加入全局导航页。
 
@@ -318,7 +318,7 @@ domain: ai-engineering
 
 ### 工作流
 
-1. **检索**：基于关键词 + 标签 + wikilink 图谱召回候选笔记（manager-agent 协助）。
+1. **检索**：基于关键词 + 标签 + wikilink 图谱召回候选笔记（quick-kb-manager-agent 协助）。
 2. **排序**：按 confidence × recency × 入链数加权。
 3. **回答生成**：
    - `strict`：每句结论必须挂 `[[]]` 或 `source` 引用；无法引用则不写。
@@ -370,7 +370,7 @@ RAG 的核心是检索后生成，关键决策在于分块策略和向量库选�
 
 ### 工作流
 
-1. **调用 memory-agent**：基于情境做经验召回（输入/输出/排序公式见 [`AGENTS_SPEC.md`](./AGENTS_SPEC.md) §3），找出历史上类似任务相关的 experience/pattern/decision。
+1. **调用 quick-kb-memory-agent**：基于情境做经验召回（输入/输出/排序公式见 [`AGENTS_SPEC.md`](./AGENTS_SPEC.md) §3），找出历史上类似任务相关的 experience/pattern/decision。
 2. **检索认知资产**：列出相关的 principle（这个人相信什么）、belief（待验证假设）、pattern（可复用模式）。
 3. **检索领域知识**：调出相关 concept 笔记作为方法支撑。
 4. **冲突检测**：若候选方案与某条 experience 教训冲突，显式警告。
@@ -430,11 +430,11 @@ RAG 的核心是检索后生成，关键决策在于分块策略和向量库选�
 ### 工作流
 
 1. **快照采集**：扫描对应周期的 daily/项目/目标笔记。
-2. **价值刷新**（调用 manager-agent）：重算所有知识型笔记的 `value.reuse`，更新 Knowledge Score 排序。
+2. **价值刷新**（调用 quick-kb-manager-agent）：重算所有知识型笔记的 `value.reuse`，更新 Knowledge Score 排序。
 3. **维度分析**：
    - **knowledge**：孤立笔记率、重复嫌疑、死链、maturity 衰减（长期未触碰 → `deprecated`）。
    - **value**：列出"高价值低置信"（KS 高但 confidence<60，该验证了）与"低复用高占用"（confidence 高但 reuse=0，该连 MOC 或归档）两类待办。
-   - **structure**：识别子领域增速异常，建议拆分/升格为新领域（manager-agent 能力）。
+   - **structure**：识别子领域增速异常，建议拆分/升格为新领域（quick-kb-manager-agent 能力）。
    - **project**：进度偏离、阻塞项。
    - **goal**：目标进展、学习路径完成度。
    - **daily**：时间分布、重复模式。
@@ -466,7 +466,7 @@ RAG 的核心是检索后生成，关键决策在于分块策略和向量库选�
 
 - **只标记不删除** —— `deprecated` 是状态，不直接归档。
 - **不自动降级 maturity** —— 由人确认；agent 仅建议。
-- **降级**：无 manager-agent 时仅做基于规则的检查，跳过价值刷新与结构演化。
+- **降级**：无 quick-kb-manager-agent 时仅做基于规则的检查，跳过价值刷新与结构演化。
 
 ---
 
@@ -557,7 +557,7 @@ tags:
 1. **目标澄清**：确认目标定义、成功标准、deadline、关联领域。
 2. **生成 goal.md**：写入 `03_goals/<slug>/goal.md`，含成功标准、关键里程碑。
 3. **学习路径推荐**（`path_source=recommend`）：
-   - 调用 research-agent，基于已入库笔记 + 公开资料生成路径。
+   - 调用 quick-kb-research-agent，基于已入库笔记 + 公开资料生成路径。
    - 路径分层：基础概念 → 进阶 → 实战项目。
    - 每个节点关联库内已有笔记或建议 Capture 的资料。
 4. **建立 _moc.md**：路径 `03_goals/<slug>/_moc.md`，索引该目标的所有相关笔记。
@@ -640,9 +640,9 @@ related:
 3. **拉起子目录**：`notes/`（项目笔记）、`decisions/`（Decision Ledger，见 DESIGN §8.4）、`refs/`（参考资料 wikilink）。
 4. **建立 _moc.md**：项目内索引页。
 5. **关联目标**：询问是否关联 goal，建立 wikilink。
-6. **主动相似项目召回**（V2 关键 · 见 DESIGN §7.6）：调用 memory-agent，基于项目主题召回历史相似项目/相关 experience/pattern/失败教训，在 README 顶部生成「经验复用建议」段：
+6. **主动相似项目召回**（V2 关键 · 见 DESIGN §7.6）：调用 quick-kb-memory-agent，基于项目主题召回历史相似项目/相关 experience/pattern/失败教训，在 README 顶部生成「经验复用建议」段：
    ```
-   ## 经验复用建议（来自 memory-agent）
+   ## 经验复用建议（来自 quick-kb-memory-agent）
    - 相似项目：[[BI 插件体系]]、[[工作流引擎]]
    - 适用 pattern：[[插件隔离模式]]
    - ⚠ 失败教训：[[2024 沙箱逃逸教训]] —— 注意隔离边界
@@ -711,15 +711,15 @@ related_goals:
 Capture    : quick-kb-capture, quick-kb-daily
 Ingest     : quick-kb-ingest
 Normalize  : quick-kb-ingest, quick-kb-normalize
-Connect    : quick-kb-connect (+ manager-agent)
+Connect    : quick-kb-connect (+ quick-kb-manager-agent)
 Query      : quick-kb-query（事实型）
-Query+     : quick-kb-advisor（决策型，+ memory-agent）
-Review     : quick-kb-review (+ manager-agent)
+Query+     : quick-kb-advisor（决策型，+ quick-kb-memory-agent）
+Review     : quick-kb-review (+ quick-kb-manager-agent)
 
 横切       : quick-kb-init, quick-kb-goal, quick-kb-project
-研究支撑   : research-agent（读外部，被 capture/ingest/goal 调用）
-记忆支撑   : memory-agent（调旧经验，被 advisor/project/goal 调用）
-主动提醒   : 事件触发（project-init/goal-create/capture/ingest/review）→ memory-agent/manager-agent
+研究支撑   : quick-kb-research-agent（读外部，被 capture/ingest/goal 调用）
+记忆支撑   : quick-kb-memory-agent（调旧经验，被 advisor/project/goal 调用）
+主动提醒   : 事件触发（project-init/goal-create/capture/ingest/review）→ quick-kb-memory-agent/quick-kb-manager-agent
 派生       : Decision Ledger 的 lesson → experience 笔记（项目归档时）
 扩展       : quick-kb-archive, quick-kb-stats, quick-kb-import
 ```
@@ -736,16 +736,16 @@ quick-kb-capture ─────┐
 quick-kb-daily ───────┤
                       ├─▶ quick-kb-ingest ─▶ quick-kb-connect
                       │         ▲                  │
-                      │    research-agent          │
+                      │    quick-kb-research-agent          │
                       │         │                  ▼
                       │         │           quick-kb-query（事实）
                       │         │           quick-kb-advisor（决策）
                       │         │                  ▲
-                      │         │           memory-agent
+                      │         │           quick-kb-memory-agent
                       │         │                  │
                       └─────────┴──────────────────┘
                                                      │
-quick-kb-review ◀──── manager-agent ◀───────────────┘
+quick-kb-review ◀──── quick-kb-manager-agent ◀───────────────┘
     │
     ├─▶ 价值刷新（重算 value.reuse、KS 排序）
     ├─▶ 结构演化建议（升格新领域）

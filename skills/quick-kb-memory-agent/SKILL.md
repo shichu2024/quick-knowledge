@@ -1,12 +1,14 @@
 ---
 name: quick-kb-memory-agent
 description: |
-  quick-knowledge 长期记忆调取者。核心 agent。在用户做新决策时，主动调取「历史上类似情境下，这个人做过什么、信什么、栽在哪」。把 vault 当作长期记忆来 query，而非文档库来检索。
-  v0.3 实现全部 5 个 intent：recall_similar / check_beliefs / detect_repeat_mistakes / proactive_suggest / present_conflicts。
-  被快 advisor / project / goal / ingest 内部调用，不直接面向用户。
+  长期记忆调取者（技能化封装 · 核心）。在用户做新决策时，主动调取「历史上类似情境下，这个人做过什么、信什么、栽在哪」。把 vault 当作长期记忆来 query，而非文档库来检索。
+  能力：recall_similar / check_beliefs / detect_repeat_mistakes / proactive_suggest / present_conflicts。
+  可被 advisor / project / goal / ingest 通过 Skill 工具调用，也可由用户直接调用。
+  触发词（中文）：我以前怎么做过… / 我的信念库 / 重复踩坑检测 / 召回相似经验
+  Triggers (EN): recall similar / check beliefs / repeat mistakes / memory recall
 version: v0.3
 phase: v0.3
-role: agent
+applies_to: 只读 `07_principles/{experiences,patterns}/` + `05_outputs/daily/` · 不写入笔记
 source_of_truth:
   - docs/DESIGN.md §7.3 / §7.6
   - docs/AGENTS_SPEC.md §3
@@ -17,7 +19,7 @@ source_of_truth:
 
 > **角色**：长期记忆调取者。**只读库内经验/认知资产**（experience/pattern/decision/principle/belief）。
 >
-> **不读**：结构（manager-agent 域）、外部资料（research-agent 域）。
+> **不读**：结构（quick-kb-manager-agent 域）、外部资料（quick-kb-research-agent 域）。
 >
 > 决定 quick-knowledge 是「个人助手」还是「带引用的 RAG」。
 
@@ -33,13 +35,13 @@ source_of_truth:
 | `proactive_suggest` | 事件类型 + 上下文 | 主动建议（用于 4 个 memory 提醒事件） |
 | `present_conflicts` | 召回结果（含 contradicts） | 冲突双方 + 各自 context 对照呈现 |
 
-> **领域边界**：输入是「库内已有的认知资产」+「当前情境文本」。任何外部资料由 research-agent 先处理后写入库，memory-agent 才能读取。
+> **领域边界**：输入是「库内已有的认知资产」+「当前情境文本」。任何外部资料由 quick-kb-research-agent 先处理后写入库，quick-kb-memory-agent 才能读取。
 
 ---
 
 ## 2. 调用契约
 
-按 [`AGENTS_SPEC.md` §通用约定](../docs/AGENTS_SPEC.md#通用约定)：
+按 [`AGENTS_SPEC.md` §通用约定](../../docs/AGENTS_SPEC.md)：
 
 ```
 memory_agent(
@@ -334,13 +336,13 @@ score = 0.68^0.45 × 0.836^0.20 × 1.0^0.15 × 0.85^0.20
 | 库内笔记 < 50 条 | `proactive_suggest` 全部关闭；其他 intent 返回 `degraded: true` + reasoning：「库内经验不足，以下基于有限样本」 |
 | 无 embedding 服务 | similarity 降为「标签 Jaccard + 标题关键词重叠」（权重各 0.5） |
 | 07_principles/ 目录不存在 | check_beliefs 返回空 + reasoning「未启用认知资产层」 |
-| memory-agent 完全不可用 | 调用方技能（advisor/project/goal）退化为「只查 concept 不调经验」的 RAG，并明确告知用户 |
+| 本技能完全不可用 | 调用方技能（advisor/project/goal）退化为「只查 concept 不调经验」的 RAG，并明确告知用户 |
 
 ---
 
 ## 7. 不变性
 
-- **纯函数式**：所有 intent 只读，不写入 frontmatter（区别于 manager-agent 的 refresh_value）
+- **纯函数式**：所有 intent 只读，不写入 frontmatter（区别于 quick-kb-manager-agent 的 refresh_value）
 - **不绑定 runtime**：核心排序公式基于纯算术，无网络依赖
 - **可解释**：每条 MemoryNote 必带 `why`；MemoryResult 必带 `reasoning`
 - **冲突不选边**：present_conflicts 永远不输出「应该选 A/B」的判断
@@ -366,7 +368,8 @@ score = 0.68^0.45 × 0.836^0.20 × 1.0^0.15 × 0.85^0.20
 
 | 偏差点 | 原因 | 真相源 |
 |--------|------|-------|
-| 候选集显式排除 concept/resource/project/goal | 防止记忆召回被「文档型」笔记稀释；这些 type 由其他流程（research-agent 摘要、manager-agent 结构）负责 | docs/AGENTS_SPEC.md §3.5 类型加权暗示 + docs/DESIGN.md §7.3 角色定位 |
-| proactive_suggest 仅 4 个 memory 事件 | manager 类 3 个事件归 manager-agent（v0.2 已实现） | docs/DESIGN.md §7.6 / dev/v0.3-assistant.md WP9 |
+| 候选集显式排除 concept/resource/project/goal | 防止记忆召回被「文档型」笔记稀释；这些 type 由其他流程（quick-kb-research-agent 摘要、quick-kb-manager-agent 结构）负责 | docs/AGENTS_SPEC.md §3.5 类型加权暗示 + docs/DESIGN.md §7.3 角色定位 |
+| proactive_suggest 仅 4 个 memory 事件 | manager 类 3 个事件归 quick-kb-manager-agent（v0.2 已实现） | docs/DESIGN.md §7.6 / dev/v0.3-assistant.md WP9 |
 | recency_weight 仅作可调权重项 | 用户对「最近多久算相关」的偏好差异最大；其他权重已公式化 | docs/AGENTS_SPEC.md §3.5 输入契约 options |
 | 检测失败仅靠 outcome + 关键词，无 ML 分类器 | v0.3 阶段保持纯规则；ML 推迟到外部工具集成 | dev/v0.3-assistant.md WP3 范围 |
+| 作为独立技能而非内部 agent | 跨 runtime 契约统一以 skill 形式分发；随 npx 安装自动可用 | 本技能定位调整 |

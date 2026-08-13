@@ -72,9 +72,9 @@ Capture → Ingest → Normalize → Connect → Query → Review → (Capture �
 
 ### 3 つの Agent（入力ドメイン非重複）
 
-- **manager-agent** —— ライブラリ構造管理
-- **research-agent** —— 外部資料処理
-- **memory-agent** —— 長期記憶呼び出し（コア差別化）
+- **quick-kb-manager-agent** —— ライブラリ構造管理
+- **quick-kb-research-agent** —— 外部資料処理
+- **quick-kb-memory-agent** —— 長期記憶呼び出し（コア差別化）
 
 ### Knowledge Score
 
@@ -89,8 +89,8 @@ KS = confidence × log2(1 + reuse) × impact
 | フェーズ | 状態 | 主な内容 |
 |----------|------|---------|
 | v0.1 mvp | ✅ | init/capture/ingest/daily + 中国語テンプレ |
-| v0.2 loops | ✅ | connect/query/review + manager/research-agent + 英語テンプレ |
-| v0.3 assistant | ✅ | memory-agent + advisor/project/goal + 認知資産テンプレ |
+| v0.2 loops | ✅ | connect/query/review + manager/quick-kb-research-agent + 英語テンプレ |
+| v0.3 assistant | ✅ | quick-kb-memory-agent + advisor/project/goal + 認知資産テンプレ |
 | v0.4 extensions | ✅ | normalize/archive/stats/import + kb.config + 多言語 README |
 | v1.0 release | ✅ | CONTRIBUTING/LICENSE + CI + demo-vault 公開 |
 | v1.1 flow-restructure | ✅ | トップレベル `NN_` 接頭辞 + 絶対パス硬制約（⚠️ BREAKING） |

@@ -28,7 +28,7 @@ domains:
 
 # ─── 领域分类树（v1.4 · 选填）─────────────────────
 # 缺省时 ingest 退为单层 domain（向后兼容）；填写后：
-#   - ingest 时 research-agent 从 taxonomy 推荐嵌套路径
+#   - ingest 时 quick-kb-research-agent 从 taxonomy 推荐嵌套路径
 #   - normalize action=regroup 按此把旧 flat 笔记迁到嵌套结构
 #   - 不在 taxonomy 的 domain 视为 leaf，仍单层
 domain_taxonomy:
@@ -161,9 +161,9 @@ capture_ai:
 | `quick-kb-archive` | `wikilink.archive_annotation` | 归档标注 |
 | `quick-kb-stats` | `obsidian.bases` / `review.*` | 报告字段 |
 | `quick-kb-import` | `language` / `domains` / `tags_vocabulary` | 字段补全 |
-| `manager-agent` | `review.*` / `proactive_reminders.*` | 阈值 + 限流 |
-| `memory-agent` | `memory_agent.*` / `proactive_reminders.*` | 排序 + 限流 |
-| `research-agent` | `research_agent.*` | 抽取参数 |
+| `quick-kb-manager-agent` | `review.*` / `proactive_reminders.*` | 阈值 + 限流 |
+| `quick-kb-memory-agent` | `memory_agent.*` / `proactive_reminders.*` | 排序 + 限流 |
+| `quick-kb-research-agent` | `research_agent.*` | 抽取参数 |
 
 ---
 

@@ -26,12 +26,16 @@ updated: 2026-08-09
 
 ### 文件位置
 
+agent 以独立 skill 形式分发，随技能包安装到 `skills/` 目录下：
+
 ```
-99_system/agents/
-├── quick-kb-manager-agent.md
-├── quick-kb-research-agent.md
-└── quick-kb-memory-agent.md
+skills/
+├── quick-kb-manager-agent/SKILL.md
+├── quick-kb-research-agent/SKILL.md
+└── quick-kb-memory-agent/SKILL.md
 ```
+
+> 历史：v0.3 之前 agent 文件位于 `99_system/agents/` 或仓库根 `agents/`，仅作为跨 runtime 契约文档存在，不随技能自动加载。v0.3+ 统一改造为 skill 格式，使其能通过 `npx skills add` 与其他 14 个技能一起分发，并支持 Skill 工具按 intent 显式调用。
 
 ### 调用契约
 
@@ -98,7 +102,7 @@ interface AgentResult {
 |---------|---------|
 | 无查询日志（早期 vault） | `refresh_value` 仅用入链数；`reuse` 数值偏低属正常 |
 | 无 embedding 服务 | 关系推荐降为标签共现 + 标题关键词 |
-| manager-agent 完全不可用 | 调用方技能自行做基于规则的最小检查 |
+| quick-kb-manager-agent 完全不可用 | 调用方技能自行做基于规则的最小检查 |
 
 ### 1.4 调用示例
 
@@ -143,7 +147,7 @@ manager_agent.detect_structure_drift(
 
 | 缺失依赖 | 降级行为 |
 |---------|---------|
-| research-agent 不可用 | ingest 回退为「模板套用 + 字段填充」，不抽原子观点；多观点素材仍作为单条入库，待人工拆分 |
+| quick-kb-research-agent 不可用 | ingest 回退为「模板套用 + 字段填充」，不抽原子观点；多观点素材仍作为单条入库，待人工拆分 |
 | 抓取失败（404/付费墙） | 仅基于已有正文片段生成摘要，标 `partial: true` |
 
 ---
@@ -264,7 +268,7 @@ score = similarity^w_s × recency_factor^w_r × impact_factor^w_i × confidence_
 |---------|---------|
 | 库内笔记 < 50 条 | 返回「库内经验不足，以下基于通用建议」+ `degraded: true`；不强行编造经验 |
 | 无 embedding 服务 | similarity 降为标签 Jaccard + 标题关键词重叠 |
-| memory-agent 完全不可用 | advisor/project 退化为「只查 concept 不调经验」的 RAG，并明确告知用户 |
+| quick-kb-memory-agent 完全不可用 | advisor/project 退化为「只查 concept 不调经验」的 RAG，并明确告知用户 |
 
 ### 3.8 调用示例
 

@@ -1,7 +1,7 @@
 <!--
 模板：MOC 主题索引（中文 · v0.2）
 用途：领域/专题索引页，由 quick-kb-connect 写入 06_wiki/mocs/<domain>-moc.md。
-特性：manager-agent.build_moc 按标签共现 + wikilink 图谱聚类生成；用户可手动调整。
+特性：quick-kb-manager-agent.build_moc 按标签共现 + wikilink 图谱聚类生成；用户可手动调整。
 真相源：references/frontmatter-v0.2.md · docs/DESIGN.md §6 · docs/SKILLS_SPEC.md §4
 -->
 ---
@@ -24,7 +24,7 @@ value:
 
 # {{domain}} · 主题索引
 
-> 由 quick-kb-connect 调用 manager-agent.build_moc 生成。手动调整后下次 connect 保留人工修订（diff merge）。
+> 由 quick-kb-connect 调用 quick-kb-manager-agent.build_moc 生成。手动调整后下次 connect 保留人工修订（diff merge）。
 
 ## 主题聚类 1 · {{topic-1}}
 
@@ -37,7 +37,7 @@ value:
 
 ## 待补充
 
-- [ ] {{manager-agent 检测到的缺口，但暂无对应笔记}}
+- [ ] {{quick-kb-manager-agent 检测到的缺口，但暂无对应笔记}}
 - [ ]
 
 ## 相关 MOC

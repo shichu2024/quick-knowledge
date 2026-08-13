@@ -2,7 +2,7 @@
 version: v1.4
 updated: 2026-08-13
 phase: v1.4
-applies_to: quick-kb-stats（KS Top 10）/ quick-kb-review（价值刷新）/ memory-agent（召回排序）
+applies_to: quick-kb-stats（KS Top 10）/ quick-kb-review（价值刷新）/ quick-kb-memory-agent（召回排序）
 source_of_truth:
   - docs/DESIGN.md §6.5（Knowledge Score）/ §6.6（value 维度）
   - docs/AGENTS_SPEC.md §3（排序公式）
@@ -11,7 +11,7 @@ source_of_truth:
 
 # 评分公式 · Scoring Formulas
 
-> 本文件公开 quick-knowledge 使用的三个核心评分公式。`quick-kb-stats`、`quick-kb-review` 和 `memory-agent` 在计算 Knowledge Score、复用度、时效性时**共同引用此文件**，确保评分口径透明、可复现。
+> 本文件公开 quick-knowledge 使用的三个核心评分公式。`quick-kb-stats`、`quick-kb-review` 和 `quick-kb-memory-agent` 在计算 Knowledge Score、复用度、时效性时**共同引用此文件**，确保评分口径透明、可复现。
 
 ---
 

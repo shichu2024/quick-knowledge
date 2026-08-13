@@ -110,8 +110,7 @@ source_of_truth:
 03_goals/
 
 99_system/
-├── skills/                # 软链或复制本框架技能（v0.1 仅创建空目录）
-├── agents/                # v0.2+ 才有 agent 文件
+├── skills/                # 软链或复制本框架技能（v0.1 仅创建空目录）；v0.3+ 含 manager/memory/research 三类 agent skill
 ├── templates/
 │   ├── zh/                # v1.4 铺设全部 12 个模板
 │   └── en/                # v1.4 铺设全部 12 个模板
@@ -392,7 +391,7 @@ runtime_hint: claude-code
 - **不创建任何笔记内容** —— 只铺骨架 + 占位文件。
 - **不破坏既有文件** —— 同名文件跳过，输出跳过列表。
 - **不接入 Obsidian** —— `.obsidian/` 配置在 v0.2 引入 obsidian-skills 后启用。
-- **不生成 agent 文件** —— `99_system/agents/` 在 v0.2 起由对应阶段填充。
+- **不生成 agent 文件** —— agent（manager/memory/research）以独立 skill 形式存在于 `skills/quick-kb-*-agent/`，随技能包分发，init 不需单独创建 `99_system/agents/` 目录。
 
 ## 6. 降级路径
 

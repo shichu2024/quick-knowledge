@@ -73,7 +73,7 @@ npx skills add shichu2024/quick-knowledge --skill '*'
 | Cursor | `~/.cursor/skills/quick-knowledge/` |
 | OpenCode | `~/.opencode/skills/quick-knowledge/` |
 
-克隆仓库后把 `skills/` 与 `agents/` 拷贝到对应目录即可。
+克隆仓库后把 `skills/` 拷贝到对应目录即可（agent 已合并入 skills：`quick-kb-{manager,memory,research}-agent`）。
 
 ### 初始化 vault
 
@@ -115,9 +115,9 @@ Capture   ──▶  Ingest   ──▶  Normalize  ──▶  Connect  ──�
 
 | Agent | 角色 | 输入域 |
 |-------|------|--------|
-| **manager-agent** | 知识库管家 · 整理与结构 | 库内结构（关系、孤立、死链） |
-| **research-agent** | 研究员 · 外部资料处理 | 外部资料（URL/PDF/长文） |
-| **memory-agent** | 长期记忆调取 · 核心差异化 | 库内认知资产（experience/pattern/principle/belief） |
+| **quick-kb-manager-agent** | 知识库管家 · 整理与结构 | 库内结构（关系、孤立、死链） |
+| **quick-kb-research-agent** | 研究员 · 外部资料处理 | 外部资料（URL/PDF/长文） |
+| **quick-kb-memory-agent** | 长期记忆调取 · 核心差异化 | 库内认知资产（experience/pattern/principle/belief） |
 
 ### Frontmatter 正交字段（V2）
 
@@ -174,8 +174,8 @@ quick-knowledge/
 | 阶段 | 代号 | 状态 | 主要内容 |
 |------|------|------|---------|
 | v0.1 | mvp | ✅ 已完成 | init/capture/ingest/daily + 中文模板 |
-| v0.2 | loops | ✅ 已完成 | connect/query/review + manager/research-agent + 英文模板 |
-| v0.3 | assistant | ✅ 已完成 | memory-agent + advisor/project/goal + 认知资产模板 |
+| v0.2 | loops | ✅ 已完成 | connect/query/review + manager/quick-kb-research-agent + 英文模板 |
+| v0.3 | assistant | ✅ 已完成 | quick-kb-memory-agent + advisor/project/goal + 认知资产模板 |
 | v0.4 | extensions | ✅ 已完成 | normalize/archive/stats/import + kb.config 完整 + 多语言 README |
 | v1.0 | release | ✅ 已完成 | CONTRIBUTING/COMMUNITY/LICENSE + CI + demo-vault 发布 |
 | v1.1 | flow-restructure | ✅ 已完成 | 顶层目录 `NN_` 前缀 + 路径硬约束（⚠️ BREAKING） |

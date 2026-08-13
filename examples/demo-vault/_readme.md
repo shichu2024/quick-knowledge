@@ -27,8 +27,8 @@
    - `07_principles/experiences/2023-mid-team-microfrontend-overhead.md` contradicts `07_principles/experiences/2023-large-team-microfrontend-success.md`
 
 5. **项目 + 目标**（v0.3）
-   - `04_projects/plugin-system/_readme.md`（含 memory-agent 召回的「经验复用建议」段）
-   - `03_goals/learn-plugin-design/_readme.md`（含 research-agent 学习路径）
+   - `04_projects/plugin-system/_readme.md`（含 quick-kb-memory-agent 召回的「经验复用建议」段）
+   - `03_goals/learn-plugin-design/_readme.md`（含 quick-kb-research-agent 学习路径）
 
 6. **MOC**（v0.2）
    - `06_wiki/mocs/isolation-patterns.md`（聚合本主题所有笔记，含冲突对照段）
@@ -60,8 +60,8 @@
   - `07_principles/experiences/2023-mid-team-microfrontend-overhead.md`（mixed）
   - `07_principles/experiences/2023-large-team-microfrontend-success.md`（success，contradicts 上一条）
 - **Decision Ledger**：`04_projects/bi-engine/decisions/2024-02-isolation-choice.md`（8 字段完整闭环 + `derived_to`）
-- **项目**：`04_projects/plugin-system/_readme.md`（含 memory-agent 召回段）
-- **目标**：`03_goals/learn-plugin-design/_readme.md`（含 research-agent 学习路径）
+- **项目**：`04_projects/plugin-system/_readme.md`（含 quick-kb-memory-agent 召回段）
+- **目标**：`03_goals/learn-plugin-design/_readme.md`（含 quick-kb-research-agent 学习路径）
 - **MOC**：`06_wiki/mocs/isolation-patterns.md`（含冲突对照段）
 - **复盘**：`05_outputs/reviews/weekly/2026-W32.md`（含 KS Top 3 + 跨维度分析）
 
@@ -74,10 +74,10 @@
 | 六大闭环全链路 | 00_inbox → 02_areas → 06_wiki/mocs → 05_outputs/reviews | v0.1-v0.2 |
 | Frontmatter V2 正交字段 | 所有正式笔记（status/maturity/confidence/value/relations/context） | v0.2-v0.3 |
 | Decision Ledger → experience 派生 | bi-engine decision → 2024-plugin-sandbox-escape | v0.3 |
-| memory-agent 召回排序 | failure experience（×1.2 加权）排前 | v0.3 |
+| quick-kb-memory-agent 召回排序 | failure experience（×1.2 加权）排前 | v0.3 |
 | ADR-011 冲突呈现 | process-level vs in-process；mid-team vs large-team | v0.3 |
 | KS 公式（confidence × log2(1+reuse) × impact） | reviews/weekly Top 3 | v0.3-v0.4 |
-| manager-agent.detect_structure_drift | reviews/weekly 「结构演化」段 | v0.3 |
+| quick-kb-manager-agent.detect_structure_drift | reviews/weekly 「结构演化」段 | v0.3 |
 | 主动提醒（new_project_init） | 04_projects/plugin-system 的「经验复用建议」段 | v0.3 |
 
 ---
@@ -96,7 +96,7 @@
 
 - 仓库已有的模板文件（见 [`templates/`](../../templates/)）
 - 14 个技能 SKILL.md（见 [`skills/`](../../skills/)）
-- 3 个 agent 规格（见 [`agents/`](../../agents/)）
+- 3 个 agent 规格（v0.3+ 已合并入 skills：[`quick-kb-manager-agent`](../../skills/quick-kb-manager-agent/) / [`quick-kb-memory-agent`](../../skills/quick-kb-memory-agent/) / [`quick-kb-research-agent`](../../skills/quick-kb-research-agent/)）
 - 所有空目录的 `.gitkeep`（实际 init 会创建）
 - `98_archive/` 目录（demo 聚焦 active 状态笔记）
 - v0.4 扩展技能产物（normalize/archive/stats/import 的运行结果，由用户实际运行时生成）

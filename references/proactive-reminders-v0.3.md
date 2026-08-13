@@ -2,7 +2,7 @@
 version: V2
 updated: 2026-08-09
 phase: v0.3
-applies_to: capture / ingest / review / project / goal / advisor 技能 + manager-agent + memory-agent
+applies_to: capture / ingest / review / project / goal / advisor 技能 + quick-kb-manager-agent + quick-kb-memory-agent
 source_of_truth:
   - docs/DESIGN.md §7.6（主动提醒机制全量）
   - docs/AGENTS_SPEC.md §4.3 + 附录（限流）
@@ -13,7 +13,7 @@ supersedes:
 
 # v0.3 主动提醒机制 · 全量 7 类事件实现说明
 
-> v0.3 在 v0.2 manager 事件子集（3 类）基础上补齐 memory 事件（4 类），实现 DESIGN §7.6 全量 7 类。由 memory-agent（4 类）+ manager-agent（3 类）协作执行。
+> v0.3 在 v0.2 manager 事件子集（3 类）基础上补齐 memory 事件（4 类），实现 DESIGN §7.6 全量 7 类。由 quick-kb-memory-agent（4 类）+ quick-kb-manager-agent（3 类）协作执行。
 
 ---
 
@@ -226,7 +226,7 @@ memory 事件优先于 manager 事件检测（memory 优先级更高）。例如
 ### 6.3 与降级配合
 
 - 库 < 50 → 所有 memory 事件关闭（manager 事件保留，因其为结构提醒不依赖经验）
-- memory-agent 完全不可用 → memory 事件全部跳过，不报错
+- quick-kb-memory-agent 完全不可用 → memory 事件全部跳过，不报错
 
 ---
 

@@ -52,7 +52,7 @@ source_of_truth:
 > 若处于中间区间，建议 Capture 本次决策跟踪 actual。
 ```
 
-### 3.2 memory-agent 返回（JSON）
+### 3.2 quick-kb-memory-agent 返回（JSON）
 
 ```typescript
 {
@@ -80,19 +80,19 @@ source_of_truth:
 
 ## 5. 冲突的来源与传播
 
-### 5.1 显式声明（用户/manager-agent 建立）
+### 5.1 显式声明（用户/quick-kb-manager-agent 建立）
 
 - 用户在 ingest/connect 阶段显式建立 `relations.contradicts`
-- manager-agent.recommend_relations 在相似度 > 0.85 但 type/title 暗示对立时建议
+- quick-kb-manager-agent.recommend_relations 在相似度 > 0.85 但 type/title 暗示对立时建议
 
-### 5.2 隐式发现（memory-agent 检测）
+### 5.2 隐式发现（quick-kb-memory-agent 检测）
 
 - recall_similar 召回双方且双方 context 不同 → 提示用户「疑似冲突，是否建立 contradicts」
 - check_beliefs 发现候选方案与某 principle 方向相反 → 标 ⚠
 
 ### 5.3 传播
 
-- 任何组件发现冲突 → 调用 memory-agent.present_conflicts 统一加工为输出
+- 任何组件发现冲突 → 调用 quick-kb-memory-agent.present_conflicts 统一加工为输出
 - 不允许各组件自己实现冲突呈现逻辑（避免不一致）
 
 ---

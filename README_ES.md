@@ -72,9 +72,9 @@ Capture → Ingest → Normalize → Connect → Query → Review → (volver a 
 
 ### Tres Agentes (dominios de entrada no superpuestos)
 
-- **manager-agent** —— gestor de estructura de la biblioteca
-- **research-agent** —— procesador de materiales externos
-- **memory-agent** —— recuperación de memoria a largo plazo (diferenciador central)
+- **quick-kb-manager-agent** —— gestor de estructura de la biblioteca
+- **quick-kb-research-agent** —— procesador de materiales externos
+- **quick-kb-memory-agent** —— recuperación de memoria a largo plazo (diferenciador central)
 
 ### Knowledge Score
 
@@ -89,8 +89,8 @@ KS = confidence × log2(1 + reuse) × impact
 | Fase | Estado | Contenido principal |
 |------|--------|---------------------|
 | v0.1 mvp | ✅ | init/capture/ingest/daily + plantillas chinas |
-| v0.2 loops | ✅ | connect/query/review + manager/research-agent + plantillas inglesas |
-| v0.3 assistant | ✅ | memory-agent + advisor/project/goal + plantillas de activos cognitivos |
+| v0.2 loops | ✅ | connect/query/review + manager/quick-kb-research-agent + plantillas inglesas |
+| v0.3 assistant | ✅ | quick-kb-memory-agent + advisor/project/goal + plantillas de activos cognitivos |
 | v0.4 extensions | ✅ | normalize/archive/stats/import + kb.config + README multilingüe |
 | v1.0 release | ✅ | CONTRIBUTING/LICENSE + CI + publicación demo-vault |
 | v1.1 flow-restructure | ✅ | Prefijo `NN_` en nivel superior + prohibición de rutas absolutas (⚠️ BREAKING) |

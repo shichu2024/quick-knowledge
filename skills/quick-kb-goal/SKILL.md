@@ -1,7 +1,7 @@
 ---
 name: quick-kb-goal
 description: |
-  目标管理 + 学习路径 + 进展记录 + 归档。create：调 research-agent 生成学习路径 + memory-agent 主动召回领域 principle/belief；progress：追加 + 里程碑；complete/cancel：归档 + 状态传播。
+  目标管理 + 学习路径 + 进展记录 + 归档。create：调 quick-kb-research-agent 生成学习路径 + 调 quick-kb-memory-agent 召回领域 principle/belief；progress：追加 + 里程碑；complete/cancel：归档 + 状态传播。
   触发词（中文）：新建目标 / 学 X 这个目标 / 更新目标进度 / 完成目标
   Triggers (EN): new goal / learning path for / update goal progress
 version: v0.3
@@ -10,13 +10,13 @@ applies_to: 写 03_goals/<slug>/ · 98_archive/goals/ · 读写相关笔记 stat
 source_of_truth:
   - docs/DESIGN.md §7.4
   - docs/SKILLS_SPEC.md §9
-  - docs/AGENTS_SPEC.md §2（research-agent）/ §3（memory-agent）
+  - docs/AGENTS_SPEC.md §1（关系推荐规则）· §2（学习路径生成）· §3（经验召回规则）
   - docs/dev/v0.3-assistant.md WP6
 ---
 
 # quick-kb-goal（v0.3）
 
-> **目标全生命周期**：create → progress → complete/cancel。核心是 create 时调 research-agent 生成学习路径 + memory-agent 主动召回领域认知资产。
+> **目标全生命周期**：create → progress → complete/cancel。核心是 create 时调 `quick-kb-research-agent`（intent=`process_resource`/`summarize`）生成学习路径 + 调 `quick-kb-memory-agent`（intent=`recall_similar`）召回领域认知资产。
 
 ---
 
@@ -36,13 +36,13 @@ source_of_truth:
 
 ### 做
 
-- create：建 goal.md + research-agent 学习路径 + memory-agent 召回领域 principle/belief
+- create：建 goal.md + 调 `quick-kb-research-agent`（intent=`summarize`）生成学习路径 + 调 `quick-kb-memory-agent`（intent=`recall_similar`）召回领域 principle/belief
 - progress：追加进展 + 里程碑勾选 + 路径动态调整建议
 - complete/cancel：归档 + 状态传播 + 复盘联动
 
 ### 不做（v0.4+）
 
-- 不调外部课程平台 API（学习路径基于库内 + research-agent 摘要）
+- 不调外部课程平台 API（学习路径基于库内 + 公开知识摘要）
 - 不自动标完成（必须用户确认）
 
 ---
@@ -56,7 +56,7 @@ source_of_truth:
 | 描述 `description` | create 时必填 | 目标情境：为什么立这个目标 |
 | 成功标准 `success_criteria` | create 时必填 | 可验证的完成标准 |
 | 截止 `deadline` | 否 | YYYY-MM-DD |
-| 领域 `domain` | 否 | 如 systems-programming（与 concept笔记 domain 一致） |
+| 领域 `domain` | 否 | 如 systems-programming（与 concept 笔记 domain 一致） |
 | 路径来源 `path_source` | 否 | `recommend`（默认）/ `manual` |
 
 ---
@@ -86,12 +86,9 @@ source_of_truth:
    └── progress/          # 进展日志
 
 4. 学习路径推荐（path_source=recommend）：
-   4.1 调 research-agent 生成路径：
-       research_agent.process_resource({
-         content: <目标描述 + domain 公开知识>,
-         intent: "summarize"
-       })
-       → 基础概念 → 进阶 → 实战 三层
+   4.1 调 `quick-kb-research-agent`（intent=`summarize`，length=`detailed`）生成路径：
+       - 输入：目标描述 + domain 公开知识摘要
+       - 按 §2.2 summarize 规则组织为「基础 → 进阶 → 实战」三层
    4.2 库内关联：扫库内已存在的相关 concept 笔记
        （按 domain tag + 标题关键词匹配）
    4.3 路径节点写入 goal.md「学习路径」段：
@@ -99,14 +96,10 @@ source_of_truth:
        2. 进阶主题（X 周） → [[已有 concept 2]]
        3. 实战项目（X 周） → [建议新开 project]
 
-5. 主动召回（核心 · 触发 memory 事件 new_goal_create）：
-   memory_agent.proactive_suggest({
-     event_type: "new_goal_create",
-     current_context: <目标描述>,
-     constraints: <domain>
-   })
-   → 召回 domain 内的 principle/belief/experience
-   → 写入 goal.md「相关笔记」段：
+5. 主动召回（核心 · 调 `quick-kb-memory-agent` intent=`proactive_suggest`，event_type=`new_goal_create`）：
+   - memory-agent 内部限定候选集为 domain 内的 principle/belief/experience
+   - 按 §3.5 score 公式排序，取相关度最高的 N 条
+   - 写入 goal.md「相关笔记」段：
       ### 领域原则
       - [[principle/xxx]] · 适用性
       ### 待验证假设
@@ -187,7 +180,7 @@ source_of_truth:
    - 是否要 Capture 这次学习的经验？
    - 是否要立进阶目标？
 
-5. 引用清理（manager-agent.repair_deadlinks 可后续做）：
+5. 引用清理（调 `quick-kb-manager-agent` intent=`repair_deadlinks` 可后续做）：
    - 顶层 _moc.md 移除目标入口或迁到 archive 区
    - 关联 project 的 relations.supports 标注「已达成/已取消」
 ```
@@ -199,7 +192,7 @@ source_of_truth:
 ```
 1. 校验：03_goals/<slug>/goal.md 存在
 2. 备份当前路径到 goal.md 的「路径历史」段（追加，不删除）
-3. 重新调 research-agent（基于当前库内笔记 + 已完成里程碑）
+3. 重新调 `quick-kb-research-agent`（intent=`summarize`）生成路径（基于当前库内笔记 + 已完成里程碑，按 §2.2 规则）
 4. 新路径写入「学习路径」段
 5. 询问用户：是否保留旧里程碑节点？
 ```
@@ -217,13 +210,13 @@ source_of_truth:
    - [ ] 标准 1
    - [ ] 标准 2
 
-🧠 memory-agent 召回（new_goal_create 事件）：
+🧠 认知资产召回（new_goal_create 事件）：
    - 领域原则: 2 条
    - 待验证假设: 1 条
    - 失败教训: 1 条
    已写入「相关笔记」段
 
-📚 学习路径（research-agent 生成）：
+📚 学习路径（由 quick-kb-research-agent 生成，按 §2 规则）：
    1. 基础（2 周） → [[已有 concept]] / [Capture 缺口: X]
    2. 进阶（3 周） → ...
    3. 实战（4 周） → [新开 project]
@@ -262,9 +255,10 @@ source_of_truth:
 
 | 缺失依赖 | 降级行为 |
 |---------|---------|
-| research-agent 不可用（create） | 学习路径降为 manual，goal.md 段标注「⚠ AI 路径推荐不可用，请手动填写」 |
-| memory-agent 不可用（create） | 跳过「相关笔记」段召回，标注「⚠ 未启用记忆召回」 |
-| 库内 < 50 条（create） | memory-agent.proactive_suggest 自动关闭（限流）；路径基于 research-agent 公开知识生成 |
+| 学习路径生成失败（create） | 学习路径降为 manual，goal.md 段标注「⚠ 路径推荐失败，请手动填写」 |
+| `07_principles/` 目录不存在（create） | 跳过「相关笔记」段召回，标注「⚠ 未启用认知资产层」 |
+| 库内 < 50 条（create） | 主动召回关闭（限流）；路径仅基于公开知识生成 |
+| 无 embedding 服务 | similarity 降为「标签 Jaccard + 标题关键词重叠」 |
 | goal 模板缺失 | 报错并指引用户先运行 quick-kb-init 同步模板 |
 
 ---
@@ -276,8 +270,8 @@ source_of_truth:
 - [ ] 03_goals/<slug>/goal.md 创建
 - [ ] frontmatter 含 type: goal, status: active, deadline, domain
 - [ ] 成功标准可验证（非空泛描述）
-- [ ] research-agent 被调用（path_source=recommend 时）
-- [ ] memory-agent 被调用（new_goal_create 事件）
+- [ ] 调 quick-kb-research-agent 生成学习路径（path_source=recommend 时，按 §2 规则）
+- [ ] 调 quick-kb-memory-agent 召回领域认知资产（07_principles/<domain>/）
 - [ ] 学习路径每节点关联库内笔记 OR 标 [Capture 缺口]
 - [ ] 里程碑 3-5 个，每个带目标日期
 - [ ] _moc.md 创建
@@ -305,4 +299,4 @@ source_of_truth:
 | 新增 `path` 工作流（重新生成） | SKILLS_SPEC §9 未列 path action 但 dev doc WP6 提及「路径动态调整」 | docs/dev/v0.3-assistant.md WP6 关键点 |
 | complete 时关联项目归档需询问 | SKILLS_SPEC §10 同样设计，避免目标完成时强制归档进行中项目 | docs/SKILLS_SPEC.md §10 边界 |
 | 复盘草稿路径用 05_outputs/reviews/ | SKILLS_SPEC §9 工作流第 2 步明确 | docs/SKILLS_SPEC.md §9 |
-| memory-agent 召回限 domain 内 | DESIGN §7.6 new_goal_create 示例「关联领域 [[前端工程]] 有 2 条原则」 | docs/DESIGN.md §7.6 |
+| 认知资产召回限 domain 内 | DESIGN §7.6 new_goal_create 示例「关联领域 [[前端工程]] 有 2 条原则」 | docs/DESIGN.md §7.6 |

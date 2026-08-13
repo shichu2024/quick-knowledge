@@ -32,7 +32,7 @@ value:
 
 ## 学习路径
 
-> 由 quick-kb-goal create 调 research-agent 生成；库内已有笔记优先关联
+> 由 quick-kb-goal create 调 quick-kb-research-agent 生成；库内已有笔记优先关联
 
 1. 基础概念（1 周） → [[02_areas/general/atomic-notes-principle|原子化笔记原则]] · [Capture 缺口：扩展系统类型学]
 2. 隔离机制（2 周） → [[experience/2024-plugin-sandbox-escape]] · [[pattern/process-level-isolation]] · [[pattern/in-process-sandbox]]
@@ -57,7 +57,7 @@ value:
 
 ## 相关笔记
 
-> 由 quick-kb-goal create 调 memory-agent（new_goal_create 事件）召回
+> 由 quick-kb-goal create 调 quick-kb-memory-agent（new_goal_create 事件）召回
 
 ### 领域原则
 - [[principle/boundary-over-reuse]] · 直接相关

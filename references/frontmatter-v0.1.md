@@ -49,7 +49,7 @@ WP1 dev doc 显式列出 8 个字段未包含 `confidence`，但 WP4（ingest）
 | 字段 | 引入阶段 | 原因 |
 |------|---------|------|
 | `maturity` | v0.3 | 依赖认知资产目录与 KS 排序逻辑 |
-| `value.reuse` 等 | v0.2 | 依赖 manager-agent 的 reuse 计算 |
+| `value.reuse` 等 | v0.2 | 依赖 quick-kb-manager-agent 的 reuse 计算 |
 | `relations.{supports,contradicts,evolves,supersedes}` | v0.2 | 依赖 connect 技能与 manager 推荐能力 |
 | `context` | v0.2 | 依赖 ingest 冲突检测 + 用户确认流程 |
 

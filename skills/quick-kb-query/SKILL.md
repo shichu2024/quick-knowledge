@@ -39,7 +39,7 @@ source_of_truth:
 
 ### 不做
 
-- ❌ 不调 memory-agent（v0.3 才有排序公式）
+- ❌ 不调经验召回（v0.3 才有完整排序公式）
 - ❌ 不修改笔记（只读）
 - ❌ 不做决策建议（advisor 域）
 
@@ -78,14 +78,14 @@ recency_factor    = max(0.3, 1 − days_since_updated / 365)
 reuse_factor      = log2(1 + value.reuse) / log2(1 + max_reuse_in_pool)
 ```
 
-> v0.2 简化排序；v0.3 memory-agent 启用完整公式（含类型加权、prefer_failures）。
+> v0.2 简化排序；v0.3 启用完整公式（含类型加权、prefer_failures，见 `docs/AGENTS_SPEC.md` §3.5）。
 
 ### 步骤 3 · 冲突检测
 
-对召回结果，扫描每条笔记的 `relations.contradicts`：
+对召回结果，调 `quick-kb-memory-agent`（intent=`present_conflicts`）扫描每条笔记的 `relations.contradicts`：
 
-- 若 A 在召回中且 A.contradicts 包含 B → 把 B 也加入召回（即使 B 原本相似度较低）
-- 形成 conflicts 列表（结构同 AGENTS_SPEC §4.2）
+- 若 A 在召回中且 A.contradicts 包含 B → memory-agent 把 B 也加入召回（即使 B 原本相似度较低）
+- memory-agent 返回 conflicts 列表（结构同 AGENTS_SPEC §4.2）
 
 ### 步骤 4 · 回答生成
 
@@ -191,7 +191,7 @@ RAG 的核心是检索后生成 [[RAG 架构设计]]。
 | 场景 | 降级行为 |
 |------|---------|
 | 无 embedding | 用关键词 + 标签 Jaccard + 标题模糊匹配 |
-| manager-agent 不可用 | 不做 wikilink 图谱扩展，仅关键词召回 |
+| 无 wikilink 图谱可扩展 | 仅关键词召回 |
 | 召回为 0 | 直接说「未找到」+ capture 建议 |
 | 库 < 5 条笔记 | 提示「库内经验不足」，仍尝试回答但标注 low-confidence |
 
@@ -218,7 +218,7 @@ RAG 的核心是检索后生成 [[RAG 架构设计]]。
 
 | 偏差点 | 原因 | 真相源 |
 |--------|------|-------|
-| 不用 memory-agent 排序公式 | memory-agent 在 v0.3 | dev/v0.2-loops.md WP5 |
+| v0.2 用简化排序公式 | 完整公式（含类型加权、prefer_failures）在 v0.3 启用 | dev/v0.2-loops.md WP5 + docs/AGENTS_SPEC.md §3.5 |
 | 排序公式简化（confidence × recency × reuse） | v0.2 无 maturity/impact，简化合理 | AGENTS_SPEC §3.5 完整公式在 v0.3 启用 |
 | 落 .query-log.jsonl | 供 review refresh_value 用 | dev/v0.2-loops.md WP6 review 需 reuse 刷新 |
 | conflicts 检测基于 relations.contradicts 字段 | ADR-011 + AGENTS_SPEC §4.2 | DESIGN §6.7 |

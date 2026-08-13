@@ -39,9 +39,9 @@ value:
 - 包含：扩展 SDK / 宿主侧运行时 / capability 授权系统 / 性能监控
 - 不包含：插件市场（v2 之后）
 
-## 经验复用建议（来自 memory-agent）
+## 经验复用建议（来自 quick-kb-memory-agent）
 
-> 由 quick-kb-project init 调 memory-agent（new_project_init 事件）召回
+> 由 quick-kb-project init 调 quick-kb-memory-agent（new_project_init 事件）召回
 
 ### 高相关 experience
 - [[experience/2024-plugin-sandbox-escape]] · 相关点：同为内部工具插件体系，且为本项目直接前置教训

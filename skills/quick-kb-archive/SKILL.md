@@ -78,7 +78,7 @@ source_of_truth:
 2. 状态检查（check 阶段）：
    对每条 target：
    - 扫描其 relations.supports / evolves 的反向引用
-   - 列出引用此笔记的其他笔记（manager_agent.repair_deadlinks 子能力）
+   - 列出引用此笔记的其他笔记（调 `quick-kb-manager-agent` intent=`repair_deadlinks`）
    - 提醒：
      · 「[[X]] 被 [[Y]] / [[Z]] 引用，归档后这些引用会标注『已归档』」
      · 「[[X]] 有未关闭的 decision（若 type=decision）→ 建议先走 project archive」
@@ -225,7 +225,7 @@ source_of_truth:
 
 | 缺失依赖 | 降级行为 |
 |---------|---------|
-| manager-agent 不可用 | wikilink 扫描降为全库 Grep `[[X]]` |
+| wikilink 索引不可用 | wikilink 扫描降为全库 Grep `[[X]]` |
 | 98_archive/ 目录不存在 | 自动创建 |
 | archive_meta 字段缺失 | unarchive 时询问用户原位置 |
 | 原路径被占用（unarchive） | 询问用户：覆盖 / 重命名 / 取消 |

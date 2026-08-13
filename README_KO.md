@@ -72,9 +72,9 @@ Capture → Ingest → Normalize → Connect → Query → Review → (Capture�
 
 ### 3개의 Agent (입력 도메인 비중복)
 
-- **manager-agent** —— 라이브러리 구조 관리
-- **research-agent** —— 외부 자료 처리
-- **memory-agent** —— 장기 기억 호출 (핵심 차별화)
+- **quick-kb-manager-agent** —— 라이브러리 구조 관리
+- **quick-kb-research-agent** —— 외부 자료 처리
+- **quick-kb-memory-agent** —— 장기 기억 호출 (핵심 차별화)
 
 ### Knowledge Score
 
@@ -89,8 +89,8 @@ KS = confidence × log2(1 + reuse) × impact
 | 단계 | 상태 | 주요 내용 |
 |------|------|---------|
 | v0.1 mvp | ✅ | init/capture/ingest/daily + 중국어 템플릿 |
-| v0.2 loops | ✅ | connect/query/review + manager/research-agent + 영어 템플릿 |
-| v0.3 assistant | ✅ | memory-agent + advisor/project/goal + 인지 자산 템플릿 |
+| v0.2 loops | ✅ | connect/query/review + manager/quick-kb-research-agent + 영어 템플릿 |
+| v0.3 assistant | ✅ | quick-kb-memory-agent + advisor/project/goal + 인지 자산 템플릿 |
 | v0.4 extensions | ✅ | normalize/archive/stats/import + kb.config + 다국어 README |
 | v1.0 release | ✅ | CONTRIBUTING/LICENSE + CI + demo-vault 공개 |
 | v1.1 flow-restructure | ✅ | 최상위 `NN_` 접두사 + 절대 경로 하드 제약 (⚠️ BREAKING) |

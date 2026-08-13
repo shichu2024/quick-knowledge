@@ -1,7 +1,7 @@
 ---
 name: quick-kb-ingest
 description: |
-  把 inbox 素材正式入库为 02_areas/resources 笔记：调用 research-agent 抽取原子观点、补全 v0.2 完整 frontmatter（含 relations/context/value.reuse）、链接原始素材、给置信度初值、做冲突检测。v0.3 将接入 memory-agent 做更准确的冲突判定。
+  把 inbox 素材正式入库为 02_areas/resources 笔记：调 quick-kb-research-agent 抽取原子观点、补全 v0.2 完整 frontmatter（含 relations/context/value.reuse）、链接原始素材、给置信度初值、调 quick-kb-manager-agent + quick-kb-memory-agent 做冲突检测。
   触发词（中文）：处理 inbox / 入库 / 把这条归档 / 消化这条 / 这条入库
   Triggers (EN): process inbox / ingest this / promote this note
 version: v0.2
@@ -10,7 +10,7 @@ applies_to: 00_inbox/ → 02_areas/ / 01_resources/
 source_of_truth:
   - docs/DESIGN.md §6（frontmatter）· §6.7（冲突处理）
   - docs/SKILLS_SPEC.md §3
-  - docs/AGENTS_SPEC.md §2（research-agent）
+  - docs/AGENTS_SPEC.md §1（关系推荐规则）· §2（原子化与 confidence 规则）· §4.2（冲突感知）
   - docs/dev/v0.2-loops.md WP9
   - references/frontmatter-v0.2.md
 ---
@@ -19,7 +19,7 @@ source_of_truth:
 
 > 把 inbox 一条素材变成 N 条原子笔记。**原始素材永不删除**；入库笔记通过 `source.note` 链回。
 >
-> **v0.2 升级**：调用 research-agent（替换 v0.1 内置 LLM）；产出完整 frontmatter（含 relations/context/value.reuse）；加入冲突检测（用 manager-agent.recommend_relations 降级，v0.3 接 memory-agent）。
+> **v0.2 升级**：调 `quick-kb-research-agent`（intent=`extract_atoms`）抽取原子观点；产出完整 frontmatter（含 relations/context/value.reuse）；加入冲突检测（调 `quick-kb-manager-agent.recommend_relations` 发现候选 + `quick-kb-memory-agent.present_conflicts` 呈现冲突）。
 
 ---
 
@@ -28,16 +28,15 @@ source_of_truth:
 ### 做
 
 - 扫描 inbox 候选（单条 / 子目录 / 全 inbox；6 类源）
-- 调用 **research-agent** 抽取原子观点（替换 v0.1 内置 LLM）
+- 调 `quick-kb-research-agent`（intent=`extract_atoms`）抽取原子观点（一笔记一观点；按 §2.2 规则含"且/并且/同时"的复合句优先拆分）
 - 分类去向：concept → `02_areas/<domain>/`、resource → `01_resources/<category>/`、idea（仍待消化）→ 留 inbox，标 `status: draft`
 - 补全 **v0.2 完整 frontmatter**（含 relations/context/value.reuse）
 - `source.note` 用 wikilink 指回 inbox 原始素材
-- 置信度初值规则（research-agent 决定）
-- **冲突检测**：调 manager-agent.recommend_relations，发现对立候选 → 提示建立 contradicts 关系
+- 置信度初值由 research-agent 按 §2.2 给出（单源 30-40 / 多源 60-75 / 一手 80-95）
+- **冲突检测**：调 `quick-kb-manager-agent.recommend_relations` 扫描同 domain 已入库笔记，发现对立候选 → 调 `quick-kb-memory-agent.present_conflicts` 呈现 → 提示建立 contradicts 关系
 
 ### 不做
 
-- ❌ 调 memory-agent（v0.3 才上）—— 冲突检测用 manager-agent 降级
 - ❌ 自动 maturity —— v0.3
 - ❌ 自动 value.impact/uniqueness/KS —— v0.3
 
@@ -48,8 +47,8 @@ source_of_truth:
 | 参数 | 必填 | 默认 | 说明 |
 |------|------|------|------|
 | `target` | 否 | `inbox` | 单条文件路径 / `inbox` 全量 / `00_inbox/ideas` 等子目录 |
-| `domain` | 否 | research-agent 推荐 | 指定领域 |
-| `depth` | 否 | `standard` | `quick` / `standard` / `deep`（v0.2 deep 与 standard 一致；v0.3 接 memory-agent 才有差异） |
+| `domain` | 否 | 由抽取规则推断 | 指定领域 |
+| `depth` | 否 | `standard` | `quick` / `standard` / `deep`（v0.2 deep 与 standard 一致；v0.3 启用语义判定后才有差异） |
 
 ---
 
@@ -67,36 +66,24 @@ source_of_truth:
 
 读取候选笔记全文。识别 `capture_type`：idea / web-clip / pdf / meeting / ai-dialog / reading。
 
-#### 2.2 调 research-agent 抽原子观点
+#### 2.2 抽取原子观点（调 `quick-kb-research-agent` intent=`extract_atoms`）
 
-```
-research_agent.extract_atoms(
-  payload: {
-    text: {{inbox 笔记正文}},
-    hint: {
-      domain: {{用户指定或推荐}},
-      known_tags: {{kb.config.yaml tags_vocabulary}},
-      taxonomy: {{kb.config.yaml domain_taxonomy}}    # v1.4+ · 选填，命中则推荐嵌套 domain
-    }
-  },
-  options: { max_atoms: 5 }
-) → {
-  found: [
-    {
-      note_type: "concept" | "resource",
-      title, body, tags, confidence, source_excerpt,
-      domain: {{单层或嵌套，如 "programming/python"}}
-    }, ...
-  ]
-}
-```
+操作：
 
-> **嵌套 domain 决策（v1.4+）**：当 `domain_taxonomy` 命中顶层 key 且能从 tags/title 推断子域 → 返回嵌套 domain（`key/sub`）；未配置 taxonomy 或未命中 → 返回单层（向后兼容）。
+1. 阅读 inbox 笔记正文
+2. 调 research-agent 按 §2.2 原子化规则拆分（每条只表达一个可独立成立的观点；含"且/并且/同时"的复合句优先拆分）
+3. 对每条原子观点（research-agent 返回值含）：
+   - `note_type`：`concept` 或 `resource`
+   - `title` / `body` / `tags` / `source_excerpt`
+   - `confidence`（research-agent 按 §2.2 confidence 初值规则给出）
+   - `domain`（单层或嵌套，如 `programming/python`）
+
+> **嵌套 domain 决策（v1.4+）**：当 `kb.config.yaml.domain_taxonomy` 命中顶层 key 且能从 tags/title 推断子域 → 推断嵌套 domain（`key/sub`）；未配置 taxonomy 或未命中 → 单层（向后兼容）。
 
 #### 2.3 原子化拆分
 
-- research-agent 返回 N 条原子笔记 → 拆为 N 条
-- `depth=quick` → 不拆，整篇转一条 resource（用 `summarize` intent）
+- 抽取得到 N 条原子笔记 → 拆为 N 条
+- `depth=quick` → 不拆，整篇转一条 resource（调 research-agent intent=`summarize` 生成摘要）
 
 #### 2.4 分类去向
 
@@ -116,7 +103,7 @@ research_agent.extract_atoms(
 
 ```yaml
 ---
-title: {{research-agent 精炼后的标题}}
+title: {{精炼后的标题}}
 type: concept                       # 或 resource
 created: {{today}}
 updated: {{today}}
@@ -124,13 +111,13 @@ tags:                               # 由 suggested_tags 转正，对照 kb.conf
   - {{domain}}/{{topic}}
 status: active                      # 默认 active；字段不全 → draft
 domain: {{domain}}
-confidence: {{research-agent 初值}}  # 单源 30-40 / 多源 60-75 / 一手 80-95
+confidence: {{初值}}                # 单源 30-40 / 多源 60-75 / 一手 80-95（AGENTS_SPEC §2.2）
 relations:                          # v0.2 启用 · 见 §2.7
   supports: []
   contradicts: []
   evolves: []
   supersedes: []
-context: {{research-agent 从正文提取，可选}}  # v0.2 启用
+context: {{从正文提取，可选}}         # v0.2 启用
 value:                              # v0.2 启用 · 仅 reuse
   reuse: 0
 source:
@@ -145,29 +132,29 @@ source:
 
 按对应模板章节填充（concept/resource）。**抽取失败**：留 `{{}}`，标 `status: draft`，不强行编造。
 
-#### 2.7 关系推荐（调用 manager-agent）
+#### 2.7 关系推荐（调 `quick-kb-manager-agent` intent=`recommend_relations`）
 
-```
-manager_agent.recommend_relations(
-  payload: { note: {{新笔记}}, candidate_pool: {{同 domain 已入库笔记}} }
-) → {
-  found: [
-    { target: "[[Vector Database]]", type: "supports", similarity: 0.72 },
-    { target: "[[模块化单体]]", type: "contradicts", similarity: 0.78 }
-  ]
-}
-```
+操作：
+
+1. 取本笔记 `domain` 下所有已入库笔记作为候选池传入 manager-agent
+2. manager-agent 内部按 §1.2 计算相似度与判定（无 embedding 时降级为：标签 Jaccard + 标题关键词重叠）
+3. manager-agent 返回候选（按 §1.2 阈值）：
+   - 相似度 > 0.6 进候选
+   - 标题近义 → `evolves`
+   - 内容对立 → `contradicts`
+   - 相似度 > 0.85 → 提示合并或 `evolves`（需用户确认）
+4. 输出候选列表（target / type / similarity）
 
 - supports/evolves/supersedes 候选 → 自动写入 relations（相似度 > 0.85 的 evolves 提示用户确认）
 - **contradicts 候选** → 进入步骤 3 冲突检测流程
 
 ### 步骤 3 · 冲突检测与主动提醒（V2 关键）
 
-> v0.2 用 manager-agent 降级；v0.3 接 memory-agent 后会有更准确的语义判定。
+> manager-agent.recommend_relations 发现对立候选 → memory-agent.present_conflicts 按 §4.2 冲突感知协议处理（同时呈现双方 + 各自 context）。
 
 #### 3.1 检测规则
 
-- research-agent 返回的候选中若存在标题/标签对立语义 → manager_agent.recommend_relations 标记为 `contradicts`
+- 抽取候选中若存在标题/标签对立语义 → 标记为 `contradicts`
 - 相似度 > 0.85 的笔记：
   - 标题近义 → `evolves`（自动）
   - 内容对立 → `contradicts`（提示用户）
@@ -206,7 +193,7 @@ manager_agent.recommend_relations(
 
 ### 步骤 5 · 主动提醒（manager 事件子集）
 
-调用 `manager_agent.proactive_remind(event: "ingest_new", context: { new_note })`：
+调 `quick-kb-manager-agent`（intent=`proactive_remind`，event=`ingest_new`）触发主动提醒：
 
 - 提示建立 `supports`/`evolves` 关系（已在 §2.7 完成）
 - 库 < 50 条时关闭
@@ -268,8 +255,7 @@ manager_agent.recommend_relations(
 
 | 场景 | 降级行为 |
 |------|---------|
-| research-agent 不可用 | 回退为「模板套用 + 字段填充」，不抽原子观点；多观点素材作单条入库 |
-| manager-agent 不可用 | 不做关系推荐与冲突检测，relations 全空，标 `needs_review: true` |
+| 无 embedding 服务 | similarity 降为「标签 Jaccard + 标题关键词重叠」（权重各 0.5）；关系推荐仍可工作但精度下降 |
 | 候选素材为空/格式损坏 | 跳过，报告 |
 | 无候选（target 无文件） | 输出「inbox 已清空」 |
 | 目标 domain 不存在 | 自动创建 `02_areas/<domain>/_moc.md` |
@@ -293,7 +279,7 @@ manager_agent.recommend_relations(
 - [ ] frontmatter 含完整 v0.2 字段（含 relations/context/value.reuse）
 - [ ] 无 v0.3 字段（maturity/value.impact/value.uniqueness）
 - [ ] 抽取失败的笔记标 `status: draft`
-- [ ] 多观点素材被正确拆分（research-agent）
+- [ ] 多观点素材被正确拆分（调 quick-kb-research-agent.extract_atoms 按 §2.2 原子化规则）
 - [ ] contradicts 候选已建立双向关系 + 提示补充 context
 - [ ] 文件名 kebab-case
 - [ ] 处理报告含统计 + 下一步建议
@@ -304,7 +290,6 @@ manager_agent.recommend_relations(
 
 | 偏差点 | 原因 | 真相源 |
 |--------|------|-------|
-| 冲突检测用 manager-agent 而非 memory-agent | memory-agent 在 v0.3 | dev/v0.2-loops.md WP9 + 偏差检查报告 §3.3 |
 | 产出完整 v0.2 frontmatter | DESIGN §6.1 V2 标准 | frontmatter-v0.2.md |
-| deep 档位与 standard 一致 | v0.3 接 memory-agent 后才有差异 | dev doc 不冲突 |
+| deep 档位与 standard 一致 | v0.3 启用语义判定后才有差异 | dev doc 不冲突 |
 | contradicts 自动建立双向 | ADR-011 + AGENTS_SPEC §4.2 不选边 | DESIGN §6.7 |

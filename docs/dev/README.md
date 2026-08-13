@@ -15,7 +15,7 @@
 |------|------|------|---------|
 | **v0.1** | `mvp` | 跑通 Capture→Ingest 最小闭环 | init / capture / ingest(简化) / daily + 中文模板 + demo-vault |
 | **v0.2** | `loops` | 六闭环打通 | connect / query / review + manager/research agent + 完整 frontmatter + Obsidian 集成 |
-| **v0.3** | `assistant` | 升级为个人决策助手 | advisor / memory-agent / goal / project + 认知资产 + maturity + Decision Ledger + 主动提醒全量 |
+| **v0.3** | `assistant` | 升级为个人决策助手 | advisor / quick-kb-memory-agent / goal / project + 认知资产 + maturity + Decision Ledger + 主动提醒全量 |
 | **v0.4** | `extensions` | 运维扩展 + 国际化 | normalize / archive / stats / import + config 完整 + README 多语言 |
 | **v1.0** | `release` | 对外发布 | 完整文档/示例 + CONTRIBUTING/COMMUNITY + marketplace |
 | **v1.1** | `flow-restructure` | 目录流转制 + 路径硬约束 | 顶层目录 `NN_` 前缀 + source.url 绝对路径禁令（⚠️ BREAKING） |
@@ -44,13 +44,13 @@ V2 相对 V1 的新增内容按依赖关系分配到各阶段：
 |---------|------|------|
 | `relations`（类型化关系） | v0.2 | connect 闭环需要 |
 | `context` 字段 | v0.2 | 与 relations 同步落地 |
-| `value.reuse`（自动） | v0.2 | manager-agent 在 review 时计算 |
+| `value.reuse`（自动） | v0.2 | quick-kb-manager-agent 在 review 时计算 |
 | `maturity`（6 态） | v0.3 | 个人助手差异化的核心 |
 | Knowledge Score 排序 | v0.3 | 依赖 maturity + value |
-| 认知资产（`principles/` + 4 类 type） | v0.3 | advisor / memory-agent 依赖 |
+| 认知资产（`principles/` + 4 类 type） | v0.3 | advisor / quick-kb-memory-agent 依赖 |
 | Decision Ledger 强化 | v0.3 | project 技能一起交付 |
-| `memory-agent` | v0.3 | advisor 依赖 |
-| 冲突呈现规则 | v0.3 | memory-agent 规格 |
+| `quick-kb-memory-agent` | v0.3 | advisor 依赖 |
+| 冲突呈现规则 | v0.3 | quick-kb-memory-agent 规格 |
 | 主动提醒机制 | v0.2（manager 事件） / v0.3（memory 事件，全量） | 分批交付 |
 | `related`→`relations` 迁移 | v0.4 | normalize 技能承担 |
 
@@ -75,19 +75,27 @@ description: |
 <技能本体，按 SKILLS_SPEC 对应章节实现>
 ```
 
-### 4.2 agent 文件 frontmatter
+### 4.2 agent skill frontmatter
 
-每个 agent 一个文件 `agents/quick-kb-<role>-agent.md`：
+每个 agent 以独立 skill 形式分发，文件位于 `skills/quick-kb-<role>-agent/SKILL.md`：
 
 ```yaml
 ---
 name: quick-kb-<role>-agent
-description: <一句话角色定义>
+description: <一句话角色定义 + 触发词>
+version: <vx.y>
+phase: <vx.y>
+applies_to: <读写范围>
+source_of_truth:
+  - docs/DESIGN.md §7
+  - docs/AGENTS_SPEC.md
 ---
 
 # <Agent 标题>
 <按 AGENTS_SPEC 对应章节实现：能力清单、输入输出契约、排序公式、降级路径>
 ```
+
+> v0.3+ 起，agent 文件从原 `agents/` 目录迁入 `skills/`，使其能随 `npx skills add` 与其他技能一起加载，并支持 Skill 工具按 intent 显式调用。
 
 ### 4.3 命名
 
@@ -114,7 +122,7 @@ description: <一句话角色定义>
 | Obsidian-skills 缺失 | 跳过 .base/.canvas 生成，纯 Markdown |
 | 无 embedding 服务 | similarity 降为标签 Jaccard + 标题关键词 |
 | 库内笔记 < 50 条 | 关闭主动提醒与 memory 召回，避免噪音 |
-| research-agent / memory-agent 不可用 | 调用方技能回退到内置 LLM 直接处理 |
+| quick-kb-research-agent / quick-kb-memory-agent 不可用 | 调用方技能回退到内置 LLM 直接处理 |
 
 ### 4.7 可解释性
 

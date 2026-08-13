@@ -24,7 +24,7 @@
 | 改动目录结构 | 新增 `principles/` 根目录 |
 | 改动闭环模型 | 六闭环增加/重命名 |
 | 改动技能清单 | 新增 `quick-kb-advisor` |
-| 改动 agent 设计 | 新增 `memory-agent` |
+| 改动 agent 设计 | 新增 `quick-kb-memory-agent` |
 | 修改核心设计决策 | 新增/推翻一条 ADR |
 | 设计哲学的根本性调整 | 改动核心设计原则 |
 

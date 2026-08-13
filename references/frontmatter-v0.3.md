@@ -130,7 +130,7 @@ KS = confidence × log2(1 + reuse) × impact
 - `reuse`：`value.reuse`（自动）
 - `impact`：`value.impact`（1-5，未填按 3 计）
 
-**KS 不强制写入笔记**，仅 review 时由 manager-agent 计算排序用。
+**KS 不强制写入笔记**，仅 review 时由 quick-kb-manager-agent 计算排序用。
 
 ### 5.1 优先处理两类
 

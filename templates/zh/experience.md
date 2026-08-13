@@ -30,7 +30,7 @@ source:
 derived_from: "[[{{源 Decision Ledger}}]]"  # v0.3 派生关系字段
 # 不写 domain（认知资产横切）
 event_date: {{事件发生日期}}    # 可选 · 与 created 区分
-outcome: success | failure | mixed   # 结果类型 · failure 在 memory-agent 召回时加权 ×1.2
+outcome: success | failure | mixed   # 结果类型 · failure 在 quick-kb-memory-agent 召回时加权 ×1.2
 ---
 
 # {{事件一句话}}

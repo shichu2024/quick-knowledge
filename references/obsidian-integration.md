@@ -144,7 +144,7 @@ npx skills add shichu2024/quick-knowledge
 
 | 环境 | init | capture(URL) | ingest | connect | query | review |
 |------|------|-------------|--------|---------|-------|--------|
-| Obsidian + obsidian-skills 全装 | 完整 | defuddle | research-agent | MOC + canvas | 完整 | 完整 + .base |
+| Obsidian + obsidian-skills 全装 | 完整 | defuddle | quick-kb-research-agent | MOC + canvas | 完整 | 完整 + .base |
 | Obsidian 但仅装部分 | 完整 | 视缺失 | 完整 | 视缺失 | 完整 | 完整 |
 | VSCode / Cursor / 纯文件 | 完整 | 基础 HTML→MD | 完整 | 仅 MOC（无 canvas） | 完整 | 完整（无 .base） |
 
@@ -153,7 +153,7 @@ npx skills add shichu2024/quick-knowledge
 ## 6. 版本演进
 
 - **v0.2**：5 项依赖全部接入（含降级）
-- **v0.3+**：无新 obsidian-skill 依赖；新功能（memory-agent/advisor/goal/project）均为纯文件操作
+- **v0.3+**：无新 obsidian-skill 依赖；新功能（quick-kb-memory-agent/advisor/goal/project）均为纯文件操作
 - **v1.0**：CI 测试矩阵覆盖上表三种环境
 
 ---

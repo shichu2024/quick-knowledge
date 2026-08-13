@@ -1,12 +1,14 @@
 ---
 name: quick-kb-manager-agent
 description: |
-  quick-knowledge 知识库管家 + 知识架构师。维护索引、关系、价值、结构。被 quick-kb-connect / quick-kb-review / quick-kb-ingest 内部调用，不直接面向用户。
-  v0.2 基础能力：tidy_inbox / build_moc / recommend_relations / detect_orphans / repair_deadlinks / refresh_value（仅入链数）/ proactive_remind（manager 事件子集）。
-  v0.3 扩展：detect_structure_drift（子领域增速异常升格建议）+ KS 排序 refresh_value + proactive_remind manager 全量（含 maturity-based stale 检测）。
+  知识库管家 + 知识架构师（技能化封装）。维护索引、关系、价值、结构。
+  能力：tidy_inbox / build_moc / recommend_relations / detect_orphans / repair_deadlinks / refresh_value（含 KS 排序）/ proactive_remind / detect_structure_drift。
+  可被其他技能（connect / review / ingest / normalize）通过 Skill 工具显式调用，也可由用户直接调用执行单项能力。
+  触发词（中文）：建 MOC / 推荐关系 / 找孤立笔记 / 修死链 / 刷新价值 / 结构漂移
+  Triggers (EN): build moc / recommend relations / find orphans / repair deadlinks / refresh value / structure drift
 version: v0.3
 phase: v0.3
-role: agent
+applies_to: 读写 frontmatter（value.reuse / value.ks）· 写入 06_wiki/mocs/ · 只读全库快照
 source_of_truth:
   - docs/DESIGN.md §7.1
   - docs/AGENTS_SPEC.md §1
@@ -18,7 +20,7 @@ source_of_truth:
 
 > **角色**：知识库管家 + 知识架构师。偏「整理与结构」。维护索引、关系、价值、结构。
 >
-> **不读**：任务语义（memory-agent 域）、外部资料（research-agent 域）。
+> **不读**：任务语义（quick-kb-memory-agent 域）、外部资料（quick-kb-research-agent 域）。
 
 ---
 
@@ -39,7 +41,7 @@ source_of_truth:
 
 ## 2. 调用契约
 
-按 [`AGENTS_SPEC.md` §通用约定](../docs/AGENTS_SPEC.md#通用约定)：
+按 [`AGENTS_SPEC.md` §通用约定](../../docs/AGENTS_SPEC.md)：
 
 ```
 manager_agent(
@@ -101,7 +103,7 @@ manager_agent(
 4. 检测缺口：某聚类笔记数 < 3 → 标「待补充」
 
 **输出**：
-- MOC 笔记写入 `06_wiki/mocs/<domain>-moc.md`，基于 [`templates/zh/moc.md`](../templates/zh/moc.md)
+- MOC 笔记写入 `06_wiki/mocs/<domain>-moc.md`，基于 [`templates/zh/moc.md`](../../templates/zh/moc.md)
 - 已存在 MOC → diff merge（保留人工修订章节，仅刷新自动生成区）
 
 **示例**：
@@ -129,7 +131,7 @@ manager_agent.build_moc(payload: { scope: "ai-engineering" })
    - 相似度 > 0.6 + 标题共现 → `supports`
    - 候选 B 的 `status: deprecated` 或 `maturity: deprecated` → `supersedes`（A 取代 B）
 
-4. v0.2 不强制写入，仅返回候选；由调用方（ingest/connect）经用户确认后写入
+4. 不强制写入，仅返回候选；由调用方（ingest/connect）经用户确认后写入
 
 **输出**：
 
@@ -208,7 +210,7 @@ KS = confidence × log2(1 + reuse) × impact
 | Review 完成 | ✓ | ✓ | 提示处理高价值低复用笔记（KS 高但 reuse=0） |
 | 长期未触碰 applied 笔记 | updated 时间 | **改为基于 maturity: applied 且 updated > 6 月** | 提示重审或降为 deprecated |
 
-**不做**（memory 事件，归 memory-agent）：
+**不做**（memory 事件，归 quick-kb-memory-agent）：
 - 新建项目/目标 → memory 召回相似项目
 - Capture 某主题素材 → memory 命中 belief/pattern
 - Ingest 检测冲突 → memory 判定
@@ -286,7 +288,7 @@ KS = confidence × log2(1 + reuse) × impact
 | 无查询日志 | refresh_value 仅用入链数；KS 中 reuse 项降级 |
 | Louvain 算法不可用 | MOC 聚类降为按 tag.topic 分组 |
 | maturity 字段缺失（旧 v0.1 笔记） | refresh_value KS 排序跳过；stale_applied 退化为 updated 时间 |
-| manager-agent 完全不可用 | 调用方技能自行做基于规则的最小检查（如 connect 只建标题共现关系） |
+| 本技能完全不可用 | 调用方技能自行做基于规则的最小检查（如 connect 只建标题共现关系） |
 
 ---
 
@@ -322,3 +324,4 @@ KS = confidence × log2(1 + reuse) × impact
 | detect_structure_drift 不实际改 domain | 避免自动改字典导致大规模 tag 重写；只产建议 | docs/AGENTS_SPEC.md §1.6 + DESIGN §6.6 |
 | stale_applied_notes v0.3 改为基于 maturity | maturity 字段 v0.3 启用，比 updated 时间更精准 | docs/DESIGN.md §7.6 + §6.4 |
 | KS 公式中 reuse 与 impact 都参与 | DESIGN §6.5 明确；confidence 字段已必填 | docs/DESIGN.md §6.5 |
+| 作为独立技能而非内部 agent | 跨 runtime 契约统一以 skill 形式分发；随 npx 安装自动可用 | 本技能定位调整 |

@@ -68,10 +68,10 @@
 ```
 
 技能会：
-1. 调 research-agent 抽取原子观点
+1. 调 quick-kb-research-agent 抽取原子观点
 2. 推断 type（concept / resource / ...）与 domain
 3. 生成 frontmatter（confidence 初始值）
-4. 检测与既有笔记的关系（manager-agent v0.2 / memory-agent v0.3）
+4. 检测与既有笔记的关系（quick-kb-manager-agent v0.2 / quick-kb-memory-agent v0.3）
 5. 移到对应目录（如 `concepts/`）
 
 ### Step 4 · 第一次 Query（v0.2+）
@@ -172,10 +172,10 @@ Ingest the latest inbox note
 ```
 
 The skill:
-1. Calls research-agent to extract atomic viewpoints
+1. Calls quick-kb-research-agent to extract atomic viewpoints
 2. Infers type (concept / resource / ...) and domain
 3. Generates frontmatter (initial confidence)
-4. Detects relations with existing notes (manager-agent v0.2 / memory-agent v0.3)
+4. Detects relations with existing notes (quick-kb-manager-agent v0.2 / quick-kb-memory-agent v0.3)
 5. Moves to the appropriate directory (e.g. `concepts/`)
 
 ### Step 4 · First Query (v0.2+)

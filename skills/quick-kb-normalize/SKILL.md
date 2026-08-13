@@ -94,7 +94,7 @@ source_of_truth:
    2.3 related → relations 迁移（核心）：
        若 frontmatter 含 legacy `related: [[X]] [[Y]]`：
        - 对每个 related 条目 X：
-         · 调 manager_agent.recommend_relations(target=当前笔记, candidate=X)
+         · 调 `quick-kb-manager-agent`（intent=`recommend_relations`）判定与 X 的关系
          · 相似度 ≥ 0.6 → 分类为 supports / contradicts / evolves / supersedes
          · 相似度 < 0.6 或不可判断 → 保留在 related（兼容字段）
        - 迁移完成后 relations 字段更新，related 字段保留剩余未分类项
@@ -102,7 +102,7 @@ source_of_truth:
    2.4 标题规范化（filename）：
        - 文件名 → kebab-case
        - 与库内既有文件冲突 → 加后缀 -2 / -3
-       - 更新所有引用此文件的 wikilink（调 manager_agent.repair_deadlinks 子能力）
+       - 更新所有引用此文件的 wikilink（调 `quick-kb-manager-agent` intent=`repair_deadlinks`）
 
 3. 写入策略：
    - 修改前先备份当前 frontmatter 到 _normalize_log/<date>-<scope>.diff.md
@@ -337,7 +337,7 @@ quick-kb-normalize scope=<domain|all> action=regroup [dry-run=true]
 | 缺失依赖 | 降级行为 |
 |---------|---------|
 | kb.config.yaml 不存在 | tags_vocabulary 跳过；其他正常 |
-| manager-agent 不可用 | related → relations 退化为「全部移到 relations.supports」+ 标注「⚠ 未分类，待人工」 |
+| 关系推荐规则失效（相似度计算异常） | related → relations 退化为「全部移到 relations.supports」+ 标注「⚠ 未分类，待人工」 |
 | 笔记 frontmatter 已损坏 | 跳过该条 + 写入失败列表（不阻塞） |
 | 文件名冲突无法解决 | 跳过重命名 + 写入待处理清单 |
 
@@ -375,6 +375,6 @@ quick-kb-normalize scope=<domain|all> action=regroup [dry-run=true]
 | 偏差点 | 原因 | 真相源 |
 |--------|------|-------|
 | dry-run 默认 false（dev doc 测试要点提及但 WP1 关键点未列） | dev doc 测试用例要求支持 dry-run，列在偏差检查文件补充 | references/v0.4-deviation-check.md §3.1 |
-| related → relations 阈值用 0.6 | 与 manager-agent recommend_relations 一致（AGENTS_SPEC §1.2） | docs/AGENTS_SPEC.md §1.2 |
+| related → relations 阈值用 0.6 | 与 AGENTS_SPEC §1.2 关系推荐规则一致 | docs/AGENTS_SPEC.md §1.2 |
 | 文件名冲突用 -2/-3 后缀 | 简单确定性策略；不引入 hash 防止用户认知负担 | 实现简化 |
 | rollback 模式 | dev doc WP1 关键点「可回滚」要求；以 diff log 为源 | docs/dev/v0.4-extensions.md WP1 |

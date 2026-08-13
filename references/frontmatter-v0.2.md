@@ -96,8 +96,8 @@ relations:
 
 | 时机 | 写入字段 | 来源 |
 |------|---------|------|
-| ingest 新笔记 | `supports`/`evolves`（如能从已有笔记推断） | manager-agent.recommend_relations |
-| connect 显式调 | 全部 4 类 | manager-agent.recommend_relations + 用户确认 |
+| ingest 新笔记 | `supports`/`evolves`（如能从已有笔记推断） | quick-kb-manager-agent.recommend_relations |
+| connect 显式调 | 全部 4 类 | quick-kb-manager-agent.recommend_relations + 用户确认 |
 | 冲突检测命中 | `contradicts` 双向 | ingest 时由 manager 候选 + 用户确认 |
 | 笔记取代（手填或 review） | `supersedes` | 用户确认 |
 
@@ -128,12 +128,12 @@ value:
 
 ```
 reuse = 入链数（wikilink 入链）
-      + Connect 推荐频次（manager-agent.recommend_relations 候选中出现次数）
+      + Connect 推荐频次（quick-kb-manager-agent.recommend_relations 候选中出现次数）
       + 查询命中次数（query 技能命中的次数，由 v0.2 落简易日志）
 ```
 
 - **初值**：ingest 时 = 0
-- **刷新**：review 时由 manager-agent.refresh_value 重算
+- **刷新**：review 时由 quick-kb-manager-agent.refresh_value 重算
 - **降级**：无 query 日志时仅算入链数
 
 ### 4.2 Knowledge Score 推迟到 v0.3

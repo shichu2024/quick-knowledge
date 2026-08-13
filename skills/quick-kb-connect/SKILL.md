@@ -1,7 +1,7 @@
 ---
 name: quick-kb-connect
 description: |
-  建立双链、生成 MOC、绘制知识地图（canvas）。调用 manager-agent 的 recommend_relations/build_moc；写入类型化 relations（不再写扁平 related）；生成 06_wiki/mocs/<domain>-moc.md；接 json-canvas 生成 .canvas（Obsidian 缺失跳过）。
+  建立双链、生成 MOC、绘制知识地图（canvas）。调 quick-kb-manager-agent 推荐关系与构建 MOC；写入类型化 relations（不再写扁平 related）；生成 06_wiki/mocs/<domain>-moc.md；接 json-canvas 生成 .canvas（Obsidian 缺失跳过）。
   触发词（中文）：连一下 / 建个 MOC / 给这领域建索引 / 画个知识地图 / 连接笔记
   Triggers (EN): connect these / build moc / map this domain / link notes
 version: v0.2
@@ -31,9 +31,9 @@ source_of_truth:
 
 ### 做
 
-- 调 manager-agent.recommend_relations 推荐类型化关系
+- 调 `quick-kb-manager-agent`（intent=`recommend_relations`）推荐类型化关系（supports/contradicts/evolves/supersedes），按 §1.2 阈值
 - 写入 `relations`（supports/contradicts/evolves/supersedes），不再写扁平 `related`
-- 调 manager-agent.build_moc 生成 `06_wiki/mocs/<domain>-moc.md`
+- 调 `quick-kb-manager-agent`（intent=`build_moc`）生成 `06_wiki/mocs/<domain>-moc.md`
 - 接 json-canvas 生成 `06_wiki/maps/<domain>.canvas`（Obsidian 缺失跳过）
 - 更新 `06_wiki/_index.md` 全局导航
 
@@ -78,7 +78,8 @@ action：all
 对每条笔记，调：
 
 ```
-manager_agent.recommend_relations(
+quick-kb-manager-agent(
+  intent: "recommend_relations",
   payload: { note: {{当前笔记}}, candidate_pool: {{范围内其他笔记}} }
 ) → {
   found: [
@@ -112,7 +113,8 @@ manager_agent.recommend_relations(
 ### 步骤 3 · MOC 生成（action=moc 或 all）
 
 ```
-manager_agent.build_moc(
+quick-kb-manager-agent(
+  intent: "build_moc",
   payload: { scope: "{{domain}}" }
 ) → {
   found: [{ path: "06_wiki/mocs/<domain>-moc.md", action: "created" | "updated" }]
@@ -218,8 +220,8 @@ manager_agent.build_moc(
 
 | 场景 | 降级行为 |
 |------|---------|
-| 无 embedding 服务 | manager-agent 降为标签 Jaccard + 标题关键词 |
-| manager-agent 不可用 | connect 退为「只扫标题共现」，标 `needs_review: true` |
+| 无 embedding 服务 | 关系推荐降为标签 Jaccard + 标题关键词 |
+| 范围内笔记相似度均 < 0.6 | connect 退为「只扫标题共现」，标 `needs_review: true` |
 | 无 json-canvas | 跳过 .canvas 生成 |
 | MOC 聚类失败 | 按 tag.topic 简单分组 |
 | 范围内笔记 < 3 条 | 不生成 MOC，提示「笔记太少，建议先 ingest」 |

@@ -67,7 +67,7 @@ Inside Claude Code:
 | Cursor | `~/.cursor/skills/quick-knowledge/` |
 | OpenCode | `~/.opencode/skills/quick-knowledge/` |
 
-Clone the repo and copy `skills/` + `agents/` into the corresponding directory.
+Clone the repo and copy `skills/` into the corresponding directory (agents are bundled inside skills as `quick-kb-{manager,memory,research}-agent`).
 
 ### Initialize Vault
 
@@ -108,9 +108,9 @@ Capture   ──▶  Ingest   ──▶  Normalize  ──▶  Connect  ──�
 
 | Agent | Role | Input Domain |
 |-------|------|--------------|
-| **manager-agent** | Librarian · structure | Library structure (relations, orphans, dead links) |
-| **research-agent** | Researcher · external | External materials (URL/PDF/long-form) |
-| **memory-agent** | Long-term memory · core differentiator | Library cognitive assets (experience/pattern/principle/belief) |
+| **quick-kb-manager-agent** | Librarian · structure | Library structure (relations, orphans, dead links) |
+| **quick-kb-research-agent** | Researcher · external | External materials (URL/PDF/long-form) |
+| **quick-kb-memory-agent** | Long-term memory · core differentiator | Library cognitive assets (experience/pattern/principle/belief) |
 
 ### Frontmatter Orthogonal Fields (V2)
 
@@ -148,8 +148,8 @@ quick-knowledge/
 | Phase | Codename | Status | Highlights |
 |-------|----------|--------|------------|
 | v0.1 | mvp | ✅ Done | init/capture/ingest/daily + zh templates |
-| v0.2 | loops | ✅ Done | connect/query/review + manager/research-agent + en templates |
-| v0.3 | assistant | ✅ Done | memory-agent + advisor/project/goal + cognitive asset templates |
+| v0.2 | loops | ✅ Done | connect/query/review + manager/quick-kb-research-agent + en templates |
+| v0.3 | assistant | ✅ Done | quick-kb-memory-agent + advisor/project/goal + cognitive asset templates |
 | v0.4 | extensions | ✅ Done | normalize/archive/stats/import + kb.config + multilingual README |
 | v1.0 | release | ✅ Done | CONTRIBUTING/COMMUNITY/LICENSE + CI + demo-vault release |
 | v1.1 | flow-restructure | ✅ Done | Top-level `NN_` prefix + absolute-path hard ban (⚠️ BREAKING) |

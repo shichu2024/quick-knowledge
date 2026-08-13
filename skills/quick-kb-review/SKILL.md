@@ -29,7 +29,7 @@ source_of_truth:
 ### 做
 
 - 周期快照采集（daily/weekly/monthly/quarterly/yearly/adhoc）
-- 调 manager-agent.refresh_value 刷新 `value.reuse`
+- 调 `quick-kb-manager-agent`（intent=`refresh_value`）刷新 `value.reuse`（入链数 + 查询命中数 + Connect 推荐频次，按 §1.1 规则）
 - 四维度分析：knowledge / project / goal / daily
 - 健康报告 + 待办清单（按优先级）
 - 主动提醒（manager 事件子集）：Review 完成 → 提示处理高价值低复用笔记
@@ -69,10 +69,11 @@ source_of_truth:
 
 ### 步骤 2 · 价值刷新
 
-调用：
+调 `quick-kb-manager-agent`（intent=`refresh_value`）：
 
 ```
-manager_agent.refresh_value(
+quick-kb-manager-agent(
+  intent: "refresh_value",
   payload: {
     snapshot: {{全库快照}},
     query_log: {{读取 99_system/workflows/.query-log.jsonl}}
@@ -88,9 +89,9 @@ manager_agent.refresh_value(
 
 #### 3.1 knowledge 维度
 
-- **孤立笔记率**：调 manager_agent.detect_orphans → 无入链无出链 / 总数
-- **重复嫌疑**：调 manager_agent.recommend_relations 找相似度 > 0.85 但未建立 evolves/supersedes 的对
-- **死链**：调 manager_agent.repair_deadlinks
+- **孤立笔记率**：调 `quick-kb-manager-agent`（intent=`detect_orphans`）→ 无入链无出链 / 总数
+- **重复嫌疑**：调 `quick-kb-manager-agent`（intent=`recommend_relations`）找相似度 > 0.85 但未建立 evolves/supersedes 的对
+- **死链**：调 `quick-kb-manager-agent`（intent=`repair_deadlinks`）
 - **frontmatter 缺失率**：扫描必填字段缺失的笔记
 - **inbox 周转**：从 query-log 与 inbox 时间戳估算 captured_at → ingest 间隔
 
@@ -181,7 +182,7 @@ manager_agent.refresh_value(
 
 ### 步骤 6 · 主动提醒（manager 事件子集）
 
-调用 `manager_agent.proactive_remind(event: "review_done", context: { snapshot })`：
+调 `quick-kb-manager-agent`（intent=`proactive_remind`，event=`review_done`，context: `{ snapshot }`）：
 
 - 提示处理高价值低复用笔记（已在 §5 待办）
 - 长期未触碰笔记（updated > 6 个月）→ 提示重审
@@ -218,7 +219,7 @@ manager_agent.refresh_value(
 - 健康指标表
 - 维度详情（按 focus）
 - 待办清单（含技能调用）
-- 主动提醒（来自 manager-agent.suggestions）
+- 主动提醒（来自 `docs/AGENTS_SPEC.md` 附录的提醒规则）
 
 ---
 
@@ -227,13 +228,13 @@ manager_agent.refresh_value(
 - **只标记不删除** —— deprecated 是状态，不直接归档
 - **不自动降级 maturity** —— v0.2 此字段未启用；v0.3 才有降级建议
 - **不自动改 status** —— 仅建议，由人确认
-- **降级**：无 manager-agent 时仅做基于规则的最小检查（孤立笔记、死链、frontmatter 缺失）
+- **降级**：仅做基于规则的最小检查（孤立笔记、死链、frontmatter 缺失）
 
 ## 7. 降级路径
 
 | 场景 | 降级行为 |
 |------|---------|
-| manager-agent 不可用 | 跳过价值刷新与结构分析；仅做规则检查（孤立/死链/缺失） |
+| 无 query-log | refresh_value 仅算入链数（按 AGENTS_SPEC §1.1 降级条款） |
 | 无 query-log | refresh_value 仅算入链数 |
 | 库内笔记 < 50 | 主动提醒关闭；仍出报告但提示「样本太少，建议先积累」 |
 | 范围内无 daily 笔记 | 跳过 daily 维度，提示「无日志可分析」 |

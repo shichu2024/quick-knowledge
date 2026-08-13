@@ -1,12 +1,12 @@
 ---
 name: quick-kb-advisor
 description: |
-  Query+ 闭环 · 决策辅助。基于个人认知资产（principle/belief/pattern/experience）辅助用户决策。调 memory-agent 召回历史经验 + 检索认知资产 + 冲突检测，输出三段：你的历史 / 你的原则 / 建议路径。
+  Query+ 闭环 · 决策辅助。基于个人认知资产（principle/belief/pattern/experience）辅助用户决策。扫描 07_principles/ + 05_outputs/daily/ 召回历史经验 + 核对信念 + 冲突检测，输出三段：你的历史 / 你的原则 / 建议路径。
   触发词（中文）：我要做…怎么搞 / 帮我决策 / 我该怎么选 / 设计个 X / advisor
   Triggers (EN): how should I / help me decide / design a / advise on
 version: v0.3
 phase: v0.3
-applies_to: 读全库认知资产 + 调 memory-agent（recall_similar / check_beliefs）
+applies_to: 读全库认知资产（07_principles/ + 05_outputs/daily/）；调 quick-kb-memory-agent 召回与排序
 source_of_truth:
   - docs/DESIGN.md §7.5
   - docs/SKILLS_SPEC.md §6
@@ -34,9 +34,9 @@ source_of_truth:
 
 ### 做
 
-- 调 `memory-agent.recall_similar` 召回相关 experience/pattern/decision
-- 调 `memory-agent.check_beliefs` 检索相关 principle/belief
-- 检索相关 concept（domain 内的方法支撑）
+- 调 `quick-kb-memory-agent` skill（intent=`recall_similar`）召回相关 experience/pattern/decision；score 排序由 memory-agent 按 `docs/AGENTS_SPEC.md` §3.5 公式计算（experience 失败案例权重提升）
+- 扫描 `07_principles/{principles,beliefs}/`，对每条判定与候选方案的 aligned/conflict/neutral 关系
+- 检索相关 concept（domain 内的方法支撑，走简单 Grep/标签匹配）
 - 候选方案与失败 experience 冲突时显式警告
 - 输出三段：你的历史 / 你的原则 / 建议路径
 - 缺口提示（建议 Capture 本次决策）
@@ -44,8 +44,8 @@ source_of_truth:
 ### 不做（v0.4+）
 
 - 不写任何笔记（Capture 由用户决定）
-- 不调 research-agent（外部资料由用户先 Capture/Ingest）
-- 不调 manager-agent（结构问题归 review/connect）
+- 不检索外部资料（外部资料由用户先 Capture/Ingest）
+- 不做结构分析（结构问题归 review/connect）
 
 ---
 
@@ -63,26 +63,22 @@ source_of_truth:
 
 ```
 1. 解析 situation + constraints → 提取关键概念和领域 domain
-2. memory_agent.recall_similar({
-     current_context: situation,
-     constraints,
-     options: { max_results: 5, prefer_failures: true }
-   })
-   → found: 相关 experience/pattern/decision
-   → conflicts?: 召回结果内部的 contradicts
+2. 经验召回：
+   - 调 `quick-kb-memory-agent`（intent=`recall_similar`，候选限 type∈{experience,pattern,decision}）
+   - memory-agent 内部按 §3.5 计算 score（几何平均 + 类型系数 + 失败系数，prefer_failures=true）
+   - 取 score 最高的 max_results=5 条
 
-3. memory_agent.check_beliefs({
-     current_context: situation,
-     candidate_plan: options || 推演方案
-   })
-   → 相关 principle/belief，每条带 aligned/conflict/neutral 标注
+3. 信念核对：
+   - 调 `quick-kb-memory-agent`（intent=`check_beliefs`）对 principle/belief 逐条判定 aligned/conflict/neutral
+   - 若 candidate_plan 缺省 → 先推演 2-3 个再核对
 
 4. 检索 concept（domain 内）：作为方法支撑
-   → 用 Grep/ Glob 在 concepts/ 或顶层笔记中按 domain tag 搜
+   → 用 Grep/Glob 在 02_areas/<domain>/ 按 domain tag 搜
 
-5. 冲突检测：
-   - 若 options 与某条 failure experience 的 lesson 冲突 → 标 ⚠
+5. 冲突检测（调 `quick-kb-memory-agent` intent=`detect_repeat_mistakes` + `present_conflicts`）：
+   - 若 options 与某条 failure experience 的 lesson 冲突 → 标 ⚠（memory-agent 输出 repeat_risk）
    - 若 options 与某条 principle 的陈述方向相反 → 标 ⚠
+   - 召回结果含 contradicts → memory-agent.present_conflicts 输出双方对照
 
 6. 缺口判断：
    - 若关键决策缺乏经验支撑（召回 < 2 条 OR 召回 confidence 均低）
@@ -99,8 +95,8 @@ source_of_truth:
 ## 你要做的：<situation 一句话>
 
 ### 你的历史
-> 召回的相关经验，按 memory-agent score 排序。
-> **无论是否降级都优先列 experience**：降级时来自 `07_principles/{experiences,patterns,principles,beliefs}/` + `05_outputs/daily/` 的规则扫描（见 §7 降级路径），非降级时来自 `memory-agent.recall_similar`。
+> 由 `quick-kb-memory-agent.recall_similar` 召回，按 §3.5 score 公式排序（experience 失败案例权重提升）。
+> 候选集：`07_principles/{experiences,patterns,principles,beliefs}/` + `05_outputs/daily/`。
 
 - [[experience/BI-engine-plugin-isolation]] · 相关点：<...>
   · 教训：<lesson 摘要>
@@ -161,7 +157,7 @@ source_of_truth:
 |---------|---------|
 | 库内笔记 < 50 条 | advisor 仍可工作，但所有建议都标注「⚠ 库内经验不足，以下非基于充分个人经验」 |
 | `07_principles/` 目录不存在 | "你的原则"段输出「未启用认知资产层」+ 提示 v0.3 启用 |
-| memory-agent 完全不可用 | 扫描 `07_principles/{experiences,patterns,principles,beliefs}/` + `05_outputs/daily/` 中匹配 decision keywords 的笔记，按 `score = 0.5 × tag_overlap + 0.3 × recency_norm + 0.2 × title_keyword_hit` 排序（recency_norm = 1/(1+days_since_updated/30)），输出明确标注「⚠ 未启用 memory-agent，以下为规则召回，质量可能下降」 |
+| 无 embedding 服务 | similarity 降为「标签 Jaccard + 标题关键词重叠」（权重各 0.5），输出标注「⚠ 未启用语义相似度」 |
 | 召回 0 条 | "你的历史"段输出「未找到相关经验」+ 强化缺口提示 |
 
 ---
@@ -177,7 +173,7 @@ source_of_truth:
 
 ## 9. 幂等保证
 
-- 同一 `situation` 多次调用，输出顺序一致（按 memory-agent score 排序）
+- 同一 `situation` 多次调用，输出顺序一致（memory-agent 按 §3.5 score 公式排序）
 - 召回结果只读，不修改任何笔记
 - 缺口提示文本一致（基于召回数量阈值，非随机）
 
@@ -185,8 +181,8 @@ source_of_truth:
 
 ## 10. 自检清单
 
-- [ ] 调用了 memory-agent（不是直接 Grep 库）
-- [ ] 召回结果按 memory-agent score 排序（experience 失败案例排前）
+- [ ] 调用了 `quick-kb-memory-agent` 而非全库盲搜（候选集限定 07_principles/ + 05_outputs/daily/）
+- [ ] memory-agent 按 §3.5 score 公式排序（experience 失败案例排前）
 - [ ] 输出含三段：你的历史 / 你的原则 / 建议路径
 - [ ] 候选与失败 experience 冲突时显式 ⚠ 警告
 - [ ] contradicts 双方同时呈现（ADR-011）
@@ -200,6 +196,6 @@ source_of_truth:
 
 | 偏差点 | 原因 | 真相源 |
 |--------|------|-------|
-| concept 检索不调 memory-agent | memory-agent 候选集排除 concept（见 memory-agent §1）；concept 检索走简单 Grep/标签 | docs/AGENTS_SPEC.md §3 类型加权表暗示 |
+| concept 不进入经验召回候选集 | 经验召回候选集严格限定为 experience/pattern/decision/principle/belief；concept 检索单独走 Grep/标签 | docs/AGENTS_SPEC.md §3 类型加权表 |
 | options 缺省时推演 2-3 个 | SKILLS_SPEC §6 输入表标注 options 非必填，但工作流第 5 步要"综合建议" | docs/SKILLS_SPEC.md §6 |
-| 不调 research-agent 检索外部 | 外部资料域归 research-agent，但 advisor 阶段不做扩展研究（避免发散） | docs/DESIGN.md §7 边界 |
+| 不检索外部资料 | advisor 阶段不做扩展研究（避免发散）；外部资料由 capture/ingest 先入库 | docs/DESIGN.md §7 边界 |
