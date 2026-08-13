@@ -12,6 +12,7 @@ source_of_truth:
   - docs/SKILLS_SPEC.md §9
   - docs/AGENTS_SPEC.md §1（关系推荐规则）· §2（学习路径生成）· §3（经验召回规则）
   - docs/dev/v0.3-assistant.md WP6
+  - references/filename-summary-rules.md（progress 文件名 summary 提炼）
 ---
 
 # quick-kb-goal（v0.3）
@@ -123,9 +124,12 @@ source_of_truth:
 
 2. 追加进展：
    - progress/<YYYY-MM-DD>-<summary>.md（结构：完成 / 学到 / 想法 / 卡点）
-     - `<summary>` 由 LLM 从本次进展内容提炼 2-5 词 kebab-case（如 `chunk-eval-baseline` / `api-stabilization`）
+     - **summary 提炼**严格按 [`filename-summary-rules.md`](../../references/filename-summary-rules.md) §2 机械判定：
+       - **Step 1 强制纯日期清单**（命中任一即 `progress/<YYYY-MM-DD>.md`）：① 进展字段全空 ② 实质字符 < 5 ③ 仅元描述无事件词
+       - **Step 2 未命中 → 必须提炼** 2-5 词 ASCII kebab-case（如 `chunk-eval-baseline` / `api-stabilization` / `m2-done` / `vector-db-research`）
+     - **禁止语义绕过**：严禁用「进展太短」「学习笼统」「里程碑完成不是主题」等借口退化为纯日期
+     - 错误反例：输入「完成 milestone 2」→ ❌ `progress/2026-08-13.md`（借口「里程碑不是主题」）→ ✅ `progress/2026-08-13-m2-done.md`
      - 同日已有 `progress/<YYYY-MM-DD>*.md` → 编辑既有文件，不重新提炼 summary，不改名
-     - 内容不可提炼 → 退为纯 `progress/<YYYY-MM-DD>.md`
    - 更新 goal.md 的 updated 字段
    - 在 goal.md「进度记录」段添加 wikilink（用实际文件 basename：`[[progress/YYYY-MM-DD-<summary>]]` 或 `[[progress/YYYY-MM-DD]]`）
 
@@ -279,6 +283,9 @@ source_of_truth:
 ### progress
 
 - [ ] progress/<date>.md 追加（不覆盖）
+- [ ] **新建 progress 文件名含 summary 段**（除非 §5 步骤 2 Step 1 命中纯日期条件）
+- [ ] **未用「进展太短 / 学习笼统 / 里程碑不是主题」等语义借口退化纯日期**
+- [ ] 同日已有 progress 文件时，编辑不改名
 - [ ] goal.md「进度记录」段添加 wikilink
 - [ ] 里程碑勾选状态正确
 

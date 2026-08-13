@@ -12,11 +12,25 @@ source_of_truth:
   - docs/SKILLS_SPEC.md §8
   - docs/dev/v0.1-mvp.md WP5
   - references/frontmatter-v0.1.md
+  - references/filename-summary-rules.md（日期类文件名 summary 提炼规则）
 ---
 
 # quick-kb-daily
 
 > 每日日志入口。**反问是增强不是阻塞** —— 用户只说一句话也能记录。
+
+---
+
+## 0. 顶层不变量（覆盖一切，违反即错误）
+
+**summary 提炼是硬约束** —— 新建日志文件时，**必须**按 [`filename-summary-rules.md`](../../references/filename-summary-rules.md) §2 机械判定：Step 1「强制纯日期清单」未命中 → 文件名**必须**含 `<YYYY-MM-DD>-<summary>.md` 段。**严禁**用以下语义借口退化为纯日期（`YYYY-MM-DD.md`）：
+
+- 「内容笼统 / 表达 vague / 不够具体」
+- 「主题分散 / 跨多个领域 / 难以归纳」
+- 「会议型日志 / 学习型日志无可提炼主题」
+- 「信息不足 / 用户表达模糊」
+
+**任何"内容笼统所以退化为纯日期"的行为都是错误**。笼统恰恰是用户原始表达——summary 反映原始表达即可（如「开了一天的会」→ `meeting-day`，**不允**许以「会议笼统」为由退化纯日期）。「内容真的为空」通过机械判定（4 段全空 / 实质字符 < 5 / 仅元描述），**绝不**作为语义借口。
 
 ---
 
@@ -58,9 +72,35 @@ source_of_truth:
 
 ### 步骤 1 · 加载或创建日志文件
 
-- **新建路径**：`05_outputs/daily/YYYY/MM/YYYY-MM-DD-<summary>.md`
-  - `<summary>` 由 LLM 从用户当日 content 提炼 2-5 个词 kebab-case（限 30 字符），如 `rag-eval-debug` / `launch-prep` / `interview-cycle`
-  - 内容空 / 不可提炼（如纯「记一下今天」）→ 退为纯日期 `YYYY-MM-DD.md`
+**summary 提炼判定**严格按 [`filename-summary-rules.md`](../../references/filename-summary-rules.md) §2 决策表逐步走（不许用单一语义条件宽放）：
+
+**Step 1 · 先查「强制纯日期」清单**（命中任一即纯日期 `YYYY-MM-DD.md`，禁止提炼）：
+
+| # | 强制纯日期条件 | 判定 |
+|---|--------------|------|
+| 1 | content 完全为空 | null / 空字符串 / 仅空白 |
+| 2 | 4 段解析后全部为空 | did / learned / ideas / blockers 均无条目 |
+| 3 | 实质字符数 < 5 | 去掉元描述后剩 < 5 字符（「ok」/「没事」/「休息」/「-」） |
+| 4 | 仅含纯元描述且无事件关键词 | 字面是「今天没什么」/「就这些」/「完毕」/「没特别要记」/「日常」之一且无具体名词 |
+
+**Step 2 · 未命中 → 必须提炼 summary**：从最有实质内容的段落抽 2-5 词 ASCII kebab-case（限 30 字符）。
+
+> **禁止语义绕过（硬约束）**：上述是机械字符判定。即使输入字面是「开了一天的会」「学了很多」「没什么特别的」「日常开发」等笼统表达，**仍按 Step 2 提炼 summary**（如 `meeting-day` / `mcp-learning` / `routine-dev` / `daily-grind`）。**严禁**用「内容笼统 / 主题分散 / 会议型日志不可提炼」等语义理由退化纯日期。
+
+**错误绕过反例**（模型常见的偷懒模式，必须避免）：
+
+| 输入 | 错误行为 | 正确行为 |
+|------|---------|---------|
+| 「今天搞了一下午 RAG 调参」 | ❌ `2026-08-13.md`（借口「调参笼统」） | ✅ `2026-08-13-rag-tuning.md` |
+| 「写了几行代码，修了个登录 bug」 | ❌ 纯日期（借口「bug 不具体」） | ✅ `2026-08-13-login-bugfix.md` |
+| 「开了一天的会，重点是 RAG 评审」 | ❌ 纯日期（借口「会议笼统」） | ✅ `2026-08-13-rag-review-meetings.md` 或 `meeting-day.md` |
+| 「学了很多关于 mcp 的东西」 | ❌ 纯日期（借口「学了很多不具体」） | ✅ `2026-08-13-mcp-learning.md` |
+| 「没什么特别的，就是日常开发」 | ❌ 纯日期（借口「日常太笼统」） | ✅ `2026-08-13-routine-dev.md` |
+| 「」/「ok」/「没事」 | ✓ 纯日期（Step 1 #3 命中） | ✅ `2026-08-13.md`（纯日期正确） |
+
+**加载/创建逻辑**：
+
+- **新建路径**：`05_outputs/daily/YYYY/MM/YYYY-MM-DD-<summary>.md`（summary 由 Step 2 提炼，如 `rag-eval-debug` / `launch-prep` / `interview-cycle` / `meeting-day` / `routine-dev`）
 - **旧文件优先**：同一天若已存在任何形式的文件（`YYYY-MM-DD.md` 或 `YYYY-MM-DD-*.md`）→ **加载既有文件编辑，不重新提炼 summary，不创建新文件**（文件名稳定性硬约束，避免 wikilink 断）
 - 月份子目录不存在 → 创建（含 `.gitkeep`）
 - 文件不存在 → 基于 [`templates/zh/daily.md`](../../templates/zh/daily.md) 创建
@@ -214,7 +254,7 @@ frontmatter 加 `ai_polished_entries: [1, 2]`（被润色条目的编号列表�
 ### 步骤 7 · 反馈输出
 
 ```
-✓ 日志已更新：05_outputs/daily/2026/08/2026-08-09.md
+✓ 日志已更新：05_outputs/daily/2026/08/2026-08-09-rag-eval-debug.md
   追加：做了什么 ×N / 学到什么 ×N / 想法 ×N / 卡点 ×N
   wikilinks：[[项目 X]]、[[某 concept]]
   待入库候选：N 条（见文件末尾「待入库」段）
@@ -330,6 +370,10 @@ frontmatter 加 `ai_polished_entries: [1, 2]`（被润色条目的编号列表�
 ## 10. 自检清单（执行后）
 
 - [ ] 文件路径正确（含年月子目录）
+- [ ] **新建文件名含 summary 段**（除非 §步骤 1 Step 1 命中纯日期条件 1-4）
+- [ ] summary 是 2-5 词 ASCII kebab-case，≤ 30 字符
+- [ ] **未用「内容笼统 / 主题分散 / 会议型日志」等语义借口退化纯日期**
+- [ ] 同日已有旧文件时，编辑不改名（文件名稳定性）
 - [ ] frontmatter 含必填字段，无 v0.2+ 字段
 - [ ] 4 段全部存在（哪怕为空 `{{}}`）
 - [ ] 反问不超过 2 轮；用户拒绝时停止

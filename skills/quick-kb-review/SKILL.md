@@ -11,6 +11,7 @@ source_of_truth:
   - docs/DESIGN.md §6.6（价值维度）· §7.1（manager）
   - docs/SKILLS_SPEC.md §7
   - docs/dev/v0.2-loops.md WP6
+  - references/filename-summary-rules.md（review 报告文件名 summary 提炼）
 ---
 
 # quick-kb-review（v0.2 基础版）
@@ -125,14 +126,19 @@ quick-kb-manager-agent(
 ### 步骤 4 · 生成健康报告
 
 写入 `05_outputs/reviews/<period>/` 下，文件名规则：
-- **新建**：`<date-token>-<summary>.md`，其中 summary 由 LLM 从报告主线主题提炼 2-5 词 kebab-case（如 `rag-focus-week` / `q3-stabilization`）
+- **新建**：`<date-token>-<summary>.md`，其中 summary **必须**按 [`filename-summary-rules.md`](../../references/filename-summary-rules.md) §2 机械判定提炼 2-5 词 kebab-case（如 `rag-focus-week` / `q3-stabilization`）
   - weekly → `YYYY-Wxx-<summary>.md`
   - monthly → `YYYY-MM-<summary>.md`
   - quarterly → `YYYY-Qx-<summary>.md`
   - yearly → `YYYY-<summary>.md`
   - adhoc → `YYYY-MM-DD-<summary>.md`
 - **旧文件优先**：同周期若已存在任何形式的报告（纯日期 / 已带 summary）→ **编辑既有文件，不重新提炼 summary，不改名**（与 daily §步骤 1 同样的稳定性约束）
-- summary 不可提炼（数据稀疏 / 主题分散）→ 退为纯日期 / 纯周期 token
+- **summary 提炼机械判定**（按 [`filename-summary-rules.md`](../../references/filename-summary-rules.md) §2）：
+  - **Step 1 强制纯周期 token**（命中任一即 `<date-token>.md`）：① 报告四维度全空 ② 实质字符 < 5 ③ 仅元描述无事件词
+  - **Step 2 未命中 → 必须提炼** 2-5 词 ASCII kebab-case（如 `rag-eval` / `stabilization` / `auth-incident` / `m2-review`）
+- **禁止语义绕过**：严禁用「维度多 / 主题分散 / 数据稀疏 / 周报难归纳」等借口退化为纯周期 token
+  - 错误反例：主线是 RAG 评估调试 → ❌ `2026-W32.md`（借口「周报维度多」）→ ✅ `2026-W32-rag-eval.md`
+  - 错误反例：季度稳定化为主 → ❌ `2026-Q3.md`（借口「季度主题分散」）→ ✅ `2026-Q3-stabilization.md`
 
 #### 健康指标表
 
@@ -212,7 +218,7 @@ quick-kb-manager-agent(
 - yearly：`05_outputs/reviews/yearly/YYYY-<summary>.md`
 - adhoc：`05_outputs/reviews/adhoc/YYYY-MM-DD-<summary>.md`
 
-> `<summary>` 由 LLM 从报告主线提炼 2-5 词 kebab-case；同周期已存在旧文件 → 编辑不改名（详见 §步骤 4）。
+> `<summary>` **必须**按 [`filename-summary-rules.md`](../../references/filename-summary-rules.md) §2 机械判定提炼 2-5 词 ASCII kebab-case；同周期已存在旧文件 → 编辑不改名（详见 §步骤 4）。**禁止**用「维度多 / 主题分散」等语义借口退化为纯周期 token。
 
 ### 5.2 报告结构
 
@@ -252,6 +258,9 @@ quick-kb-manager-agent(
 ## 9. 自检清单
 
 - [ ] 报告写入正确路径
+- [ ] **新建报告文件名含 summary 段**（除非 §步骤 4 Step 1 命中纯周期条件）
+- [ ] **未用「维度多 / 主题分散 / 数据稀疏 / 周报难归纳」等语义借口退化纯周期 token**
+- [ ] 同周期已有报告文件时，编辑不改名
 - [ ] 健康指标表含全部指标（含阈值对照）
 - [ ] refresh_value 已更新 value.reuse
 - [ ] 待办清单按优先级排序，每条挂技能调用

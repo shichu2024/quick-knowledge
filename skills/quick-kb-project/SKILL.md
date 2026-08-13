@@ -12,6 +12,7 @@ source_of_truth:
   - docs/SKILLS_SPEC.md §10
   - docs/AGENTS_SPEC.md §3 / §3.8
   - docs/dev/v0.3-assistant.md WP5
+  - references/filename-summary-rules.md（progress 文件名 summary 提炼）
 ---
 
 # quick-kb-project（v0.3）
@@ -117,9 +118,13 @@ source_of_truth:
 
 2. 追加进展：
    - progress/<YYYY-MM-DD>-<summary>.md（用 daily 模板简化版）
-     - `<summary>` 由 LLM 从本次进展提炼 2-5 词 kebab-case（如 `auth-bug-fix` / `demo-dry-run`）
+     - **summary 提炼**严格按 [`filename-summary-rules.md`](../../references/filename-summary-rules.md) §2 机械判定：
+       - **Step 1 强制纯日期清单**（命中任一即 `progress/<YYYY-MM-DD>.md`）：① 进展字段全空 ② 实质字符 < 5 ③ 仅元描述无事件词
+       - **Step 2 未命中 → 必须提炼** 2-5 词 ASCII kebab-case（如 `auth-impl` / `demo-dry-run` / `vector-db-blocker` / `m2-done`）
+     - **禁止语义绕过**：严禁用「进展太短」「卡点描述笼统」「里程碑完成不是主题」等借口退化为纯日期
+     - 错误反例：输入「今天实现了登录流程」→ ❌ `progress/2026-08-13.md`（借口「实现太简单」）→ ✅ `progress/2026-08-13-auth-impl.md`
+     - 错误反例：输入「卡在向量库选型上」→ ❌ 纯日期（借口「卡点太短」）→ ✅ `progress/2026-08-13-vector-db-blocker.md`
      - 同日已有 `progress/<YYYY-MM-DD>*.md` → 编辑既有文件，不重新提炼 summary，不改名
-     - 内容不可提炼 → 退为纯 `progress/<YYYY-MM-DD>.md`
    - 含：完成 / 卡点 / 下一步
 
 3. 更新 _readme.md：
@@ -315,6 +320,9 @@ source_of_truth:
 ### update
 
 - [ ] progress/ 追加新进展（不覆盖）
+- [ ] **新建 progress 文件名含 summary 段**（除非 §5 步骤 2 Step 1 命中纯日期条件）
+- [ ] **未用「进展太短 / 卡点笼统 / 里程碑不是主题」等语义借口退化纯日期**
+- [ ] 同日已有 progress 文件时，编辑不改名
 - [ ] _readme.md 的 updated 字段刷新
 - [ ] Decision Ledger 回填提醒：扫描 actual/lesson 为空的条目并输出「⏳ DEC-00X 实施已 N 天」
 
