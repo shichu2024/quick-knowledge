@@ -286,6 +286,8 @@ domain: {{domain}}
 | 动作 | 细则 | 幂等保证 |
 |------|------|---------|
 | 补缺失模板 | 按 §3.3 三级回退探测，将 vault `99_system/templates/{zh,en}/` 中缺失的模板文件补齐 | 已存在同名文件则跳过，不覆盖 |
+| **模板完整性校验（v1.5 WP1）** | 对 vault 内已存在的每个模板文件计算 SHA-256，与仓库源 `templates/{zh,en}/<name>.md` 比对。**不一致**（用户手改或旧版残留）→ 在 upgrade 报告标 ⚠，**询问**用户是否覆盖（默认不覆盖，保留用户改动） | SHA-256 一致则跳过；不一致未确认则不动 |
+| 补缺失 schema | 将 `references/frontmatter-schema-v1.json` 复制到 vault `99_system/config/frontmatter-schema.json`（若缺失） | 已存在则跳过 |
 | 补缺失目录 | 按 §2 骨架清单检查 `00_inbox/` ~ `99_system/` 下的目录，缺失则创建并放 `.gitkeep` | 已存在目录则跳过 |
 | 合并 config 新字段 | 读取 `99_system/config/kb.config.yaml`，将当前技能版本新增的字段（如 `domain_taxonomy`）以注释默认值形式追加 | 已存在同名字段则跳过，不覆盖已有值 |
 
@@ -419,6 +421,7 @@ runtime_hint: claude-code
 - [ ] `99_system/config/kb.config.yaml` 存在且 `language` 字段有效
 - [ ] `99_system/templates/zh/` 与 `99_system/templates/en/` 各含 12 个模板文件（共 24 个）
 - [ ] `99_system/config/frontmatter-schema.json` 存在（v1.5 WP3，normalize schema_check 依赖）
+- [ ] **upgrade 场景**：24 个模板 SHA-256 已与仓库源比对，不一致项已 ⚠ 标注（v1.5 WP1）
 - [ ] `00_inbox/`、`02_areas/`、`01_resources/`、`07_principles/`、`06_wiki/`、`05_outputs/`、`03_goals/`、`04_projects/`、`98_archive/`、`99_system/` 顶层目录齐全
 - [ ] 每个空叶子目录含 `.gitkeep`
 - [ ] 每个领域至少一个 `_moc.md`

@@ -44,8 +44,11 @@ source_of_truth:
 ### 做
 
 - 状态检查（提醒未关闭的关联项）
-- 迁移到 `98_archive/<type>/` 子目录
-- 更新指向归档对象的 wikilinks
+- **copy + stub 模式归档**（v1.5 WP5 定档）：
+  - 原位置保留 stub 文件（frontmatter 加 `status: archived` + `archive_meta.redirect_to: [[98_archive/<type>/<slug>]]` + 正文一行「已归档，见 [[...]]」）
+  - 完整内容复制到 `98_archive/<type>/<slug>.md`
+  - 理由：保留 wikilink 解析路径（原位置仍可访问），断链率最低；stub 是显式标记，不依赖隐式元数据
+- 更新指向归档对象的 wikilinks（target 字符串加「(已归档)」后缀）
 - status → archived
 - 生成归档记录（archive_index）
 - 可恢复（unarchive）
@@ -54,7 +57,7 @@ source_of_truth:
 
 - ❌ 不删除笔记（永远可恢复）
 - ❌ 不派生 experience（归 project archive）
-- ❌ 不改 frontmatter 的 relations 内容（仅 status）
+- ❌ 不改 relations 的**类型结构**（supports 仍 supports）—— 但 relations 内的 **target 字符串**可加「(已归档)」后缀（v1.5 WP5 边界澄清）
 
 ---
 
@@ -88,30 +91,37 @@ source_of_truth:
    - 询问：是否继续？
    - 用户确认后进入迁移
 
-4. 迁移：
-   - 决定目标路径：98_archive/<type>/<原相对路径>
-     · 98_archive/concepts/<...>
-     · 98_archive/resources/<...>
-     · 98_archive/ideas/<...>
-     · 98_archive/decisions/<...>（孤立 decision，非项目内）
-     · 98_archive/materials/<...>（过期素材）
-   - 移动文件（保留原相对结构）
+4. 迁移（**copy + stub 模式 · v1.5 WP5 定档**）：
+   4.1 决定归档目标路径：98_archive/<type>/<原相对路径>
+       · 98_archive/concepts/<...>
+       · 98_archive/resources/<...>
+       · 98_archive/ideas/<...>
+       · 98_archive/decisions/<...>（孤立 decision，非项目内）
+       · 98_archive/materials/<...>（过期素材）
+   4.2 **copy**：完整内容复制到归档路径（保留原 frontmatter 全字段 + 正文）
+   4.3 **stub**：原位置文件改写为 stub，含：
+       - frontmatter：status: archived + updated: <date> + archive_meta 段（见 5）
+       - 正文：仅一行「> 已归档，完整内容见 [[98_archive/<type>/<slug>]]」
+       - 理由：保留原 wikilink 解析路径，断链率最低
 
-5. 更新原笔记 frontmatter：
+5. 更新 stub frontmatter（原文件位置）：
    - status: active/draft → archived
    - updated: <date>
-   - 追加 archive_meta 段（v0.4 新增可选字段）：
+   - 追加 archive_meta 段（v0.4 + v1.5 WP5）：
      archived_at: <date>
      archive_reason: <reason>
+     redirect_to: [[98_archive/<type>/<slug>]]   # v1.5 WP5 新增
 
-6. 更新指向此笔记的 wikilinks（关键）：
-   - 扫描全库含 [[X]] 的笔记
-   - 在每处添加标注：「[[X]] (已归档)」
+6. 更新指向此笔记的 wikilinks（v1.5 WP5 边界澄清）：
+   - 扫描全库含 [[X]] 的笔记（含 frontmatter.relations 内的 target 与正文 wikilink）
+   - **relations 类型结构不动**（supports 仍 supports，evolves 仍 evolves）
+   - **target 字符串可加后缀**：[[X]] → [[X]]（已归档）或改为 [[98_archive/<type>/X|X (已归档)]]
    - 不删除 wikilink（保持可追溯）
-   - 若 dead link 严格模式开启（kb.config.yaml）→ 改为 [[98_archive/<type>/X|X (已归档)]]
+   - 严格模式（kb.config.yaml.dead_link_strict=true）→ 改为 path-qualified 形式
+   - 幂等：已含「(已归档)」后缀的不再重复添加
 
-7. 写入 archive_index：
-   98_archive/_index.md 追加：
+7. 写入 archive_index（v1.5 WP5 命名统一）：
+   98_archive/_archive-index.md 追加：
    - [[98_archive/<type>/<原路径>|<title>]] · 归档于 <date> · 原因：<reason>
 
 8. contradicts 提示（concept 类型 · 仅提示不自动改）：
@@ -130,15 +140,16 @@ source_of_truth:
 ## 5. 工作流 · unarchive
 
 ```
-1. 解析 target（同 archive）
+1. 解析 target（同 archive · 支持归档副本路径或原 stub 路径）
 
-2. 反向迁移：
+2. 反向迁移（copy + stub 反向 · v1.5 WP5）：
    98_archive/<type>/<...> → <原路径>
-   - 从 archive_meta 读原路径（若记录）
-   - 若原路径已不存在 → 恢复到原位置
-   - 若原路径已被新笔记占用 → 询问用户（覆盖 / 重命名 / 取消）
+   - 从 archive_meta.redirect_to 或 archive_meta 读原路径（若记录）
+   - 用归档副本完整内容覆盖原 stub
+   - 若原路径已被新笔记占用（非 stub）→ 询问用户（覆盖 / 重命名 / 取消）
+   - 删除归档副本（unarchive 后归档路径不保留）
 
-3. 更新 frontmatter：
+3. 更新 frontmatter（原位置恢复后的文件）：
    - status: archived → active（或原值，若 archive_meta 记录）
    - 移除 archive_meta 段
    - updated: <date>
@@ -147,7 +158,7 @@ source_of_truth:
    - 移除「(已归档)」标注
    - 恢复 [[X]] 原形
 
-5. 从 98_archive/_index.md 移除条目
+5. 从 98_archive/_archive-index.md 移除条目（v1.5 WP5 命名统一）
 
 6. 输出报告
 ```
@@ -174,8 +185,8 @@ source_of_truth:
 ✅ 已归档：3 条笔记
 
 📋 处理详情：
-   - [[concept/X]] → 98_archive/concepts/X.md
-     · 被 5 处引用 → 已标注「(已归档)」
+   - [[concept/X]] → 98_archive/concepts/X.md（copy）+ 原位置保留 stub（v1.5 WP5）
+     · 被 5 处引用 → wikilink target 加「(已归档)」后缀
      · status: active → archived
      · ⚠ 参与 contradicts（对方：[[concept/Y]]）→ 建议人工评估是否消解
    - [[resource/Y]] → 98_archive/resources/Y.md
@@ -183,7 +194,7 @@ source_of_truth:
    - [[idea/Z]] → 98_archive/ideas/Z.md
      · 被 2 处引用 → 已标注
 
-📝 archive_index 已更新：98_archive/_index.md
+📝 archive_index 已更新：98_archive/_archive-index.md（v1.5 WP5 命名统一）
 ```
 
 ### unarchive 成功
@@ -237,12 +248,13 @@ source_of_truth:
 - [ ] target 解析正确（单条/多条/wikilink）
 - [ ] check 模式不执行归档
 - [ ] archive 前用户确认（必须）
-- [ ] 迁移到正确的 98_archive/<type>/ 子目录
+- [ ] **copy + stub 模式**（v1.5 WP5）：归档副本完整 + 原位置 stub 含 redirect_to
+- [ ] stub frontmatter 含 archive_meta 段（archived_at + reason + redirect_to）
+- [ ] relations 类型结构不动，target 字符串加「(已归档)」后缀（v1.5 WP5 边界）
+- [ ] 归档 index 命名为 `_archive-index.md`（v1.5 WP5 统一）
 - [ ] frontmatter status → archived
-- [ ] archive_meta 段记录 archived_at + reason + 原路径
 - [ ] 指向归档对象的 wikilinks 全部标注「(已归档)」
-- [ ] 98_archive/_index.md 追加条目
-- [ ] unarchive 完整恢复（含 wikilink）
+- [ ] unarchive 完整恢复（含 wikilink + 移除归档副本）
 - [ ] 已归档笔记二次归档报错
 - [ ] decision 类型提醒先走 project archive
 - [ ] concept 且含 contradicts 时报告中提示「建议人工评估是否消解」
@@ -257,3 +269,6 @@ source_of_truth:
 | wikilink 标注「(已归档)」而非删除 | dev doc 要求「不删除可恢复」+「不产生死链」 | docs/dev/v0.4-extensions.md WP2 + DESIGN §10 |
 | 新增 check / unarchive action | dev doc 要求「可恢复」，unarchive 为反向操作；check 为预览 | docs/dev/v0.4-extensions.md WP2 |
 | 不派生 experience | 与 project archive 区分；纯归档无 lesson 闭环 | docs/SKILLS_SPEC.md §11 边界 |
+| v1.5 WP5 定档 copy + stub 模式 | 原 spec 「迁移」语义模糊（move vs copy）；copy+stub 保留原 wikilink 解析路径，断链率最低 | docs/dev/v1.5-cross-skill-consistency.md WP5 |
+| v1.5 WP5 relations 边界澄清 | 「不改 relations」原指类型结构不动；target 字符串加后缀属 wikilink 维护范畴 | 同上 |
+| v1.5 WP5 index 命名统一 `_archive-index.md` | 原 `_index.md` 与目录默认索引混淆 | 同上 |

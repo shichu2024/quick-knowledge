@@ -59,7 +59,7 @@ source_of_truth:
 | 项目 `project` | 是 | 名称（slug） |
 | 描述 `description` | init 时必填 | 项目要解决什么问题 |
 | 关联目标 `goal` | 否 | goal slug |
-| 模板 `template` | 否 | 默认 `templates/{zh,en}/project.md` |
+| 模板 `template` | 否 | 默认读 vault `99_system/templates/{lang}/project.md`（由 init 铺设；v1.5 WP1 统一表述） |
 | 归档复盘 `retrospective` | archive 时可选 | 是否生成复盘草稿 |
 
 ---
@@ -71,7 +71,7 @@ source_of_truth:
 
 2. 创建结构：
    04_projects/<slug>/
-   ├── _readme.md         # 用 templates/zh/project.md
+   ├── _readme.md         # 用 99_system/templates/{lang}/project.md（v1.5 WP1）
    ├── _moc.md            # 项目内索引
    ├── notes/             # 项目笔记
    ├── decisions/         # Decision Ledger

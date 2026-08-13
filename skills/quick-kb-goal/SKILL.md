@@ -72,7 +72,7 @@ source_of_truth:
    - 关联领域 domain
    - 情境 context（为什么立这个目标）
 
-2. 生成 03_goals/<slug>/goal.md（用 templates/{zh,en}/goal.md）：
+2. 生成 03_goals/<slug>/goal.md（用 vault `99_system/templates/{lang}/goal.md`，由 init 铺设；v1.5 WP1 统一表述）：
    - title / context / deadline / domain
    - 成功标准（success_criteria）
    - 学习路径段：留空待 step 4
