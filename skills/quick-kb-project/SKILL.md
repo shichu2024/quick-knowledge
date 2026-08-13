@@ -325,7 +325,9 @@ source_of_truth:
 
 - [ ] 04_projects/<slug>/ 创建完整子目录结构
 - [ ] _readme.md 含 frontmatter（type: project, status: active）
-- [ ] 扫描 `07_principles/` 完成经验召回（new_project_init 事件）
+- [ ] 经验召回（二选一 · v1.5 WP8）：
+      · 正常态：调 quick-kb-memory-agent（intent=proactive_suggest，new_project_init 事件）
+      · 降级态：手动 Grep `07_principles/experiences/` 全部失败案例 + ⚠ 标注（库内 < 50 条时关闭）
 - [ ] 召回结果写入「经验复用建议」段（按 experience/pattern/principle 分类）
 - [ ] 失败教训显式 ⚠ 标注
 - [ ] 关联 goal 双向 wikilink

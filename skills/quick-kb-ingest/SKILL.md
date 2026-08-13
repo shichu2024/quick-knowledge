@@ -66,6 +66,21 @@ source_of_truth:
 
 读取候选笔记全文。识别 `capture_type`：idea / web-clip / pdf / meeting / ai-dialog / reading。
 
+**`capture_type → note_type` 默认映射（v1.5 WP7 · research-agent 可覆盖）**：
+
+| capture_type | 默认 note_type | 说明 |
+|--------------|---------------|------|
+| `idea` | `concept` | 用户想法通常提炼为 concept |
+| `web-clip` | `resource` | 网页素材归 resource |
+| `pdf` | `resource` | 论文/报告归 resource；若内容是方法论 → concept |
+| `meeting` | `concept` | 会议决议提炼为 concept |
+| `ai-dialog` | `concept` | AI 对话中的观点提炼为 concept |
+| `reading` | `resource` | 书籍/课程归 resource |
+
+> research-agent `extract_atoms` 返回的 `note_type` 优先于本默认映射（按内容实质判定）。映射冲突时以 research-agent 输出为准 + 在 ingest 报告标 ⚠。
+
+**保留 `capture_type` 作溯源（v1.5 WP7）**：入库笔记 frontmatter 加 `source.capture_type: <原值>`，便于后续按来源筛选（如「找出所有来自会议的 concept」）。
+
 #### 2.2 抽取原子观点（调 `quick-kb-research-agent` intent=`extract_atoms`）
 
 操作：
@@ -279,7 +294,12 @@ source:
 - [ ] frontmatter 含完整 v0.2 字段（含 relations/context/value.reuse）
 - [ ] 无 v0.3 字段（maturity/value.impact/value.uniqueness）
 - [ ] 抽取失败的笔记标 `status: draft`
-- [ ] 多观点素材被正确拆分（调 quick-kb-research-agent.extract_atoms 按 §2.2 原子化规则）
+- [ ] 原子观点拆分（二选一 · v1.5 WP8）：
+      · 正常态：调 quick-kb-research-agent（intent=extract_atoms，按 §2.2 规则）
+      · 降级态：手动按「含且/并且/同时的复合句优先拆」+ ⚠ 标注；confidence 给保守值 30-40
+- [ ] 冲突检测（二选一 · v1.5 WP8）：
+      · 正常态：调 manager-agent.recommend_relations + memory-agent.present_conflicts
+      · 降级态：手动 Grep 同 domain 笔记找对立语义候选 + ⚠ 标注「未启用语义冲突检测」
 - [ ] contradicts 候选已建立双向关系 + 提示补充 context
 - [ ] 文件名 kebab-case
 - [ ] 处理报告含统计 + 下一步建议

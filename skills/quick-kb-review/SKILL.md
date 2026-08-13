@@ -262,7 +262,9 @@ quick-kb-manager-agent(
 - [ ] **未用「维度多 / 主题分散 / 数据稀疏 / 周报难归纳」等语义借口退化纯周期 token**
 - [ ] 同周期已有报告文件时，编辑不改名
 - [ ] 健康指标表含全部指标（含阈值对照）
-- [ ] refresh_value 已更新 value.reuse
+- [ ] value.reuse 刷新（二选一 · v1.5 WP8）：
+      · 正常态：调 quick-kb-manager-agent（intent=refresh_value）
+      · 降级态：手动统计每条笔记的入链数作为 reuse 近似值 + ⚠ 标注「未含查询命中数 + Connect 推荐频次」
 - [ ] 待办清单按优先级排序，每条挂技能调用
 - [ ] 无 v0.3 字段（maturity/KS/structure drift）出现在报告
 - [ ] 主动提醒遵守限流（≤3 / 库 <50 关闭）

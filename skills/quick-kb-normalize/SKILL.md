@@ -410,7 +410,9 @@ quick-kb-normalize scope=<domain|all> action=regroup [dry-run=true]
 - [ ] scope 扫描正确（all / domain / legacy）
 - [ ] 字段补全取默认值（非空字符串）
 - [ ] 标签归一对照 tags_vocabulary
-- [ ] related → relations 调用 manager_agent（相似度阈值 0.6）
+- [ ] related → relations 迁移（二选一 · v1.5 WP8）：
+      · 正常态：调 manager-agent.recommend_relations 判定类型（相似度阈值 0.6）
+      · 降级态：全部移到 relations.supports + 标注「⚠ 未分类，待人工」（详见 §9 降级路径）
 - [ ] 不可判断的 related 保留（不强行分类）
 - [ ] 文件名 kebab-case 化 + 冲突解决
 - [ ] wikilink 引用同步更新（重命名后）

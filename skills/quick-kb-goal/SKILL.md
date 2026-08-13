@@ -274,8 +274,12 @@ source_of_truth:
 - [ ] 03_goals/<slug>/goal.md 创建
 - [ ] frontmatter 含 type: goal, status: active, deadline, domain
 - [ ] 成功标准可验证（非空泛描述）
-- [ ] 调 quick-kb-research-agent 生成学习路径（path_source=recommend 时，按 §2 规则）
-- [ ] 调 quick-kb-memory-agent 召回领域认知资产（07_principles/<domain>/）
+- [ ] 学习路径生成（二选一 · v1.5 WP8）：
+      · 正常态：调 quick-kb-research-agent（intent=summarize）
+      · 降级态：goal.md 学习路径段标「⚠ 路径推荐失败，请手动填写」
+- [ ] 认知资产召回（二选一 · v1.5 WP8）：
+      · 正常态：调 quick-kb-memory-agent（intent=proactive_suggest，限定 07_principles/<domain>/）
+      · 降级态：手动 Grep 07_principles/<domain>/ 全部 principle/belief + ⚠ 标注
 - [ ] 学习路径每节点关联库内笔记 OR 标 [Capture 缺口]
 - [ ] 里程碑 3-5 个，每个带目标日期
 - [ ] _moc.md 创建
