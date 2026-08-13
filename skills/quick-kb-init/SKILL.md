@@ -49,7 +49,7 @@ source_of_truth:
    - 输出提示：
 
    ```
-   ⚠ 已检测到 quick-knowledge vault（初始化于 2026-08-08，版本 v0.1）。
+   ⚠ 已检测到 quick-knowledge vault（初始化于 2026-08-13，schema v1 / skill v1.4.1）。
      - 如需重新初始化，请手动删除 .kb-initialized 与 99_system/ 后重试。
      - 如需升级配置，编辑 99_system/config/kb.config.yaml。
    ```
@@ -113,8 +113,8 @@ source_of_truth:
 ├── skills/                # 软链或复制本框架技能（v0.1 仅创建空目录）
 ├── agents/                # v0.2+ 才有 agent 文件
 ├── templates/
-│   ├── zh/                # v0.1 铺设 4 个模板
-│   └── en/                # v0.1 创建空目录，v0.2 填充
+│   ├── zh/                # v1.4 铺设全部 12 个模板
+│   └── en/                # v1.4 铺设全部 12 个模板
 ├── attachments/
 ├── workflows/
 ├── prompts/
@@ -151,18 +151,48 @@ domains:                           # 已注册领域（与 02_areas/ 子目录�
 #   ai-engineering: [rag, agent, eval]
 ```
 
-#### 3.2 `99_system/templates/zh/` 下铺设 4 个 v0.1 模板
+#### 3.2 `99_system/templates/{zh,en}/` 下铺设全部 12 个模板
 
-复制仓库 `templates/zh/` 下的：
+将仓库 `templates/zh/` 与 `templates/en/` 下的全部 12 个模板文件复制到 vault 的 `99_system/templates/{zh,en}/`：
+
+**基础 4 类（v0.1 起即有）**：
 
 - `note-concept.md`
 - `note-idea.md`
-- `daily.md`
 - `note-resource.md`
+- `daily.md`
 
-若仓库本身被克隆安装，则从仓库根 `templates/zh/` 复制；若 runtime 提供 inline 内嵌，按 SKILL 提示词内嵌版本写入。**已存在同名文件则跳过，不覆盖。**
+**认知资产 8 类（v1.4 起，与 `07_principles/` 子目录一一对应）**：
 
-#### 3.3 `06_wiki/_index.md`（全局导航页占位）
+- `experience.md`
+- `principle.md`
+- `belief.md`
+- `decision.md`
+- `goal.md`
+- `project.md`
+- `pattern.md`
+- `moc.md`
+
+两种语言各 12 个文件，共 24 个。**已存在同名文件则跳过，不覆盖。**
+
+#### 3.3 模板路径三级回退
+
+模板文件按以下顺序探测，命中即复制（每语言独立探测，混合命中合法）：
+
+| 优先级 | 源 | 探测路径 | 适用场景 |
+|--------|-----|---------|---------|
+| ① 最高 | 技能自带 | `skills/quick-kb-init/templates/{zh,en}/<filename>` | 技能目录包含 `templates/` 子目录（推荐，随技能包分发） |
+| ② 中 | 仓库根 | `$QUICK_KB_REPO_ROOT/templates/{zh,en}/<filename>` | 环境变量 `QUICK_KB_REPO_ROOT` 指向 quick-knowledge 仓库根 |
+| ③ 兜底 | SKILL 内联 | 本 SKILL.md 内嵌的模板文本（与 `templates/zh/` 字节级一致） | 以上两级均不存在时（如纯提示词场景，无文件系统） |
+
+**探测逻辑**：
+
+1. 对每个模板文件（如 `note-concept.md`），依次检查优先级 ① → ② → ③。
+2. 命中第一级可用源即从该源复制，**不为同一文件降级到更低优先级**。
+3. 若某文件在所有级别均不可用，写入占位模板（仅 frontmatter + 标题），并在报告中标 ⚠。
+4. **幂等**：目标已存在同名文件则跳过，不覆盖。
+
+#### 3.4 `06_wiki/_index.md`（全局导航页占位）
 
 ```markdown
 ---
@@ -188,7 +218,7 @@ tags:
 - _（待 quick-kb-review 列出）_
 ```
 
-#### 3.4 `00_inbox/_readme.md`（inbox 用法说明）
+#### 3.5 `00_inbox/_readme.md`（inbox 用法说明）
 
 ```markdown
 # Inbox · 采集入口
@@ -212,7 +242,7 @@ tags:
 3. inbox 原始素材**永不删除**，由 review 闭环统一清理
 ```
 
-#### 3.5 `02_areas/<domain>/_moc.md`（每个领域一份）
+#### 3.6 `02_areas/<domain>/_moc.md`（每个领域一份）
 
 ```markdown
 ---
@@ -235,6 +265,31 @@ domain: {{domain}}
 ## 待补充
 - [ ]
 ```
+
+#### 3.7 upgrade 子流程（v1.4 起）
+
+当步骤 1 检测到 `.kb-initialized` 已存在时，**不立即结束**，而是先读取其 `schema_version` 与 `skill_version`，与当前技能版本比较：
+
+```
+.kb-initialized.schema_version  <  当前技能 schema_version？
+```
+
+- **版本一致** → 走步骤 1 原有逻辑（提示已初始化，结束流程）。
+- **版本不一致（需升级）** → 执行以下补缺操作，**全部幂等**：
+
+| 动作 | 细则 | 幂等保证 |
+|------|------|---------|
+| 补缺失模板 | 按 §3.3 三级回退探测，将 vault `99_system/templates/{zh,en}/` 中缺失的模板文件补齐 | 已存在同名文件则跳过，不覆盖 |
+| 补缺失目录 | 按 §2 骨架清单检查 `00_inbox/` ~ `99_system/` 下的目录，缺失则创建并放 `.gitkeep` | 已存在目录则跳过 |
+| 合并 config 新字段 | 读取 `99_system/config/kb.config.yaml`，将当前技能版本新增的字段（如 `domain_taxonomy`）以注释默认值形式追加 | 已存在同名字段则跳过，不覆盖已有值 |
+
+**升级完成后**：
+
+1. 更新 `.kb-initialized` 的 `schema_version` 与 `skill_version` 为当前值。
+2. 输出升级报告，列出补缺的文件 / 目录 / config 字段。
+3. 结束流程（不进入后续步骤 4 ~ 6）。
+
+> upgrade 子流程是 init 的「增量补缺」模式：只补不删、只补不改，确保用户自定义内容永不被破坏。
 
 ### 步骤 4 · 写入 vault 根 `_readme.md`
 
@@ -263,16 +318,27 @@ domain: {{domain}}
 
 ### 步骤 5 · 写入 `.kb-initialized` 标记
 
-```
-quick-knowledge vault
-version: v0.1
-initialized_at: {{ISO datetime}}
-language: {{language}}
-domains: {{comma-separated}}
-runtime_hint: {{auto-detected}}
+采用 YAML frontmatter 格式，便于 upgrade 子流程解析 `schema_version`：
+
+```yaml
+---
+schema_version: 1
+skill_version: v1.4.1
+initialized_at: 2026-08-13
+language: zh
+domains: general,programming/python
+runtime_hint: claude-code
+---
 ```
 
-> 标记文件**仅一行一个字段**，避免 YAML 解析依赖。`runtime_hint` 记录 init 时检测到的 runtime（claude-code / codex / cursor / opencode / unknown），供后续诊断。
+| 字段 | 说明 |
+|------|------|
+| `schema_version` | vault 结构 schema 版本号（整数递增），用于 upgrade 子流程判断是否需补缺 |
+| `skill_version` | 初始化时使用的技能版本号（如 `v1.4.1`） |
+| `initialized_at` | 初始化日期（`YYYY-MM-DD`） |
+| `language` | 模板语言（`zh` / `en`） |
+| `domains` | 初始化时注册的领域列表（逗号分隔） |
+| `runtime_hint` | init 时检测到的 runtime（`claude-code` / `codex` / `cursor` / `opencode` / `unknown`），供后续诊断 |
 
 ### 步骤 6 · 输出报告
 
@@ -286,7 +352,7 @@ runtime_hint: {{auto-detected}}
   创建目录：N 个（含 .gitkeep）
   系统文件：
     - 99_system/config/kb.config.yaml
-    - 99_system/templates/zh/ × 4
+    - 99_system/templates/{zh,en}/ × 12 each（共 24 个）
     - 06_wiki/_index.md
     - 00_inbox/_readme.md
     - 02_areas/{{domain}}/_moc.md × N
@@ -315,7 +381,7 @@ runtime_hint: {{auto-detected}}
 | `07_principles/` | 创建但不写 | v0.3 认知资产 |
 | `04_projects/`, `03_goals/`, `06_wiki/mocs/`, `06_wiki/maps/` | 创建但不写 | v0.2+ connect / v0.3 goal/project |
 | `98_archive/` | 创建但不写 | v0.3+ project / v0.4 archive |
-| `99_system/templates/en/` | 创建空目录 | v0.2 英文模板 |
+| `99_system/templates/en/` | ✓ 铺设 12 个模板 | init（v1.4 起，与 zh 同步） |
 
 > **理由**：完整骨架让用户从 day 1 看到最终形态，避免后续升级时频繁迁移目录结构。v0.1 不使用的目录靠 `_moc.md` 占位或 `.gitkeep` 标注用途。
 
@@ -336,6 +402,7 @@ runtime_hint: {{auto-detected}}
 | 目录名冲突（已有同名非空目录） | 保留原内容，仅补缺的子目录与 `.gitkeep` |
 | 磁盘空间不足 | 报错并清理已写入的临时文件（保持幂等） |
 | 模板源缺失（仓库未带 `templates/zh/`） | 写入占位模板（仅 frontmatter + 标题），并在报告中标 ⚠ |
+| 模板源全缺失（①②③ 三级探测均未命中） | 内联模板兜底（与 `templates/zh/` 字节级一致），并在报告中标 ⚠ |
 
 ---
 
@@ -343,11 +410,12 @@ runtime_hint: {{auto-detected}}
 
 - [ ] vault 根含 `.kb-initialized` 与 `_readme.md`
 - [ ] `99_system/config/kb.config.yaml` 存在且 `language` 字段有效
-- [ ] `99_system/templates/zh/` 含 4 个模板文件
+- [ ] `99_system/templates/zh/` 与 `99_system/templates/en/` 各含 12 个模板文件（共 24 个）
 - [ ] `00_inbox/`、`02_areas/`、`01_resources/`、`07_principles/`、`06_wiki/`、`05_outputs/`、`03_goals/`、`04_projects/`、`98_archive/`、`99_system/` 顶层目录齐全
 - [ ] 每个空叶子目录含 `.gitkeep`
 - [ ] 每个领域至少一个 `_moc.md`
 - [ ] 二次执行：提示已初始化，不覆盖
+- [ ] upgrade 场景：版本不一致时补缺模板/目录/config 字段，不覆盖已有文件
 
 ---
 
@@ -358,3 +426,4 @@ runtime_hint: {{auto-detected}}
 | v0.1 创建完整骨架（而非 v0.1 子集） | 让用户从 day 1 看到最终形态，避免后续迁移 | DESIGN §4 是真相源；dev/v0.1-mvp.md WP2 亦明确「创建 DESIGN §4 目录骨架」 |
 | `confidence` 纳入 frontmatter 子集 | DESIGN §6.1 列为标准字段；WP4 ingest 需置信度初值规则 | 见 `references/frontmatter-v0.1.md` §2.1 |
 | `.kb-initialized` 用简单键值而非 YAML | 避免引入 YAML 解析依赖，便于跨平台 | 不冲突，SKILLS_SPEC §1 仅要求"记录版本号 + 日期" |
+| v1.4 起 `.kb-initialized` 改为 YAML frontmatter 格式 | upgrade 子流程（§3.7）需解析 `schema_version` / `skill_version` 做版本比较，YAML frontmatter 支持结构化字段读写 | 与 SKILLS_SPEC §1 兼容（仍含版本号 + 日期），仅格式升级 |

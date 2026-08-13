@@ -135,6 +135,13 @@ source_of_truth:
    - 关键决策若变化 → 在 decisions/ 新增 Decision Ledger
 
 4. 更新 _moc.md：纳入新笔记的索引
+
+5. Decision Ledger 回填提醒（输出报告段）：
+   扫描 decisions/*.md，对 frontmatter 中 actual: "" 或 lesson: "" 的条目：
+   - N 天 = today - decision.created_at（created_at 取文件名日期或 frontmatter date 字段）
+   - 在 update 输出报告中列出：
+     「⏳ DEC-00X 实施已 N 天，请回填 actual/lesson」
+   - 若无未回填条目 → 输出「✅ 所有 Decision Ledger 已回填」
 ```
 
 ---
@@ -146,6 +153,19 @@ source_of_truth:
    - 扫描 decisions/，列出 actual / lesson 仍为空的 Decision Ledger
    - 列出 notes/ 未关联 _moc 的笔记
    - 提示用户：「以下决策尚未补 actual/lesson，是否在归档前补齐？」
+
+1.5 归档前置门控（未回填 Decision Ledger 拦截）：
+   若步骤 1 扫描到 actual: "" 或 lesson: "" 的 Decision Ledger 条目：
+   - ⛔ 中止归档，输出警告：
+     「⚠ 以下 Decision Ledger 尚未回填 actual/lesson：
+       - DEC-00X（<title>）actual: "" lesson: ""
+       ...
+      请先补齐，或对无需回填的决策填写 lesson: skipped，
+      或使用 --force 强制归档。」
+   - 用户须满足以下任一条件才能继续归档：
+     a) 所有 Decision Ledger 的 actual 与 lesson 均已回填（含 lesson: skipped）
+     b) 显式传入 --force 参数（跳过拦截，但警告仍写入归档日志）
+   - 幂等：二次调用若条件已满足则直接放行，不重复警告
 
 2. 决策闭环（对每条 Decision Ledger）：
    2.1 补 actual（如未填）：与用户交互询问「实际结果如何？」
@@ -175,6 +195,23 @@ source_of_truth:
    3.4 检查可升格：lesson 中是否含可抽象的 principle/pattern 候选
        - 若用户确认 → 在 07_principles/principles/ 或 07_principles/patterns/ 新建
        - relations.evolves: [[<派生 experience>]]
+   3.5 contradicts 消解扫描（保守启发式 · 宁可漏消解不误消解）：
+       遍历本项目 Decision Ledger 的所有 lesson，对每条 lesson：
+       a) 全库扫描 frontmatter relations.contradicts 对，收集现存矛盾对列表
+       b) 对每对矛盾（笔记 A ↔ 笔记 B），检查 lesson 文本是否同时提及
+          A 与 B 双方——命中条件（全部满足才视为消解）：
+          · lesson 中出现 A 的笔记 title（或 wikilink [[A]]），且
+          · lesson 中出现 B 的笔记 title（或 wikilink [[B]]），或
+          · lesson 中同时命中 A 与 B 的 domain 关键词
+            （domain 关键词 = 双方 frontmatter domain 字段的交集词）
+       c) 若 lesson 同时命中双方 → 视为该 lesson 消解此矛盾对：
+          · 在笔记 A 与笔记 B 的 frontmatter 追加：
+            relations.resolved_by: [[07_principles/experiences/<派生 experience>]]
+          · 在笔记 A 与笔记 B 的 context 段追加标注：
+            「已由 [[07_principles/experiences/<派生 experience>]] 消解
+             （场景：<lesson 一句话摘要>）」
+       d) 若 lesson 仅命中一方 → 不动（宁可漏消解不误消解）
+       e) 幂等：笔记 frontmatter 已含 resolved_by 指向同一 experience → 跳过
 
 4. 迁移目录：
    04_projects/<slug>/ → 98_archive/projects/<slug>/
@@ -235,6 +272,10 @@ source_of_truth:
      - [[experience/2026-XX-XX-yyy]]
      - [[experience/2026-XX-XX-zzz]]
 
+🔗 contradicts 消解（若命中）：
+   - [[concept/A]] ↔ [[concept/B]] 已由 [[experience/2026-XX-XX-xxx]] 消解
+   - 已写入双方 resolved_by + context.conflict_note
+
 📊 复盘草稿：98_archive/projects/<slug>/retrospective.md
 
 🔄 状态更新：
@@ -281,13 +322,17 @@ source_of_truth:
 
 - [ ] progress/ 追加新进展（不覆盖）
 - [ ] _readme.md 的 updated 字段刷新
+- [ ] Decision Ledger 回填提醒：扫描 actual/lesson 为空的条目并输出「⏳ DEC-00X 实施已 N 天」
 
 ### archive
 
+- [ ] 归档前置门控：未回填 Decision Ledger 存在时中止归档（除非 --force 或 lesson: skipped）
 - [ ] 所有 Decision Ledger 的 actual/lesson 补全
 - [ ] 每条 lesson 派生为独立 experience 笔记
 - [ ] 派生 experience 含 derived_from + outcome + source.note
 - [ ] 原 Decision Ledger 含 derived_to（双向引用）
+- [ ] contradicts 消解扫描：lesson 同时命中双方才标记 resolved_by；仅命中一方不动
+- [ ] resolved_by 双向写入 + context.conflict_note 标注
 - [ ] 项目目录迁移到 98_archive/projects/
 - [ ] _readme.md status → archived, maturity → teachable
 - [ ] 复盘草稿含 expected vs actual 偏差分析

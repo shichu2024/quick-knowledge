@@ -52,6 +52,7 @@ source_of_truth:
 | `question` | ✓ | — | 自然语言问题 |
 | `scope` | 否 | 全库 | 领域 / 标签 / 全库；领域可含 `/` 嵌套（v1.4+，如 `programming/python`，扫叶子目录；单层 `programming` 扫全子树） |
 | `mode` | 否 | `strict` | `strict`（必须引用）/ `hybrid`（库内 + 推测分段） |
+| `include_archived` | 否 | `true` | `true`：归档笔记（`98_archive/`）正常参与召回（默认，向后兼容）；`false`：过滤掉 `98_archive/` 下的命中 |
 
 ---
 
@@ -93,6 +94,7 @@ reuse_factor      = log2(1 + value.reuse) / log2(1 + max_reuse_in_pool)
 - **每句结论必须挂引用**（`[[]]` 或 `source`）
 - 无法引用 → 不写（避免幻觉）
 - 召回为 0 → 明确说「库内未找到关于 X 的笔记」，建议 capture
+- **归档笔记标注**：命中 `98_archive/` 下的笔记时，引用后追加 `(📄 已归档 YYYY-MM-DD)`，日期取该笔记 frontmatter 的 `archived_at` 字段；若无 `archived_at` 字段则写 `(📄 已归档)`
 
 输出：
 
@@ -208,6 +210,7 @@ RAG 的核心是检索后生成 [[RAG 架构设计]]。
 - [ ] hybrid 模式库内/推测分段清晰
 - [ ] 查询日志已落 jsonl
 - [ ] 不修改任何笔记
+- [ ] 归档命中是否标注 (📄 已归档)
 
 ---
 

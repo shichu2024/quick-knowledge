@@ -68,6 +68,30 @@ relations:
   supersedes: []                           # A 取代了过期的 B（有向 A→B）
 ```
 
+### 3.0.1 反向键（自动补全，connect 写入）
+
+有向关系写入 A 的正向键时，自动在目标笔记 B 补对应反向键。反向键与正向键同 schema（`string[]`，元素为 wikilink），仅语义反向：
+
+```yaml
+relations:
+  evolved_by: ["[[RAG 架构设计]]"]         # B 被 A 演化自（A.evolves → B 的反向）
+  superseded_by: ["[[RAG v2]]"]            # B 被 A 取代（A.supersedes → B 的反向）
+  source_of: ["[[衍生笔记]]"]              # B 是 A 的衍生来源（A.derived_from → B 的反向）
+  refined_by: ["[[精炼版]]"]               # B 被 A 精炼（A.refines → B 的反向）
+```
+
+| 反向键 | 对应正向键 | 语义 |
+|--------|-----------|------|
+| `evolved_by` | `evolves` | B 被 A 演化自（A 在 evolves 中列出 B） |
+| `superseded_by` | `supersedes` | B 被 A 取代（A 在 supersedes 中列出 B） |
+| `source_of` | `derived_from` | B 是 A 的衍生来源（A 在 derived_from 中列出 B） |
+| `refined_by` | `refines` | B 被 A 精炼（A 在 refines 中列出 B） |
+
+**写入规则**：
+- 反向键由 connect 技能在写入正向键时自动补全（详见 `skills/quick-kb-connect/SKILL.md` §5.2.1）。
+- 补全幂等——已存在不重复追加。
+- 反向键为可选字段，结构不存在时视为空（不强制要求 4 键齐全）。
+
 ### 3.1 v0.2 写入时机
 
 | 时机 | 写入字段 | 来源 |

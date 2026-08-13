@@ -168,6 +168,8 @@ manager_agent.build_moc(
     → 手动补充 contradicts 笔记的 context
 ```
 
+> 💡 **下一步**：运行 `quick-kb-query` 验证检索效果，或 `quick-kb-stats` 查看知识库健康度。
+
 ---
 
 ## 5. 输出契约
@@ -176,11 +178,29 @@ manager_agent.build_moc(
 
 严格按 [`frontmatter-v0.2.md` §3](../../references/frontmatter-v0.2.md)。
 
+> **❌ 硬约束**：生成 MOC 条目时，`confidence` / `maturity` / `tags` / `status` / `domain` **必须逐字段从对应笔记 frontmatter 原样复制**，禁止从正文关键词推断。任何字段缺失 → 条目该字段留空 + 在 MOC 末尾「⚠ 字段缺失清单」列出，**禁止默认填充**。
+
 ### 5.2 MOC 路径
 
 `06_wiki/mocs/<domain>-moc.md`
 
 > **嵌套 domain（v1.4+）**：`scope` 含 `/` 时，MOC 文件名用 `-` 连接：`scope=programming/python` → `06_wiki/mocs/programming-python-moc.md`。
+
+#### 5.2.1 非对称关系反向补全
+
+写入有向关系时，自动在目标笔记补反向键：
+
+| 正向（A→B） | 自动补的反向（B→A） |
+|-------------|---------------------|
+| `evolves` | `evolved_by` |
+| `supersedes` | `superseded_by` |
+| `derived_from` | `source_of` |
+| `refines` | `refined_by` |
+| `supports` / `contradicts` | 对称，已在双方写入（保持现状） |
+
+**规则**：
+- 反向补全**幂等**——已存在不重复追加。
+- 删除 A 中正向关系后，B 的反向键**不自动删除**（保留人工痕迹，仅在报告列「孤儿反向键」）。
 
 ### 5.3 Canvas 路径
 
@@ -221,6 +241,7 @@ manager_agent.build_moc(
 - [ ] 既有 MOC 的人工修订段被保留
 - [ ] Canvas 在 Obsidian 缺失时正确跳过
 - [ ] 全局导航 `06_wiki/_index.md` 已更新
+- [ ] **MOC 字段 vs frontmatter 一致性自检**——生成 MOC 后立即 diff，不一致直接 fail（不再仅警告）
 
 ---
 

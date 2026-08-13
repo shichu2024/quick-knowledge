@@ -21,6 +21,7 @@
 | **v1.1** | `flow-restructure` | 目录流转制 + 路径硬约束 | 顶层目录 `NN_` 前缀 + source.url 绝对路径禁令（⚠️ BREAKING） |
 | **v1.2** | `ai-polish` | 用户手敲输入的 AI 润色提议 | capture 步骤 2.5 + daily 步骤 3.5 + 三选一确认 + 原文保存 |
 | **v1.3** | `skillopt-integration` | 行为评测与技能文本优化 | 自定义 SkillOpt benchmark `quickkb`（dataloader + rollout + adapter + 4 scorers）+ 51 golden cases（45 单点 + 6 J 类端到端）+ nightly mock 后端 workflow |
+| **v1.4** | `nested-domain` + `test-feedback-hardening` | 嵌套 domain（已发布 v1.4.0）+ 测试反馈硬化（计划 v1.4.1+） | **Part A**：`domain_taxonomy` schema + flat→嵌套迁移 + ingest/init/connect/query/normalize 支持 + 日期类文件名 LLM 摘要 / **Part B**：init 铺全 12 模板 + schema 升级 / connect MOC 字段硬约束 + 反向关系补全 / import 量表统一 + 弱键去重 / 跨技能状态联动 / references 公开 counting/scoring/polish 规则 |
 
 ---
 
@@ -163,6 +164,7 @@ WP 标记：`WPn · <名称>`，每个 WP 含：交付物、依赖、关键实�
 - [`v1.1-restructure.md`](./v1.1-restructure.md) —— 目录流转制 + 路径硬约束（迁移指南）
 - [`v1.2-ai-polish.md`](./v1.2-ai-polish.md) —— AI 润色提议（capture / daily）
 - [`v1.3-skillopt-integration.md`](./v1.3-skillopt-integration.md) —— SkillOpt 行为评测与技能文本优化（设计阶段）
+- [`v1.4-nested-domain-and-hardening.md`](./v1.4-nested-domain-and-hardening.md) —— 嵌套 domain（Part A 已实施）+ 测试反馈硬化（Part B 计划中）
 
 ---
 

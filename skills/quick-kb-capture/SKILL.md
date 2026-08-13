@@ -65,7 +65,8 @@ source_of_truth:
 | `content` | 二选一 | string | 纯文本/转写文本 |
 | `url` | 二选一 | string | 网页链接 |
 | `file_path` | 二选一 | string | PDF/文件路径 |
-| `source_type` | 否 | enum | 强制指定 `idea`/`web-clip`/`pdf`/`meeting`/`ai-dialog`/`reading`；未给则自动判定 |
+| `source_type` | 否 | enum | 强制指定源类型；未给则自动判定。合法值见 `capture_type` 词表（§步骤 1） |
+| `capture_type` | — | — | **frontmatter 字段**（非入参），取值 ∈ `{idea, web-clip, pdf, meeting, ai-dialog, reading}`。等于源类型字面值；PDF 写 `pdf`（即使落入 `reading/` 目录）。详见 [`references/polish-rules.md`](../../references/polish-rules.md) §1.1 |
 | `source_hint` | 否 | string | 用户标注来源（「同事 X 说的」「某书第 3 章」） |
 | `suggested_tags` | 否 | string[] | 用户主动给的候选标签；未给则 AI 推断 |
 
@@ -75,15 +76,19 @@ source_of_truth:
 
 ## 4. 工作流（通用）
 
-### 步骤 1 · 识别源类型
+### 步骤 1 · 识别源类型（含 capture_type 校验）
 
-| 判定 | 流向 |
-|------|------|
-| URL 正则匹配 | → web-clip |
-| `.pdf` / `.epub` 后缀 | → pdf |
-| 含「会议」「参会」「主持人」等会议关键词 | → meeting（若 source_type=meeting 强制） |
-| 含「AI 说」「Claude 答」「GPT」等对话关键词 | → ai-dialog（若 source_type=ai-dialog 强制） |
-| 其他（文本） | → idea 或 reading（用户选） |
+**capture_type 合法词表**：`idea` | `web-clip` | `pdf` | `meeting` | `ai-dialog` | `reading`
+
+> 若用户通过 `source_type` 显式指定的值不在词表内 → **警告并提示合法值**：「⚠ `source_type=<值>` 不在合法词表内，合法值为 `idea / web-clip / pdf / meeting / ai-dialog / reading`。已按自动判定处理。」然后走自动判定流程。
+
+| 判定 | 流向 | capture_type |
+|------|------|-------------|
+| URL 正则匹配 | → web-clip | `web-clip` |
+| `.pdf` / `.epub` 后缀 | → pdf | `pdf` |
+| 含「会议」「参会」「主持人」等会议关键词 | → meeting（若 source_type=meeting 强制） | `meeting` |
+| 含「AI 说」「Claude 答」「GPT」等对话关键词 | → ai-dialog（若 source_type=ai-dialog 强制） | `ai-dialog` |
+| 其他（文本） | → idea 或 reading（用户选） | `idea` / `reading` |
 
 ### 步骤 2 · 抓取与清洗（按源类型）
 
@@ -284,6 +289,8 @@ partial: {{true|false}}
   下一步：
     → quick-kb-ingest 00_inbox/{{dir}}/20260809-1430-<slug>.md
 ```
+
+> 💡 **下一步**：运行 `quick-kb-ingest` 将此素材正式入库（抽取原子观点、补全 frontmatter、检测冲突）。
 
 ---
 

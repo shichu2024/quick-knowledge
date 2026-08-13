@@ -230,6 +230,70 @@ quick-kb-normalize scope=<domain|all> action=regroup [dry-run=true]
 
 ---
 
+## 5.5. MOC 过期引用检测（v1.4+）
+
+> normalize 保持只读语义，**不自动改 MOC**。仅在本次执行触发了 related→relations 迁移、文件名 kebab-case 改名、regroup 等「笔记位置/标识变化」的动作后，输出一次性提示，由用户决定是否运行 `quick-kb-connect mode=refresh`。
+
+### 触发条件
+
+本次执行满足以下任一条件即触发检测：
+
+- 执行了 `related → relations` 迁移（relations 字段被写入）
+- 执行了文件名 kebab-case 改名
+- 执行了 regroup（笔记文件路径变更）
+
+### 检测逻辑
+
+1. 收集本次受影响笔记的标识集合 `affected`：
+   - 迁移：笔记 slug
+   - 改名：旧文件名 + 新 slug
+   - regroup：旧 path-qualified wikilink target + 新 target
+2. 扫描 `06_wiki/mocs/*.md`（含各 domain 的 `_moc.md`），对正文每一处 wikilink：
+   - target 命中 `affected` 任一标识 → 记入 `stale_moc_refs`
+3. 输出 `stale_moc_refs` 到 §5 报告末尾的「过期引用」段（见下）
+
+### 输出位置
+
+在 diff log 引用行（`📝 diff 已备份：...` 或 `📝 diff：...`）之后、最终摘要（`⚠ 待确认` / `🔗 post-check`）之前插入。
+
+### 输出示例（run / regroup 模式 · 有过期引用）
+
+```
+📝 diff 已备份：_normalize_log/2026-08-09-all.diff.md
+
+⚠ 以下 MOC 文件引用了被迁移的笔记，可能过期：
+   - 06_wiki/mocs/programming/_moc.md → [[async-patterns]]、[[rust-ownership]]
+   - 06_wiki/mocs/ai-engineering/_moc.md → [[vector-db-old]]
+   建议运行 `quick-kb-connect mode=refresh`。
+
+⚠ 待确认：
+   ...
+```
+
+### 输出示例（无过期引用时）
+
+```
+📝 diff 已备份：_normalize_log/2026-08-09-all.diff.md
+
+✅ MOC 引用检查：本次受影响笔记未被 06_wiki/mocs/ 下任何 MOC 引用，无需刷新。
+
+⚠ 待确认：
+   ...
+```
+
+### dry-run / rollback
+
+- `dry-run`：不实际改动文件，不触发检测（无「受影响笔记」可收集）
+- `rollback`：回滚动作本身也会改变笔记标识，**同样触发检测**（提示用户 rollback 后 MOC 可能再次过期）
+
+### 边界
+
+- 仅扫 `06_wiki/mocs/` 下的 `.md`，不扫散落笔记正文中的 wikilink（归 connect/repair_deadlinks）
+- 检测只输出提示，**不修改 MOC 文件**；修复由用户显式调用 `quick-kb-connect mode=refresh` 完成
+- 若 `06_wiki/mocs/` 目录不存在 → 跳过检测，不报错
+
+---
+
 ## 6. diff log 格式
 
 ```markdown

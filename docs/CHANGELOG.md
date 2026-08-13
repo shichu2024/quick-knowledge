@@ -4,6 +4,74 @@
 
 ---
 
+## v1.4.1 · 2026-08-13 · 测试反馈硬化 Part B（基于两次外部端到端测试）
+
+**摘要**：两次外部端到端测试共提出 174 条改进建议，去伪存真后保留 18 条真实可落地项（剔除误报 38 条，主要是测试者未完整阅读 SKILL.md 把 spec 已有能力当成缺失）。本版本不引入新能力，只做**硬化**：把执行走样点升级为硬约束、补全跨技能联动断点、公开缺失的受控词表/评分公式。**无 BREAKING CHANGE**。
+
+### 工作包
+
+| WP | 内容 | 影响 |
+|----|------|------|
+| B-WP1 | init 铺全 12 模板（原 4） + schema_version 升级机制 + 模板路径三级回退 | init/SKILL.md +69 行 |
+| B-WP2 | connect MOC 字段硬约束（必须逐字抄自 frontmatter，禁止正文推断） + 非对称关系反向补全（evolved_by/superseded_by/source_of/refined_by） | connect/SKILL.md + frontmatter-v0.2.md |
+| B-WP3 | import confidence 量表统一 0-1（原百分制） + 弱键去重（tags 交集+url 相似度，仅标注不 skip） | import/SKILL.md |
+| B-WP4a | archive 冲突消解回写（lesson 解决的 contradicts 对自动加 resolved_by） | project/SKILL.md + archive/SKILL.md |
+| B-WP4b | normalize 提示刷新 MOC（迁移后扫描 06_wiki/mocs/ 列出过期引用） | normalize/SKILL.md |
+| B-WP4c | query 归档标注（命中 98_archive/ 追加 📄 已归档） + include_archived 参数 | query/SKILL.md |
+| B-WP4d | advisor 降级召回扩展（memory-agent 不可用时扫 07_principles/ + 05_outputs/daily/） | advisor/SKILL.md |
+| B-WP4e | project Decision Ledger 回填检查（update 提示 + archive 前置门控） | project/SKILL.md |
+| B-WP5 | references 公开 counting-rules/scoring/polish-rules + 各技能「下一步」提示 + Windows 中文路径段 | 3 新文件 + 4 SKILL.md + user-guide.md |
+
+### 剔除的误报（不做）
+
+| 来源 | 原报告说法 | 不做的原因 |
+|------|----------|----------|
+| 测试2 §4.3 / 测试3 init | 模板不在仓库 | `templates/{zh,en}/` 各 12 个齐全 |
+| 测试3 全篇 | docs/ 不存在 | `docs/{DESIGN,AGENTS_SPEC,SKILLS_SPEC,VERSIONING}.md` 齐全 |
+| 测试3 §5.1 | agent 全部缺失 | `agents/` 下三个 agent 定义齐全；是否实例化是 harness 职责 |
+| 测试3 archive | archive 不幂等/不可恢复 | `archive/SKILL.md §8` 已定义幂等 + unarchive action |
+| 测试3 advisor | advisor 无降级路径 | `advisor/SKILL.md §7` 已定义两档降级（本版本仅扩展召回范围） |
+| 测试3 ingest | inbox 状态未更新 | ingest 步骤 7 追加 `> [!info] 已入库` callout（本版本不改形式） |
+
+### 文件清单
+
+| 类型 | 文件 |
+|------|------|
+| 新增设计文档 | `docs/dev/v1.4-nested-domain-and-hardening.md`（Part A 反推 + Part B 计划合一） |
+| 新增 references | `references/counting-rules.md`（正式笔记边界）、`references/scoring.md`（KS/reuse 公式）、`references/polish-rules.md`（润色决策表统一） |
+| 修改 references | `references/frontmatter-v0.2.md`（补 4 个反向关系键 schema） |
+| 修改 SKILL.md（10 个） | init / capture / ingest / daily / connect / query / advisor / normalize / archive / project / import |
+| 修改 docs | `docs/dev/README.md`（v1.4 行）、`docs/user-guide.md`（Windows 中文路径段） |
+
+合计 14 文件修改 + 4 新文件，约 +377 / -43 行。
+
+---
+
+## v1.4.0 · 2026-08-12 · 嵌套 domain + LLM 文件名摘要
+
+**摘要**：让 `domain` 字段从扁平字符串升级为支持嵌套的路径（如 `ai-engineering/retrieval/rag`），引入 `domain_taxonomy` 配置 schema，扩展 ingest/init/connect/query/normalize 全链路感知。日期类文件名附带 LLM 提炼的摘要。**无 BREAKING CHANGE**。
+
+### 工作包（已实施）
+
+| WP | commit | 内容 |
+|----|--------|------|
+| A-WP1 | `f7c1c30` | spec：`domain_taxonomy` 配置 schema + frontmatter-v0.2 嵌套 domain 字段 |
+| A-WP2 | `daa54cd` | skills：ingest/init/connect/query 支持嵌套 domain 解析与路由 |
+| A-WP3 | `6cbabb4` | normalize：`regroup` 动作支持 flat→嵌套 domain 迁移 |
+| A-WP4 | `be6a597` | skills：日期类文件名附带 LLM 提炼的摘要 |
+
+### 设计决策
+
+- domain 分隔符选 `/`（与文件系统路径一致，可直接映射目录）
+- domain 必须在 `domain_taxonomy` 中声明（受控词表，避免拼写漂移）
+- `regroup` 默认不开启，需显式 `--regroup`（迁移是大动作）
+
+### 后补文档
+
+设计文档 `docs/dev/v1.4-nested-domain-and-hardening.md` Part A 在实施后补写，记录决策与验收点。
+
+---
+
 ## v1.3.1 · 2026-08-11 · capture 行为修复（hard rate 0% → 100%）
 
 **摘要**：基于 v1.3 引入的 SkillOpt 行为评测，跨模型（qwen3.7-max + GLM 5.2）跑 capture val/test split 后发现 5 类共 20+ 个 bug，分 5 个 commit（P0–P4）系统性修复。最终 val/test/unseen 三 split 全部 100% hard rate。**无 BREAKING CHANGE**——所有修复都是「让 SKILL.md 表达更清晰 + harness scorer 更精确 + case 设计自洽」，技能外部行为契约不变。

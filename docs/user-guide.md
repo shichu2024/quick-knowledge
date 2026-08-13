@@ -278,7 +278,71 @@ A：quick-knowledge 是聚焦「个人知识库」的技能包，可与任意其
 
 ---
 
-## 9. 下一步
+## 9. Windows + 中文路径注意事项
+
+在 Windows 环境下使用 quick-knowledge 且 vault 路径或笔记内容包含中文时，需注意以下事项：
+
+### 9.1 使用 pathlib 而非字符串拼接
+
+Python 脚本中处理文件路径时，**始终使用 `pathlib.Path`**，不要手动拼接字符串。`pathlib` 自动处理 Windows 反斜杠 `\` 与 POSIX 正斜杠 `/` 的转换，避免编码问题。
+
+```python
+# 正确
+from pathlib import Path
+note_path = Path("02_areas") / domain / f"{slug}.md"
+
+# 避免
+note_path = "02_areas/" + domain + "/" + slug + ".md"
+```
+
+### 9.2 设置 PYTHONIOENCODING=utf-8
+
+在终端 / 脚本运行前设置环境变量，确保 Python 标准输入输出使用 UTF-8 编码：
+
+```bash
+# Git Bash / WSL
+export PYTHONIOENCODING=utf-8
+
+# PowerShell
+$env:PYTHONIOENCODING = "utf-8"
+
+# CMD
+set PYTHONIOENCODING=utf-8
+```
+
+> 不设置时，Windows 默认编码（GBK / cp936）可能导致含中文 / emoji 的输出乱码或 `UnicodeEncodeError`。
+
+### 9.3 避免 bash sed/awk 处理中文
+
+在 Windows 的 Git Bash 环境下，**避免使用 `sed`、`awk`、`grep` 等 GNU 工具处理含中文的 Markdown 文件**。这些工具的 locale 和编码行为在 Windows 上不稳定，可能导致：
+- 中文被截断（按字节而非字符处理）
+- 文件被写入 BOM 或错误编码
+- 正则匹配中文失败
+
+**替代方案**：
+- 文件内容替换 → 用 Python（`pathlib` + `re`）或 Node.js
+- 文件搜索 → 用 ripgrep（`rg`，对 UTF-8 支持良好）或 Python
+- 批量重命名 → 用 Python `pathlib.Path.rename()`
+
+### 9.4 脚本文件头声明 UTF-8
+
+含中文路径或中文内容的 Python 脚本，在文件首行声明编码：
+
+```python
+# -*- coding: utf-8 -*-
+```
+
+> Python 3 默认 UTF-8 源文件编码，但显式声明可避免某些边缘场景（如 Windows 上被工具链误判为 cp1252）。
+
+### 9.5 Obsidian 与 Windows 路径
+
+- Obsidian 原生支持中文路径和中文文件名
+- wikilink `[[中文标题]]` 在 Obsidian 中正常工作
+- `.canvas` / `.json` 等 JSON 格式文件默认 UTF-8，无需额外处理
+
+---
+
+## 10. 下一步
 
 - 完整设计：[DESIGN.md](./DESIGN.md)
 - 技能规格：[SKILLS_SPEC.md](./SKILLS_SPEC.md)

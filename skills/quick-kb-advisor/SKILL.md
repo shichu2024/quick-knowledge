@@ -99,7 +99,8 @@ source_of_truth:
 ## 你要做的：<situation 一句话>
 
 ### 你的历史
-> 召回的相关经验，按 memory-agent score 排序
+> 召回的相关经验，按 memory-agent score 排序。
+> **无论是否降级都优先列 experience**：降级时来自 `07_principles/{experiences,patterns,principles,beliefs}/` + `05_outputs/daily/` 的规则扫描（见 §7 降级路径），非降级时来自 `memory-agent.recall_similar`。
 
 - [[experience/BI-engine-plugin-isolation]] · 相关点：<...>
   · 教训：<lesson 摘要>
@@ -160,7 +161,7 @@ source_of_truth:
 |---------|---------|
 | 库内笔记 < 50 条 | advisor 仍可工作，但所有建议都标注「⚠ 库内经验不足，以下非基于充分个人经验」 |
 | `07_principles/` 目录不存在 | "你的原则"段输出「未启用认知资产层」+ 提示 v0.3 启用 |
-| memory-agent 完全不可用 | 退化为「只查 concept 不调经验」的 RAG，并明确告知：「⚠ memory-agent 不可用，以下建议缺乏历史经验支撑」 |
+| memory-agent 完全不可用 | 扫描 `07_principles/{experiences,patterns,principles,beliefs}/` + `05_outputs/daily/` 中匹配 decision keywords 的笔记，按 `score = 0.5 × tag_overlap + 0.3 × recency_norm + 0.2 × title_keyword_hit` 排序（recency_norm = 1/(1+days_since_updated/30)），输出明确标注「⚠ 未启用 memory-agent，以下为规则召回，质量可能下降」 |
 | 召回 0 条 | "你的历史"段输出「未找到相关经验」+ 强化缺口提示 |
 
 ---

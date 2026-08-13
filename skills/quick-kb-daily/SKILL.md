@@ -223,6 +223,8 @@ frontmatter 加 `ai_polished_entries: [1, 2]`（被润色条目的编号列表�
   → 明天继续：quick-kb-daily
 ```
 
+> 💡 **下一步**：将检测到的待入库项运行 `quick-kb-capture` 采集，把日志中的候选想法正式落盘。
+
 ---
 
 ## 5. 输出契约

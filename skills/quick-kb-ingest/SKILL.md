@@ -226,6 +226,8 @@ manager_agent.recommend_relations(
     → 补充冲突笔记的 context：[[list-of-conflicts]]
 ```
 
+> 💡 **下一步**：运行 `quick-kb-connect` 建立 relations 与 MOC，把刚入库的笔记接入知识图谱。
+
 ### 步骤 7 · 更新 inbox 原始素材（非破坏性）
 
 在原始素材顶部追加 callout（不改正文）：

@@ -114,7 +114,15 @@ source_of_truth:
    98_archive/_index.md 追加：
    - [[98_archive/<type>/<原路径>|<title>]] · 归档于 <date> · 原因：<reason>
 
-8. 输出汇总报告
+8. contradicts 提示（concept 类型 · 仅提示不自动改）：
+   若归档对象 type=concept 且其 frontmatter relations 含 contradicts 字段：
+   - 列出该 concept 参与的所有 contradicts 对
+   - 在汇总报告中标注：
+     「⚠ [[concept/X]] 参与 contradicts 关系（对方：[[concept/Y]]）
+      → 建议人工评估：归档后该矛盾对是否已被某 experience 消解？
+      （archive 技能不知 lesson 上下文，不自动修改 relations）」
+
+9. 输出汇总报告
 ```
 
 ---
@@ -169,6 +177,7 @@ source_of_truth:
    - [[concept/X]] → 98_archive/concepts/X.md
      · 被 5 处引用 → 已标注「(已归档)」
      · status: active → archived
+     · ⚠ 参与 contradicts（对方：[[concept/Y]]）→ 建议人工评估是否消解
    - [[resource/Y]] → 98_archive/resources/Y.md
      · 被 0 处引用（无影响）
    - [[idea/Z]] → 98_archive/ideas/Z.md
@@ -236,6 +245,7 @@ source_of_truth:
 - [ ] unarchive 完整恢复（含 wikilink）
 - [ ] 已归档笔记二次归档报错
 - [ ] decision 类型提醒先走 project archive
+- [ ] concept 且含 contradicts 时报告中提示「建议人工评估是否消解」
 
 ---
 

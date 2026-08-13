@@ -128,21 +128,30 @@ source_of_truth:
        - created / updated: 从原笔记或文件 mtime
        - captured_at: <import date>（标识为导入）
        - status: 原 status 若有效则保留，否则 inbox（type 确定则 draft）
-       - confidence: 原 confidence 若 [0,100] 则保留，否则 50
+       - confidence: 原 confidence 若在 [0,1] 保留；若在 (1,100] 则除以 100 归一；缺失默认 0.5
        - tags: 原 tags 直接迁移
        - domain: 缺失（待 ingest 时填）
        - source.kind: <obsidian|notion|logseq>
        - source.original_path: <原路径>
        - source.imported_at: <date>
 
-   3.3 重复检测：
-       - 计算 dedupe_key = hash(title + (domain || ''))
-       - 若 source.url 存在 → 也作为 dedupe_key 候选
-       - 查 00_inbox/ 与全库是否已存在同 dedupe_key
-       - 按 dedupe 策略处理：
-         · skip → 跳过，计入「重复」类
-         · overwrite → 覆盖（保留原 captured_at）
-         · rename → 加 -import-<N> 后缀
+   3.3 重复检测（两级）：
+
+       【强键 —— 命中则自动 skip，计入「重复」类】
+       · 强键 1：hash(title + (domain || '')) 命中既有笔记
+       · 强键 2：source.url 与既有笔记的 source.url 完全相等
+
+       【弱键 —— 命中则标注，不改变导入行为】
+       · 弱键条件 A：|sorted(tags_A) ∩ sorted(tags_B)| ≥ 2 且
+                      Levenshtein(title_A, title_B) / max(len(A), len(B)) < 0.3
+       · 弱键条件 B：source.url 去除 "https://"、"www."、尾部 "/" 后，
+                      Jaccard(A, B) > 0.7 或包含关系成立
+       · 弱键命中 → 导入报告中加 ⚠「疑似重复 [[X]]，人工确认是否跳过」
+
+       【强键命中后的 dedupe 策略】
+       · skip → 跳过（默认）
+       · overwrite → 覆盖（保留原 captured_at）
+       · rename → 加 -import-<N> 后缀
 
    3.4 写入 00_inbox/imported/<source>/<原文件名>.md
        - 保留原文（不动正文）
@@ -150,6 +159,7 @@ source_of_truth:
 
 4. 生成导入报告：
    - 扫描数 / 成功数 / 重复跳过数 / 失败数
+   - ⚠ 疑似重复清单（所有弱键命中对）
    - 失败原因清单（frontmatter 损坏等）
    - 推荐下一步：quick-kb-ingest 批量入库
 
@@ -187,6 +197,16 @@ source_of_truth:
 - `Corrupted Note.md` · YAML frontmatter 解析失败
 - `Untitled.md` · 缺 title 无法推断
 - ... 完整清单见 00_inbox/imported/_failed-2026-08-09.md
+
+## ⚠ 疑似重复清单
+
+> 弱键命中（非自动跳过），人工确认是否需要去重：
+
+| 导入项 | 已有笔记 | 命中类型 |
+|--------|---------|---------|
+| `[[concept/RAG-impl]]` | `[[concept/RAG-architecture]]` | tags∩≥2 + 标题距离<0.3 |
+| `[[resource/anthropic-blog]]` | `[[resource/anthropic-home]]` | url 相似度>0.7 |
+| ... | ... | ... |
 
 ## 推荐下一步
 
