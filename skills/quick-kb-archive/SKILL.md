@@ -14,6 +14,8 @@ source_of_truth:
   - docs/SKILLS_SPEC.md §11
   - docs/AGENTS_SPEC.md §1
   - docs/dev/v0.4-extensions.md WP2
+  - references/wikilink-conventions.md（v1.6 · 归档后缀约定）
+  - references/json-canvas-schema.md（v1.6 · canvas 节点归档处理）
 ---
 
 # quick-kb-archive（v0.4）
@@ -124,7 +126,17 @@ source_of_truth:
    98_archive/_archive-index.md 追加：
    - [[98_archive/<type>/<原路径>|<title>]] · 归档于 <date> · 原因：<reason>
 
-8. contradicts 提示（concept 类型 · 仅提示不自动改）：
+8. canvas 节点处理（v1.6 WP9-3 · 若 vault 含 .canvas 文件）：
+   扫描 `06_wiki/maps/*.canvas`，对每个引用归档笔记的节点（按 `file` 字段或 `id` 匹配 basename）：
+   - `file` → 更新为 stub 路径（`02_areas/<domain>/<slug>.md`，原位置保留 stub）
+   - `label` → 追加「 (已归档)」后缀
+   - `color` → 改为 `"1"`（红 · 视觉提示已归档）
+   - `id` → **保持不变**（稳定性约束，改名会破坏 edge 引用）
+   - edges → **不动**（保留历史关系；归档不等于关系消失）
+   详见 [`json-canvas-schema.md`](../../references/json-canvas-schema.md) §5
+   - 若 vault 无 .canvas 文件 → 跳过本步，报告中不提示
+
+9. contradicts 提示（concept 类型 · 仅提示不自动改）：
    若归档对象 type=concept 且其 frontmatter relations 含 contradicts 字段：
    - 列出该 concept 参与的所有 contradicts 对
    - 在汇总报告中标注：
@@ -132,7 +144,7 @@ source_of_truth:
       → 建议人工评估：归档后该矛盾对是否已被某 experience 消解？
       （archive 技能不知 lesson 上下文，不自动修改 relations）」
 
-9. 输出汇总报告
+10. 输出汇总报告
 ```
 
 ---
@@ -254,7 +266,8 @@ source_of_truth:
 - [ ] 归档 index 命名为 `_archive-index.md`（v1.5 WP5 统一）
 - [ ] frontmatter status → archived
 - [ ] 指向归档对象的 wikilinks 全部标注「(已归档)」
-- [ ] unarchive 完整恢复（含 wikilink + 移除归档副本）
+- [ ] unarchive 完整恢复（含 wikilink + 移除归档副本 + 反向 canvas 处理）
+- [ ] **canvas 节点归档处理**（v1.6 WP9-3 · 若 vault 含 .canvas）：file 指向 stub + label 含「(已归档)」+ color 改红 + id/edges 不动
 - [ ] 已归档笔记二次归档报错
 - [ ] decision 类型提醒先走 project archive
 - [ ] concept 且含 contradicts 时报告中提示「建议人工评估是否消解」
@@ -272,3 +285,4 @@ source_of_truth:
 | v1.5 WP5 定档 copy + stub 模式 | 原 spec 「迁移」语义模糊（move vs copy）；copy+stub 保留原 wikilink 解析路径，断链率最低 | docs/dev/v1.5-cross-skill-consistency.md WP5 |
 | v1.5 WP5 relations 边界澄清 | 「不改 relations」原指类型结构不动；target 字符串加后缀属 wikilink 维护范畴 | 同上 |
 | v1.5 WP5 index 命名统一 `_archive-index.md` | 原 `_index.md` 与目录默认索引混淆 | 同上 |
+| v1.6 WP9-3 增加 canvas 节点归档处理 | 原 spec 未定义 canvas 节点处理；stub 模式下 file 指向 stub 保证 Obsidian 双击仍能打开 | docs/dev/v1.5-cross-skill-consistency.md WP9 + references/json-canvas-schema.md §5 |

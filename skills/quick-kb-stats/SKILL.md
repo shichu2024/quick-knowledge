@@ -12,6 +12,7 @@ source_of_truth:
   - docs/DESIGN.md §6.5（KS）/ §6.4（maturity）/ §6.3（captured_at）
   - docs/SKILLS_SPEC.md §11
   - docs/dev/v0.4-extensions.md WP3
+  - references/wikilink-conventions.md（v1.6 · 死链统计口径）
 ---
 
 # quick-kb-stats（v0.4）
@@ -70,7 +71,7 @@ source_of_truth:
 | 高价值低置信清单 | KS ≥ 中位数 AND confidence < 60（0-100 量纲） | KS + confidence |
 | 低复用高占用清单 | confidence ≥ 70（0-100 量纲） AND value.reuse = 0 | confidence + value.reuse |
 | inbox 周转时长 | 平均 captured_at → status 离开 inbox 的天数 | frontmatter.captured_at + 历史 |
-| 死链数 | 找不到对应文件的 [[X]] 数 | wikilink 扫描 |
+| 死链数 | 找不到对应文件的 [[X]] 数（按 [`wikilink-conventions.md`](../../references/wikilink-conventions.md) §8 口径判定） | wikilink 扫描 |
 | MOC 数 | 06_wiki/mocs/ 下文件数 | 文件路径 |
 | 孤立 MOC | 无入链的 MOC | wikilink 图谱 |
 | domain 分布 | 按 domain 计数 + 占比 | frontmatter.domain |

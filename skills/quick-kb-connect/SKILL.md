@@ -13,6 +13,8 @@ source_of_truth:
   - docs/AGENTS_SPEC.md §1.1（manager build_moc/recommend_relations）
   - docs/dev/v0.2-loops.md WP4
   - references/frontmatter-v0.2.md §3
+  - references/json-canvas-schema.md（v1.6 · canvas 字段与着色规则）
+  - references/wikilink-conventions.md（v1.6 · 双链命名约定）
 ---
 
 # quick-kb-connect（v0.2）
@@ -134,8 +136,10 @@ quick-kb-manager-agent(
 ### 步骤 4 · 知识地图（action=canvas 或 all）
 
 1. 探测 json-canvas 技能是否可用
-2. 可用 → 调用生成 `06_wiki/maps/<domain>.canvas`，节点 = 笔记、边 = relations（按类型着色）
+2. 可用 → 调用生成 `06_wiki/maps/<domain>.canvas`，节点 = 笔记、边 = relations（按 [`json-canvas-schema.md`](../../references/json-canvas-schema.md) §4 着色）
 3. 不可用 → 跳过，报告「Obsidian-skills 缺失，仅产出 MOC；安装后运行 connect action=canvas 补全」
+
+> 节点 `id` / `file` / `label` 与边 `color` / 方向严格按 [`references/json-canvas-schema.md`](../../references/json-canvas-schema.md)。对称关系只生成一条无向边；反向键（evolved_by 等）不重复生成边。
 
 ### 步骤 5 · 更新全局导航
 
