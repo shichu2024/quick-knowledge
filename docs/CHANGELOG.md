@@ -4,6 +4,110 @@
 
 ---
 
+## v1.6.0 · 2026-08-13 · canvas / wikilink 规范化（WP9）
+
+**摘要**：为 canvas 文件与 wikilink 写法建立跨技能一致性规范。引入两份 references 文件作为 connect / archive / stats 的共同真相源。**无 BREAKING CHANGE**。
+
+### 工作包
+
+| WP | 内容 | 影响 |
+|----|------|------|
+| WP9-1 | `references/json-canvas-schema.md`：nodes/edges 字段定义 + 边按 relations 类型着色表（supports=绿/contradicts=红/evolves=紫/supersedes=橙/derived_from=黄/refines=青）+ archive 节点处理（file→stub、label+「(已归档)」、color=红、id/edges 不动） | 新文件 |
+| WP9-2 | `references/wikilink-conventions.md`：默认 basename `[[X]]` / 重名 path-qualified `[[ai-eng/rag]]` / 归档半角后缀 `(已归档)` / Decision Ledger 强制全路径 / canvas file 字段区别 / stats 死链统计口径 | 新文件 |
+| WP9-3 | connect §步骤4 + archive §4 step8 引用上述两份 ref；stats 死链统计引用 wikilink-conventions §8 | connect / archive / stats SKILL.md |
+
+### 文件清单
+
+| 类型 | 文件 |
+|------|------|
+| 新增 references | `references/json-canvas-schema.md`、`references/wikilink-conventions.md` |
+| 修改 SKILL.md | quick-kb-connect / quick-kb-archive / quick-kb-stats（source_of_truth + 内文引用） |
+
+### 评测
+
+capture split=test 9/9 hard（100%）；flow split=train 2/4 hard / soft 0.79（within known variance）。
+
+---
+
+## v1.5.2 · 2026-08-13 · 跨技能一致性硬化 WP7+WP8
+
+**摘要**：补全 capture→ingest 衔接映射 + daily 待入库一键命令；统一各技能自检清单的「降级态」表述格式。**无 BREAKING CHANGE**。
+
+### 工作包
+
+| WP | 内容 | 影响 |
+|----|------|------|
+| WP7 | ingest 新增 `capture_type → note_type` 默认映射表（web/pdf/meeting/ai_dialog/reading/import → resource），保留 `source.capture_type` 作溯源；daily §步骤4 wikilink 提取算法明示（候选集 7 目录 + 整词匹配 + 强别名 + 高潜力名词判定）；§步骤5 待入库段加 `quick-kb-capture "<摘要>"` 一键命令 | ingest / daily SKILL.md |
+| WP8 | advisor / goal / review / ingest / normalize 自检清单改为「正常态 / 降级态 / 二选一」三档格式，覆盖 agent 不可用场景；connect/query 不需调整（行为驱动自检） | advisor / goal / review / ingest / normalize SKILL.md |
+
+### 文件清单
+
+修改 SKILL.md × 6（ingest / daily / advisor / goal / review / normalize）。
+
+---
+
+## v1.5.1 · 2026-08-13 · 跨技能一致性硬化 WP1+WP5+WP6
+
+**摘要**：init 增加模板 SHA-256 校验机制；archive 改用 copy+stub 模式（原位置保留 stub 含 `redirect_to`，断链率最低）；advisor 支持可选持久化到产出层。**无 BREAKING CHANGE**。
+
+### 工作包
+
+| WP | 内容 | 影响 |
+|----|------|------|
+| WP1 | init §3.7 upgrade 增加 12 模板 SHA-256 比对 + frontmatter-schema.json 补缺检查；§3.2.1 铺设 schema 文件到 vault；§7 自检 +3 项 | init/SKILL.md |
+| WP5 | archive 定档 copy+stub 模式：完整内容复制到 `98_archive/<type>/<slug>.md` + 原位置保留 stub（frontmatter `status: archived` + `archive_meta.redirect_to` + 正文一行重定向）；unarchive 反向流程同步；index 命名统一 `_archive-index.md`；relations 边界澄清（类型结构不动 / target 字符串可加「(已归档)」后缀） | archive/SKILL.md |
+| WP6 | advisor 新增 `persist` 参数（默认 false）：不写认知资产层（02/07）+ 可选持久化决策记录到产出层（05/decisions）；§7 降级扩展为手动 Grep 4 类认知资产（concept/principle/belief/pattern/experience） | advisor/SKILL.md |
+
+### 文件清单
+
+修改 SKILL.md × 3（init / archive / advisor）。
+
+---
+
+## v1.5.0 · 2026-08-13 · 跨技能一致性硬化 WP2+WP3+WP4
+
+**摘要**：统一 confidence 量纲为 0-100 整数；引入 JSON Schema 校验机制（normalize `schema_check` 子动作）；project Decision Ledger 支持多对一派生（多 decisions → 单 experience 合并）。**含 BREAKING：confidence 字段从 0-1 小数统一为 0-100 整数**（spec 早已是 0-100，import 违反，本版本对齐）。**含 BREAKING：source 字段结构统一**（废弃 import 的 kind/original_path/imported_at）。
+
+### 工作包
+
+| WP | 内容 | 影响 |
+|----|------|------|
+| WP2 | confidence 全库统一 0-100 整数（spec frontmatter-v0.2.md L44 已是 0-100，本版本修正 import / ingest / research-agent / stats / advisor / review 等违规处）；import 归一逻辑：原 (0,1] × 100 取整，默认 50 | 全部含 confidence 的 SKILL.md + frontmatter-v0.2.md |
+| WP3 | 新增 `references/frontmatter-schema-v1.json`（JSON Schema 覆盖 13+ 字段类型）；normalize `action=schema_check` 子动作（9 项检查表 + 输出格式）；schema 文件由 init 铺设到 vault | 新文件 + normalize SKILL.md + init SKILL.md |
+| WP4 | project Decision Ledger 多对一派生：多 decisions → 单 experience 合并（same domain + same lesson 主题词）；§6 step 3 重写为 6 子步（派生判定 / 新建 / 字段 / 双向 / 升格 / 消解）；§6 step 1.5 字段缺失/空字符串/null 三态等价拦截；§6 step 2.3 outcome 关键字清单明示（success/failure/mixed + failure 优先）；frontmatter-v0.2 §3.0.2 新增 derived_from/derived_to 必为 YAML list 支持多对一 | project/SKILL.md + frontmatter-v0.2.md |
+
+### 文件清单
+
+| 类型 | 文件 |
+|------|------|
+| 新增 references | `references/frontmatter-schema-v1.json` |
+| 修改 references | `references/frontmatter-v0.2.md`（confidence 量纲声明 + derived_from/derived_to list） |
+| 修改 SKILL.md | 全部含 confidence 字段的技能（import / ingest / research-agent / advisor / review / stats / normalize）+ project + init |
+
+### 设计决策
+
+- confidence 选 0-100（vs 0-1）：5 处 spec 已用 0-100，仅 import 用 0-1，迁移成本更低
+- 多对一派生合并键：same domain + same lesson 主题词（避免同项目 N decisions 生成 N 条碎片 experience）
+- schema 检查不强制阻塞 normalize：只报告，不自动改（防误改用户笔记）
+
+---
+
+## v1.4.2 · 2026-08-13 · 日期类文件名 summary 提炼防绕过（内容笼统场景）
+
+**摘要**：堵住 v1.4.0「日期类文件名附带 LLM 摘要」规则的一个绕过路径——当 LLM 输出「内容笼统」「今日笔记」等无信息摘要时，捕捉 / 重提取规则不生效。本版本集中化判定规则 + 在 4 个技能中同步堵漏。**无 BREAKING CHANGE**。
+
+### 变更
+
+- 抽出集中化判定规则到单一位置（避免 4 处技能各写各的漂移）
+- capture / daily / ingest / advisor 4 处同步引用集中化规则
+- 「素材缺失」「内容笼统」两个场景分别明示触发条件（AND 逻辑）
+
+### 文件清单
+
+修改 SKILL.md × 4（capture / daily / ingest / advisor）+ 1 处集中化规则。
+
+---
+
 ## v1.4.1 · 2026-08-13 · 测试反馈硬化 Part B（基于两次外部端到端测试）
 
 **摘要**：两次外部端到端测试共提出 174 条改进建议，去伪存真后保留 18 条真实可落地项（剔除误报 38 条，主要是测试者未完整阅读 SKILL.md 把 spec 已有能力当成缺失）。本版本不引入新能力，只做**硬化**：把执行走样点升级为硬约束、补全跨技能联动断点、公开缺失的受控词表/评分公式。**无 BREAKING CHANGE**。
