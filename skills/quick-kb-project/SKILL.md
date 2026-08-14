@@ -4,7 +4,7 @@ description: |
   项目全生命周期管理。init：建目录 + README + 主动召回相似项目经验；update：追加进展；archive：补 Decision Ledger + lesson 派生 experience + 迁移归档。
   触发词（中文）：开个项目 / 项目 X / 归档项目
   Triggers (EN): new project / archive project
-version: v0.3
+version: v1.8.0
 phase: v0.3
 applies_to: 写 04_projects/<slug>/ · 98_archive/projects/ · 07_principles/experiences/（派生）
 source_of_truth:
@@ -112,6 +112,14 @@ source_of_truth:
 
 8. 更新顶层 _moc.md（若有）加入项目入口
 ```
+
+### 4.1 写入前校验（v1.8 WP2 · 适用于 init / update / archive 所有写入）
+
+落盘前按 [`write-validation-rules.md`](../../references/write-validation-rules.md) 校验，任一失败 → 按规则修正后才写入，不得静默落盘不合规内容；无文件索引可查时在输出中 ⚠ 标注：
+
+- **linked_principles / relations.supports（关联 goal）引用必须用实际文件名**：对照 vault 文件名索引，禁止别名或编号占位（如 `[[principle-001]]` → 须写实际文件名 `[[principle/<实际 basename>]]`）
+- **decision 引用格式 `[[dec-001]]`，禁止双前缀**（如 `[[decisions/dec-001]]`）
+- **wikilink 目标存在性**：经验复用段、派生 experience、`derived_from` / `derived_to` 等所有 `[[X]]` 目标必须已存在于库内
 
 ---
 
@@ -317,7 +325,7 @@ source_of_truth:
 |---------|---------|
 | `07_principles/` 目录不存在（init） | 跳过「经验复用建议」段，标注「⚠ 未启用认知资产层」 |
 | 库内 < 50 条（init） | 主动召回关闭（限流）；README 段留空 |
-| 无 embedding 服务 | similarity 降为「标签 Jaccard + 标题关键词重叠」 |
+| 无 embedding 服务 | similarity 按 [`scoring.md`](../../references/scoring.md)「无 embedding 降级相似度公式」计算（标签 Jaccard × 0.6 + 标题关键词重叠 × 0.4） |
 | `07_principles/experiences/` 目录不存在（archive） | 自动创建（v0.3 已建） |
 | Decision Ledger 模板缺失 | 报错并指引用户先运行 quick-kb-init 同步模板 |
 
@@ -335,6 +343,7 @@ source_of_truth:
 - [ ] 召回结果写入「经验复用建议」段（按 experience/pattern/principle 分类）
 - [ ] 失败教训显式 ⚠ 标注
 - [ ] 关联 goal 双向 wikilink
+- [ ] 写入前校验（§4.1）已执行（引用实际文件名 / decision 引用无双前缀 / wikilink 目标存在）
 
 ### update
 

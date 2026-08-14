@@ -4,7 +4,7 @@ description: |
   基于库内笔记回答事实型问题，强制引用。strict 模式默认（每句结论挂 [[]]）；召回含 contradicts 时同时呈现双方 + context（ADR-011）；召回为 0 明确说「未找到」，不编造。
   触发词（中文）：我笔记里… / 找一下… / 关于 X 怎么说 / KB 查
   Triggers (EN): search my notes / what do I have on / kb query
-version: v0.2
+version: v1.8.0
 phase: v0.2
 applies_to: 读全库 · 落简易查询日志
 source_of_truth:
@@ -66,7 +66,7 @@ source_of_truth:
    - 标题关键词匹配（模糊）
    - wikilink 图谱扩展（命中笔记的 relations 邻居加分）
 3. **embedding 路径**（如可用）：question embedding → 余弦相似度
-4. **降级**：无 embedding → 仅用上述规则
+4. **降级**：无 embedding → 相似度按 [`references/scoring.md`](../../references/scoring.md)「无 embedding 降级相似度公式」计算，召回仍叠加上述规则
 
 ### 步骤 2 · 排序
 
@@ -190,7 +190,7 @@ RAG 的核心是检索后生成 [[RAG 架构设计]]。
 
 | 场景 | 降级行为 |
 |------|---------|
-| 无 embedding | 用关键词 + 标签 Jaccard + 标题模糊匹配 |
+| 无 embedding | 相似度按 [`references/scoring.md`](../../references/scoring.md)「无 embedding 降级相似度公式」计算（标签 Jaccard × 0.6 + 标题关键词重叠 × 0.4），叠加关键词 + 标题模糊匹配 |
 | 无 wikilink 图谱可扩展 | 仅关键词召回 |
 | 召回为 0 | 直接说「未找到」+ capture 建议 |
 | 库 < 5 条笔记 | 提示「库内经验不足」，仍尝试回答但标注 low-confidence |

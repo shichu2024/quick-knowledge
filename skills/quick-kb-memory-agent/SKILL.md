@@ -6,7 +6,7 @@ description: |
   可被 advisor / project / goal / ingest 通过 Skill 工具调用，也可由用户直接调用。
   触发词（中文）：我以前怎么做过… / 我的信念库 / 重复踩坑检测 / 召回相似经验
   Triggers (EN): recall similar / check beliefs / repeat mistakes / memory recall
-version: v0.3
+version: v1.8.0
 phase: v0.3
 applies_to: 只读 `07_principles/{experiences,patterns}/` + `05_outputs/daily/` · 不写入笔记
 source_of_truth:
@@ -161,7 +161,7 @@ interface MemoryNote extends Note {
 - `experience`、`pattern`、`decision`、`principle`、`belief`
 
 **处理**：
-1. 对候选集中每条笔记，计算 `similarity`（embedding 余弦 / 降级：标签 Jaccard + 标题关键词重叠）
+1. 对候选集中每条笔记，计算 `similarity`（embedding 余弦；降级公式见 [`references/scoring.md`](../../references/scoring.md)「无 embedding 降级相似度公式」）
 2. 过滤 `similarity < min_similarity`（默认 0.55）
 3. 按 §4 公式计算 `score` 并排序
 4. 取前 `max_results` 条
@@ -301,7 +301,7 @@ score = similarity^w_s × recency_factor^w_r × impact_factor^w_i × confidence_
 
 | 因子 | 计算 | 默认权重 |
 |------|------|---------|
-| `similarity` | embedding 余弦 或 标签 Jaccard + 标题关键词重叠（降级） | **0.45** |
+| `similarity` | embedding 余弦；降级按 [`references/scoring.md`](../../references/scoring.md)「无 embedding 降级相似度公式」 | **0.45** |
 | `recency_factor` | `max(0.3, 1 − days/365)`（1 年后衰减到底线 0.3，不归零） | **0.20** |
 | `impact_factor` | `(value.impact ?? 3) / 5` | **0.15** |
 | `confidence_factor` | `confidence / 100` | **0.20** |
@@ -397,7 +397,7 @@ score = 0.68^0.45 × 0.836^0.20 × 1.0^0.15 × 0.85^0.20
 | 缺失依赖 | 降级行为 |
 |---------|---------|
 | 库内笔记 < 50 条 | `proactive_suggest` 全部关闭；其他 intent 返回 `degraded: true` + reasoning：「库内经验不足，以下基于有限样本」 |
-| 无 embedding 服务 | similarity 降为「标签 Jaccard + 标题关键词重叠」（权重各 0.5） |
+| 无 embedding 服务 | similarity 按 [`references/scoring.md`](../../references/scoring.md)「无 embedding 降级相似度公式」计算（标签 Jaccard × 0.6 + 标题关键词重叠 × 0.4） |
 | 07_principles/ 目录不存在 | check_beliefs 返回空 + reasoning「未启用认知资产层」 |
 | 本技能完全不可用 | 调用方技能（advisor/project/goal）退化为「只查 concept 不调经验」的 RAG，并明确告知用户 |
 
@@ -421,7 +421,7 @@ score = 0.68^0.45 × 0.836^0.20 × 1.0^0.15 × 0.85^0.20
 - [ ] recency_factor 使用 `max(0.3, ...)` 不归零
 - [ ] present_conflicts 同时呈现双方，不输出选择建议
 - [ ] proactive_suggest 遵守限流（≤3 / 库<50 关闭 / 同事件去重）
-- [ ] 无 embedding 服务时 similarity 走标签 Jaccard 降级
+- [ ] 无 embedding 服务时 similarity 按评分文件降级公式计算（见 §6.2）
 - [ ] 每条 MemoryNote 都带 `why`，MemoryResult 都带 `reasoning`
 - [ ] check_beliefs 输出对每条候选标注「aligned/conflict/neutral」
 

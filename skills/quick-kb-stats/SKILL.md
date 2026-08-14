@@ -5,7 +5,7 @@ description: |
   只读，不改笔记。
   触发词（中文）：KB 统计 / 健康度 / 仪表盘 / vault 状态
   Triggers (EN): kb stats / vault health / dashboard
-version: v0.4
+version: v1.8.0
 phase: v0.4
 applies_to: 只读全库 · 输出 05_outputs/reviews/adhoc/
 source_of_truth:
@@ -81,6 +81,7 @@ source_of_truth:
 
 - `title` / `type` / `created` / `updated` / `status` / `confidence`
 - 注：`maturity` / `value` / `relations` / `context` 为 v0.2+ 字段，对 v0.1 旧笔记不视为缺失
+- **本字段集为全技能统一的缺失率口径**（quick-kb-review 复盘复用）：报告输出该指标时注明「口径：quick-kb-stats §4.1」，确保同 vault 双技能计算结果必然相等
 
 ---
 

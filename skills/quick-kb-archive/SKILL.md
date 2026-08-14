@@ -3,10 +3,10 @@ name: quick-kb-archive
 description: |
   通用归档技能。安全归档任意对象（不限于 project/goal）：concept/resource/idea/decision 等。
   状态检查 → 迁移到 98_archive/ → 更新指向归档对象的 wikilinks（避免死链）→ 可恢复。
-  与 v0.3 project.archive 不同：本技能不触发 lesson 派生，纯归档操作。
+  通用归档不派生 experience；仅当归档对象 type=project 时，执行 lesson → experience 草稿半自动化（status: draft，需用户确认后激活）。
   触发词（中文）：归档 / archive / 把 X 收起来
   Triggers (EN): archive / put away / move to archive
-version: v0.4
+version: v1.8.0
 phase: v0.4
 applies_to: 写 98_archive/ · 更新 wikilinks · 不删笔记
 source_of_truth:
@@ -25,7 +25,7 @@ source_of_truth:
 > | 技能 | 适用对象 | 是否派生 experience | 是否更新 status |
 > |------|---------|-------------------|---------------|
 > | `quick-kb-project archive` | 项目（含 decisions/） | ✅ Decision Ledger → experience | status → archived |
-> | `quick-kb-archive`（本技能） | 任意对象（concept/resource/idea/...） | ❌ 纯归档 | status → archived |
+> | `quick-kb-archive`（本技能） | 任意对象（concept/resource/idea/...） | 仅 project 类型派生（草稿，步骤 10） | status → archived |
 
 ---
 
@@ -58,7 +58,7 @@ source_of_truth:
 ### 不做
 
 - ❌ 不删除笔记（永远可恢复）
-- ❌ 不派生 experience（归 project archive）
+- ❌ 通用类型不派生 experience → 仅 type=project 时派生 experience 草稿（步骤 10，v1.7 WP7-D）
 - ❌ 不改 relations 的**类型结构**（supports 仍 supports）—— 但 relations 内的 **target 字符串**可加「(已归档)」后缀（v1.5 WP5 边界澄清）
 
 ---
@@ -310,7 +310,7 @@ source_of_truth:
 | 新增 archive_meta 字段（archived_at / reason / 原路径） | dev doc 要求「可恢复」，需记录原位置 | docs/dev/v0.4-extensions.md WP2 |
 | wikilink 标注「(已归档)」而非删除 | dev doc 要求「不删除可恢复」+「不产生死链」 | docs/dev/v0.4-extensions.md WP2 + DESIGN §10 |
 | 新增 check / unarchive action | dev doc 要求「可恢复」，unarchive 为反向操作；check 为预览 | docs/dev/v0.4-extensions.md WP2 |
-| 不派生 experience | 与 project archive 区分；纯归档无 lesson 闭环 | docs/SKILLS_SPEC.md §11 边界 |
+| 仅 type=project 派生 experience 草稿（其余类型不派生） | 与 project archive 区分：通用归档无 lesson 闭环；project 类型走步骤 10 草稿半自动化（v1.7 WP7-D） | docs/SKILLS_SPEC.md §11 边界 + docs/dev/v1.7-automation-and-integration.md WP7 |
 | v1.5 WP5 定档 copy + stub 模式 | 原 spec 「迁移」语义模糊（move vs copy）；copy+stub 保留原 wikilink 解析路径，断链率最低 | docs/dev/v1.5-cross-skill-consistency.md WP5 |
 | v1.5 WP5 relations 边界澄清 | 「不改 relations」原指类型结构不动；target 字符串加后缀属 wikilink 维护范畴 | 同上 |
 | v1.5 WP5 index 命名统一 `_archive-index.md` | 原 `_index.md` 与目录默认索引混淆 | 同上 |

@@ -4,7 +4,7 @@ description: |
   目标管理 + 学习路径 + 进展记录 + 归档。create：调 quick-kb-research-agent 生成学习路径 + 调 quick-kb-memory-agent 召回领域 principle/belief；progress：追加 + 里程碑；complete/cancel：归档 + 状态传播。
   触发词（中文）：新建目标 / 学 X 这个目标 / 更新目标进度 / 完成目标
   Triggers (EN): new goal / learning path for / update goal progress
-version: v0.3
+version: v1.8.0
 phase: v0.3
 applies_to: 写 03_goals/<slug>/ · 98_archive/goals/ · 读写相关笔记 status
 source_of_truth:
@@ -111,6 +111,14 @@ source_of_truth:
 
 7. 更新顶层 _moc.md：纳入新目标入口
 ```
+
+### 4.1 写入前校验（v1.8 WP2 · 适用于 create / progress / complete / path 所有写入）
+
+落盘前按 [`write-validation-rules.md`](../../references/write-validation-rules.md) 校验，任一失败 → 按规则修正后才写入，不得静默落盘不合规内容；无文件索引可查时在输出中 ⚠ 标注：
+
+- **linked_principles / linked_goals 引用必须用实际文件名**：对照 vault 文件名索引，禁止别名或编号占位（如 `[[principle-001]]` → 须写实际文件名 `[[principle/<实际 basename>]]`）
+- **decision 引用格式 `[[dec-001]]`，禁止双前缀**（如 `[[decisions/dec-001]]`）
+- **wikilink 目标存在性**：所有写入的 `[[X]]`（学习路径节点 / 相关笔记段 / 进度记录 wikilink 等）目标必须已存在于库内
 
 ---
 
@@ -259,7 +267,7 @@ source_of_truth:
 | 学习路径生成失败（create） | 学习路径降为 manual，goal.md 段标注「⚠ 路径推荐失败，请手动填写」 |
 | `07_principles/` 目录不存在（create） | 跳过「相关笔记」段召回，标注「⚠ 未启用认知资产层」 |
 | 库内 < 50 条（create） | 主动召回关闭（限流）；路径仅基于公开知识生成 |
-| 无 embedding 服务 | similarity 降为「标签 Jaccard + 标题关键词重叠」 |
+| 无 embedding 服务 | similarity 按 [`scoring.md`](../../references/scoring.md)「无 embedding 降级相似度公式」计算（标签 Jaccard × 0.6 + 标题关键词重叠 × 0.4） |
 | goal 模板缺失 | 报错并指引用户先运行 quick-kb-init 同步模板 |
 
 ---
@@ -278,6 +286,7 @@ source_of_truth:
       · 正常态：调 quick-kb-memory-agent（intent=proactive_suggest，限定 07_principles/<domain>/）
       · 降级态：手动 Grep 07_principles/<domain>/ 全部 principle/belief + ⚠ 标注
 - [ ] 学习路径每节点关联库内笔记 OR 标 [Capture 缺口]
+- [ ] 写入前校验（§4.1）已执行（引用实际文件名 / decision 引用无双前缀 / wikilink 目标存在）
 - [ ] 里程碑 3-5 个，每个带目标日期
 - [ ] _moc.md 创建
 

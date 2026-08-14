@@ -4,7 +4,7 @@ description: |
   把 inbox 素材正式入库为 02_areas/resources 笔记：调 quick-kb-research-agent 抽取原子观点、补全 v0.2 完整 frontmatter（含 relations/context/value.reuse）、链接原始素材、给置信度初值、调 quick-kb-manager-agent + quick-kb-memory-agent 做冲突检测。
   触发词（中文）：处理 inbox / 入库 / 把这条归档 / 消化这条 / 这条入库
   Triggers (EN): process inbox / ingest this / promote this note
-version: v0.2
+version: v1.8.0
 phase: v0.2
 applies_to: 00_inbox/ → 02_areas/ / 01_resources/
 source_of_truth:
@@ -162,6 +162,15 @@ source:
 - supports/evolves/supersedes 候选 → 自动写入 relations（相似度 > 0.85 的 evolves 提示用户确认）
 - **contradicts 候选** → 进入步骤 3 冲突检测流程
 
+#### 2.8 写入前校验（v1.8 WP2）
+
+落盘前按 [`references/write-validation-rules.md`](../../references/write-validation-rules.md) 校验，**不得静默落盘不合规内容**：
+
+1. frontmatter 全集：必填字段（title/type/created/updated/status）、`confidence` 0-100 整数、无 v0.3 越权字段
+2. relations 类型化：dict 格式、键 ∈ schema enum（禁止自创关系类型）、值为 wikilink 字符串数组
+3. wikilink 目标存在性：`source.note` / relations / 正文中的 `[[X]]` 目标必须在 vault 文件名索引内；不存在 → 降级为普通文本或加粗
+4. 校验失败的修正项记入步骤 6 处理报告；无文件索引可查时 ⚠ 标注「未执行写入前校验」
+
 ### 步骤 3 · 冲突检测与主动提醒（V2 关键）
 
 > manager-agent.recommend_relations 发现对立候选 → 调 memory-agent.present_conflicts（返回结构见其 §0）按冲突感知协议处理（同时呈现双方 + 各自 context）。
@@ -304,7 +313,7 @@ source:
 
 | 场景 | 降级行为 |
 |------|---------|
-| 无 embedding 服务 | similarity 降为「标签 Jaccard + 标题关键词重叠」（权重各 0.5）；关系推荐仍可工作但精度下降 |
+| 无 embedding 服务 | similarity 降为「标签 Jaccard × 0.6 + 标题关键词重叠 × 0.4」（统一公式见 [`references/scoring.md`](../../references/scoring.md) §5）；关系推荐仍可工作但精度下降 |
 | 候选素材为空/格式损坏 | 跳过，报告 |
 | 无候选（target 无文件） | 输出「inbox 已清空」 |
 | 目标 domain 不存在 | 自动创建 `02_areas/<domain>/_moc.md` |
@@ -343,6 +352,7 @@ source:
       · [ ] tags 格式为 inline array
 - [ ] **v1.7 新增**（WP3-B）：
       · [ ] supports/contradicts 冲突消歧检测已执行
+- [ ] **v1.8 新增**（WP2）：写入前校验已执行（§2.8），修正项记入报告
 
 ---
 

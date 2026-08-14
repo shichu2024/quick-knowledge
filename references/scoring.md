@@ -1,12 +1,13 @@
 ---
-version: v1.4
-updated: 2026-08-13
-phase: v1.4
-applies_to: quick-kb-stats（KS Top 10）/ quick-kb-review（价值刷新）/ quick-kb-memory-agent（召回排序）
+version: v1.8
+updated: 2026-08-14
+phase: v1.8
+applies_to: quick-kb-stats（KS Top 10）/ quick-kb-review（价值刷新）/ quick-kb-memory-agent（召回排序）/ quick-kb-manager-agent · quick-kb-query · quick-kb-advisor（无 embedding 降级相似度）
 source_of_truth:
   - docs/DESIGN.md §6.5（Knowledge Score）/ §6.6（value 维度）
   - docs/AGENTS_SPEC.md §3（排序公式）
   - docs/dev/v1.4-docs.md B-WP5
+  - docs/dev/v1.8-e2e-calibration.md WP3-3
 ---
 
 # 评分公式 · Scoring Formulas
@@ -109,8 +110,26 @@ KS = 0.4 × 75 + 0.3 × 75 + 0.3 × 44 = 30 + 22.5 + 13.2 = 65.7
 
 ---
 
-## 5. 版本历史
+## 5. 无 embedding 降级相似度公式
+
+embedding 服务不可用时，所有依赖相似度的技能（quick-kb-manager-agent / quick-kb-memory-agent / quick-kb-query / quick-kb-advisor，以及 ingest 关系推荐中的 manager-agent 调用）**统一引用本条目**，不再各自定义权重：
+
+```
+similarity = 标签 Jaccard × 0.6 + 标题关键词重叠 × 0.4
+```
+
+| 因子 | 权重 | 说明 |
+|------|------|------|
+| 标签 Jaccard | 0.6 | `|tags_A ∩ tags_B| / |tags_A ∪ tags_B|` |
+| 标题关键词重叠 | 0.4 | 标题分词后重叠词数 / 较长标题词数 |
+
+> **统一理由**：同一对笔记在不同技能中的 similarity 必须相等（跨技能一致性）；此前 manager-agent 用 0.6/0.4、memory-agent/query 各自定义，导致同一 vault 内排序不可复现（dev doc v1.8 §0.2 N3）。降级精度下降仅影响推荐质量，不影响公式本身。
+
+---
+
+## 6. 版本历史
 
 | 版本 | 日期 | 变更 |
 |------|------|------|
 | v1.4 | 2026-08-13 | 初始版本，公开三个公式及参数 |
+| v1.8 | 2026-08-14 | 新增 §5 无 embedding 降级相似度公式（标签 Jaccard × 0.6 + 标题关键词重叠 × 0.4，全局统一定档） |

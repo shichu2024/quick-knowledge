@@ -4,6 +4,46 @@
 
 ---
 
+## v1.8.0 · 2026-08-14 · E2E 校准与写入校验层（WP1-WP5）
+
+**摘要**：基于测试7全技能 E2E 报告（17 技能 / 41 reported issues，报告 §九已自审重审），对照仓库实态二次校准：报告判定的「schema 矛盾」实为 init 资源定位链断裂后执行方即兴生成第三套 schema 所致；12 条误报的共同根因是写入前无校验层。核心改进：init 技能包资源自包含、全写入型技能接入写入前校验（frontmatter + wikilink 目标存在性）、跨技能口径统一（import 目录名 / 缺失率口径 / 降级相似度公式）、archive 语义矛盾修正、17 技能版本元数据统一。**无 BREAKING CHANGE**。
+
+### 工作包
+
+| WP | 内容 | 影响 |
+|----|------|------|
+| WP1 | init 技能包自带 `templates/{zh,en}/`（14×2）+ `references/frontmatter-schema-v1.json`，使三级回退第①级真实命中；§3.3 回退表如实化（③ 兜底仅覆盖 4 个系统文件，非全部模板）；schema 落地记录 SHA-256 指纹（`.kb-initialized.schema_sha256`），upgrade 校验指纹不一致 → ⚠ 询问；新增「①② 均不可达禁止即兴生成 schema/模板」条款；upgrade 版本判定明确以 17 技能统一版本号为准；模板计数 12 → 14 修正 | init SKILL.md + 新增技能自带资源 |
+| WP2 | 新建 `references/write-validation-rules.md`（frontmatter 最小校验集 + wikilink 目标存在性 + 校验失败处理）；ingest/capture/import/connect/daily/goal/project 共 7 个写入型 SKILL 增加写入前校验步骤；connect 另增写入后自检（反向键对称补全 + 关系去重 + 禁止自创关系类型）；goal/project 禁止别名引用（`[[principle-001]]` 类） | 新文件 + 7 SKILL.md |
+| WP3 | import 目录命名统一为 `00_inbox/imported/<source>/`（清除 `_imports/` 残留）；review frontmatter 缺失率显式引用 stats §4.1 同口径（同字段集 + 同扫描范围跳过 98_archive/99_system）；`references/scoring.md` 新增 §5「无 embedding 降级相似度公式」（标签 Jaccard × 0.6 + 标题关键词重叠 × 0.4），manager-agent/memory-agent/query/advisor/ingest 降级段统一引用，删除各自本地权重；manager-agent §3.6 refresh_value 标注「写回型操作 · 非纯函数」；research-agent 不变量澄清（existing_notes 由调用方传入） | import / review / stats / manager-agent / memory-agent / query / advisor / research-agent SKILL.md + scoring.md |
+| WP4 | archive SKILL 消除「不派生 experience」与步骤 10 project lesson 派生的矛盾：统一为「通用归档不派生；仅 type=project 时派生 experience 草稿（status: draft 需确认）」 | archive SKILL.md |
+| WP5 | 17 个 SKILL.md frontmatter `version` 统一为 v1.8.0（原 v0.1~v1.4 混杂，影响 `.kb-initialized` upgrade 判定） | 全部 17 SKILL.md |
+
+### 文件清单
+
+| 类型 | 文件 |
+|------|------|
+| 新增 references | `references/write-validation-rules.md` |
+| 新增技能自带资源 | `skills/quick-kb-init/templates/{zh,en}/**`（14×2）、`skills/quick-kb-init/references/frontmatter-schema-v1.json` |
+| 新增 dev doc | `docs/dev/v1.8-e2e-calibration.md` |
+| 修改 SKILL.md × 17 | 全部 17 个 SKILL（version 统一）+ 其中 12 个含实质改动 |
+| 修改 references | `references/scoring.md` |
+
+### 校准过滤（不修复清单）
+
+测试报告 41 条 → 报告 §九自审 8 真问题 → 仓库二次校准：
+- #2/#8（confidence/relations schema 矛盾）→ 根因重定位为 WP1（vault 即兴 schema），仓库权威源内部一致
+- #18 refresh_value / #20 cross_verify → 降级 P2 措辞修复（归 WP3）
+- 12 条执行偏差类误报 → 由 WP2 校验层拦截根因，不改技能逻辑
+- #28/#29 设计约束、#36/#37 推迟、import 输出项计数 → 测试方法学问题
+
+详见 `docs/dev/v1.8-e2e-calibration.md` §0 校准 + 附：41 条处理映射。
+
+### 评测
+
+capture split=test **9/9 hard（100%）**；flow split=train (6:1:1 seed 1) **2/4 hard / soft 0.79**（hard 在已知方差内，soft 较 v1.7.0 的 0.69 提升）。均无退化。
+
+---
+
 ## v1.7.0 · 2026-08-14 · 自动化与跨技能集成（WP1-WP7）
 
 **摘要**：基于测试5（155 笔记 / 215 改进点）+ 测试6（22 笔记 / 36 完善点）两份独立报告交叉比对，经 §0 校准过滤后落地 24 条真问题，归为 7 WP。核心改进：agent 被调用契约硬化、ingest 全链路补强（反向补全 + inbox 清理 + tags 硬化）、关系循环/冲突检测、polish_mode 自动化、模板与 slug 协议补齐、仪表盘 maturity 漏斗 + recency_factor、导入归档协议完善。**无 BREAKING CHANGE**。

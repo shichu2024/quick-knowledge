@@ -4,7 +4,7 @@ description: |
   低摩擦采集：把用户的想法、网页 URL、PDF、会议转写、AI 对话、阅读笔记快速写入 inbox。v0.2 接入 defuddle 抓取干净正文；新增 PDF/会议/AI 对话/阅读四类源；主动提醒（memory 事件）推迟 v0.3。v1.2 新增「AI 润色提议」步骤——对用户手敲输入主动生成扩写版，三选一确认。
   触发词（中文）：记一下 / 快记 / 收藏这个 / 抓这个网页 / 保存这段 / 记个想法 / 抓 PDF / 保存对话
   Triggers (EN): capture this / save this / clip this page / quick note / capture pdf
-version: v1.2
+version: v1.8.0
 phase: v1.2
 applies_to: 00_inbox/
 source_of_truth:
@@ -257,6 +257,14 @@ polish 触发判定**严格**按下面的**决策表**逐步走（不许用单�
 
 `<slug>` kebab-case，限 40 字符。重名追加 `-2`/`-3`。
 
+### 步骤 4.5 · 写入前校验（v1.8 WP2）
+
+落盘前按 [`references/write-validation-rules.md`](../../references/write-validation-rules.md) 校验 inbox 简化集：
+
+1. frontmatter：`title` / `captured_at` / `capture_type` 按词表（`idea` / `web-clip` / `pdf` / `meeting` / `ai-dialog` / `reading`）；严禁提前写入正式字段（type/status/maturity/relations/context/value/confidence）
+2. wikilink 目标检查：正文中生成的 `[[X]]` 目标必须已存在于 vault 文件名索引；不存在 → 降级为普通文本或加粗，不写死链
+3. 校验失败 → 按规则修正后直接写入（**不阻塞、不对话追问**，与 §0 零对话不变量一致）；无法校验（无文件索引）时在反馈输出中 ⚠ 标注
+
 ### 步骤 5 · 写入文件（frontmatter）
 
 所有源统一走 inbox 最小集（[`frontmatter-v0.2.md` §7](../../references/frontmatter-v0.2.md)）：
@@ -382,6 +390,7 @@ partial: {{true|false}}
 - [ ] web-clip / pdf 抓取正文**未进入**润色流程
 - [ ] 若 `ai_polished: true`，必含 `source.original_text`
 - [ ] 反馈输出含「下一步 → ingest」提示
+- [ ] **v1.8 新增**（WP2）：写入前校验已执行（§步骤 4.5），未引入对话式追问
 - [ ] 无 v0.2 正式字段被提前写入（maturity/relations/context/value 等）
 
 ---

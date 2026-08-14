@@ -4,7 +4,7 @@ description: |
   Query+ 闭环 · 决策辅助。基于个人认知资产（principle/belief/pattern/experience）辅助用户决策。扫描 07_principles/ + 05_outputs/daily/ 召回历史经验 + 核对信念 + 冲突检测，输出三段：你的历史 / 你的原则 / 建议路径。
   触发词（中文）：我要做…怎么搞 / 帮我决策 / 我该怎么选 / 设计个 X / advisor
   Triggers (EN): how should I / help me decide / design a / advise on
-version: v0.3
+version: v1.8.0
 phase: v0.3
 applies_to: 读全库认知资产（07_principles/ + 05_outputs/daily/）；调 quick-kb-memory-agent 召回与排序
 source_of_truth:
@@ -164,7 +164,7 @@ source_of_truth:
 | 库内笔记 < 50 条 | advisor 仍可工作，但所有建议都标注「⚠ 库内经验不足，以下非基于充分个人经验」 |
 | `07_principles/` 目录不存在 | "你的原则"段输出「未启用认知资产层」+ 提示 v0.3 启用 |
 | `07_principles/concepts/` 子目录不存在（v1.5 WP6） | concept 检索段降级为「跨全库 Grep 关键词」+ 标 ⚠；不阻塞主流程 |
-| 无 embedding 服务 | similarity 降为「标签 Jaccard + 标题关键词重叠」（权重各 0.5），输出标注「⚠ 未启用语义相似度」 |
+| 无 embedding 服务 | similarity 按 [`references/scoring.md`](../../references/scoring.md)「无 embedding 降级相似度公式」计算（标签 Jaccard × 0.6 + 标题关键词重叠 × 0.4），输出标注「⚠ 未启用语义相似度」 |
 | 召回 0 条 | "你的历史"段输出「未找到相关经验」+ 强化缺口提示 |
 | **memory-agent skill 不可用（v1.5 WP6 扩展）** | 手动 Grep 扫描 `07_principles/{principles,beliefs,patterns,experiences}/` **全部 4 类**认知资产，按文件 `updated` 近因排序取 Top N；标 ⚠「降级模式：未走 score 排序」。**不再退化为只查 concept**（原降级过保守） |
 

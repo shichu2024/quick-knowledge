@@ -4,7 +4,7 @@ description: |
   每日日志：把用户口述的一句话变成结构化日志（做了什么/学到什么/想法/卡点）。描述不足时反问补充（最多 2 轮），自动生成 wikilinks，发现待入库项时建议调用 capture。v1.2 新增「AI 润色提议」——对 4 段中识别出的短句主动扩写，用户三选一确认。
   触发词（中文）：今天的日志 / 记日志 / daily / 今天做了什么
   Triggers (EN): daily log / today's notes / log today
-version: v1.2
+version: v1.8.0
 phase: v1.2
 applies_to: 05_outputs/daily/YYYY/MM/
 source_of_truth:
@@ -266,6 +266,13 @@ frontmatter 加 `ai_polished_entries: [1, 2]`（被润色条目的编号列表�
 
 **非阻塞** —— 用户可忽略；列表写入文件供后续手动处理。
 
+### 步骤 5.5 · 写入前校验（v1.8 WP2）
+
+落盘前按 [`write-validation-rules.md`](../../references/write-validation-rules.md) 校验，任一失败 → 按规则修正后才写入，不得静默落盘不合规内容；无文件索引可查时在输出中 ⚠ 标注：
+
+- **正文 wikilink 目标存在性**：所有 `[[X]]` 目标必须已存在于 vault 文件名索引（对照步骤 4 候选集）；无对应笔记文件的**术语性链接（如 `[[RAG]]`）禁止**，降级为普通文本或加粗
+- frontmatter 必填字段齐全（`title` / `type=daily` / `created` / `updated` / `tags` / `status`，v0.1 子集）
+
 ### 步骤 6 · 写入文件
 
 - frontmatter（基于 v0.1 子集）：
@@ -415,6 +422,7 @@ frontmatter 加 `ai_polished_entries: [1, 2]`（被润色条目的编号列表�
 - [ ] 4 段全部存在（哪怕为空 `{{}}`）
 - [ ] 反问不超过 2 轮；用户拒绝时停止
 - [ ] 已有笔记标题被正确转 wikilink
+- [ ] 写入前校验（§步骤 5.5）已执行：正文 wikilink 全部有对应笔记文件（术语性 `[[]]` 已降级为文本/加粗）
 - [ ] 待入库候选（若有）写入对应段
 - [ ] `append=true` 时未覆盖既有内容
 - [ ] v1.2+ 润色：用户选润色的短句用润色版替换，原句以 `<!-- original: ... -->` 保留

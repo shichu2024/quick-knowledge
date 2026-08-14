@@ -6,7 +6,7 @@ description: |
   可被 capture / ingest / goal 通过 Skill 工具调用，也可由用户直接调用。
   触发词（中文）：处理资料 / 抽原子观点 / 摘要 / 交叉验证 / 研究这个
   Triggers (EN): process resource / extract atoms / cross verify / summarize / research this
-version: v0.2
+version: v1.8.0
 phase: v0.2
 applies_to: 只读外部资料（URL / PDF / 长文）· 不读库内已有笔记
 source_of_truth:
@@ -178,7 +178,7 @@ research_agent(
 **输入**：`{ candidates: Note[], existing_notes: Note[] }`
 
 **处理**：
-1. 对每条候选笔记，与 existing_notes 比对相似度（标签 Jaccard + 标题关键词）
+1. 对每条候选笔记，与 existing_notes 比对相似度（降级公式见 [`scoring.md`](../../references/scoring.md)「无 embedding 降级相似度公式」）
 2. 相似度 > 0.6 的既有笔记 → 提升候选 confidence（多源佐证）
 3. 相似度 > 0.85 → 建议合并或建立 `evolves`/`supersedes`
 4. 内容对立 → 建议建立 `contradicts`（v0.2 仅返回候选，由 ingest 决定是否写入）
@@ -255,7 +255,7 @@ research_agent(
 
 ## 6. 不变性
 
-- **只读外部资料**：不读库内已有笔记（避免与 quick-kb-memory-agent 域重叠）
+- **只读外部资料**：不读库内已有笔记（避免与 quick-kb-memory-agent 域重叠）。`cross_verify` 所需的 `existing_notes` 由**调用方传入**（输入参数），research-agent 自身不主动读取库内笔记——输入域隔离不变量不受影响
 - **保留原始**：source.raw 永久指向原始素材
 - **不提升 confidence 至 81+**：除非确证为一手实验/官方文档
 - **可解释**：每条原子笔记附 `source_excerpt`

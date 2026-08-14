@@ -4,7 +4,7 @@ description: |
   建立双链、生成 MOC、绘制知识地图（canvas）。调 quick-kb-manager-agent 推荐关系与构建 MOC；写入类型化 relations（不再写扁平 related）；生成 06_wiki/mocs/<domain>-moc.md；接 json-canvas 生成 .canvas（Obsidian 缺失跳过）。
   触发词（中文）：连一下 / 建个 MOC / 给这领域建索引 / 画个知识地图 / 连接笔记
   Triggers (EN): connect these / build moc / map this domain / link notes
-version: v0.2
+version: v1.8.0
 phase: v0.2
 applies_to: 06_wiki/ + 各笔记 frontmatter.relations
 source_of_truth:
@@ -82,6 +82,14 @@ action：all
 - 入参/返回结构见 manager-agent SKILL.md §0 契约
 - 返回候选列表（target / type / similarity / reason）
 
+#### 2.0 写入前校验（v1.8 WP2）
+
+落盘前按 [`write-validation-rules.md`](../../references/write-validation-rules.md) 校验，任一失败 → 按规则修正后才写入，不得静默落盘不合规内容；无文件索引可查时在输出中 ⚠ 标注：
+
+- **relations 键必须 ∈ schema enum**（supports / contradicts / evolves / supersedes / evolved_by / superseded_by / derived_from / source_of / refines / refined_by，对照 [`frontmatter-v0.2.md` §3](../../references/frontmatter-v0.2.md)）——**禁止自创关系类型**（如 `complements`）
+- **wikilink 目标存在性**：relations / MOC / 反向键中的 `[[X]]` 目标必须已存在于 vault 文件名索引，否则降级为普通文本或加粗
+- **关系去重**：同一笔记对同 target + 同 type 的关系不重复写入
+
 #### 2.1 写入策略（v1.7 含 WP3-A/B 循环与冲突检测）
 
 | 关系 | 相似度 | interactive=true | interactive=false |
@@ -118,6 +126,13 @@ action：all
 
 - supports/contradicts（对称）→ 在双方 frontmatter 都写入
 - evolves/supersedes（有向）→ 仅在源笔记写入（B→A 时只在 A 写 `evolves: [B]`）
+
+#### 2.4 写入后自检（v1.8 WP2）
+
+写 A→B 关系后，**必须**检查 B 的 frontmatter 已含对应反向键，缺失则补写（幂等，已存在不重复追加）：
+
+- 对称关系（supports/contradicts）→ B 的对应键必须已含 A
+- 有向关系按 §5.2.1 反向补全表：`evolves`→`evolved_by`、`supersedes`→`superseded_by`、`derived_from`→`source_of`、`refines`→`refined_by`
 
 ### 步骤 3 · MOC 生成（action=moc 或 all）
 
@@ -241,7 +256,7 @@ build_moc 时，对同 domain + 同 type 的笔记对，若满足以下条件标
 
 | 场景 | 降级行为 |
 |------|---------|
-| 无 embedding 服务 | 关系推荐降为标签 Jaccard + 标题关键词 |
+| 无 embedding 服务 | similarity 按 [`scoring.md`](../../references/scoring.md)「无 embedding 降级相似度公式」计算（标签 Jaccard × 0.6 + 标题关键词重叠 × 0.4） |
 | 范围内笔记相似度均 < 0.6 | connect 退为「只扫标题共现」，标 `needs_review: true` |
 | 无 json-canvas | 跳过 .canvas 生成 |
 | MOC 聚类失败 | 按 tag.topic 简单分组 |
@@ -271,6 +286,8 @@ build_moc 时，对同 domain + 同 type 的笔记对，若满足以下条件标
       · [ ] supports/contradicts 冲突消歧检测已执行
 - [ ] **v1.7 WP3-C 新增**：
       · [ ] evolves/supersedes 候选推荐已生成（若适用）
+- [ ] **写入前校验（v1.8 WP2）**：relations 键 ∈ schema enum（无自创类型）/ wikilink 目标存在 / 同 target+type 去重
+- [ ] **写入后自检（v1.8 WP2）**：每条 A→B 写入后，B 的反向键已确认存在或已补写
 
 ---
 

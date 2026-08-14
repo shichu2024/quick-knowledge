@@ -6,7 +6,7 @@ description: |
   重复检测基于 (title + domain) 或 source.url。
   触发词（中文）：导入 / import / 从 Obsidian / 从 Notion / 从 Logseq
   Triggers (EN): import from / migrate from / ingest external
-version: v0.4
+version: v1.8.0
 phase: v0.4
 applies_to: 读外部源 · 写 00_inbox/ · 不删原库
 source_of_truth:
@@ -157,7 +157,15 @@ source_of_truth:
        · overwrite → 覆盖（保留原 captured_at）
        · rename → 加 -import-<N> 后缀
 
-   3.4 写入 00_inbox/imported/<source>/<原文件名>.md
+   3.4 写入前校验（v1.8 WP2）
+       按 references/write-validation-rules.md 校验转换后 frontmatter：
+       - 字段集：必填字段齐全；confidence 0-100 整数；type/status ∈ 词表
+       - 禁止自创字段（对照 references/frontmatter-schema-v1.json）；
+         原库特有字段不映射 → 丢弃并记入报告；字段值无法确定 → status: draft
+       - 校验失败按规则修正后写入，不得静默落盘不合规内容
+       （原文 wikilink 保留，不做存在性拦截——见 §8 降级路径）
+
+   3.5 写入 00_inbox/imported/<source>/<原文件名>.md
        - 保留原文（不动正文）
        - frontmatter 用转换后的版本
 
@@ -173,8 +181,8 @@ source_of_truth:
 
 **v1.7 强制提示（import 写完后输出末尾强建议）**：
 ```markdown
-> 已导入 N 条到 00_inbox/_imports/<source>/。
-> 下一步：调用 quick-kb-ingest（scope=00_inbox/_imports/<source>/）将其入库。
+> 已导入 N 条到 00_inbox/imported/<source>/。
+> 下一步：调用 quick-kb-ingest（scope=00_inbox/imported/<source>/）将其入库。
 > （import 不自动触发 ingest，避免批量导入时一次性 ingest 失败回滚困难）
 ```
 ```
@@ -278,6 +286,7 @@ source_of_truth:
 - [ ] 二次导入同源 skip 已导入项
 - [ ] _dedupe-index.jsonl 跨次去重
 - [ ] 失败笔记不阻塞整体流程
+- [ ] **v1.8 新增**（WP2/WP3）：写入前校验已执行（§5 步骤 3.4）；全文目录名统一为 `00_inbox/imported/`
 
 ---
 

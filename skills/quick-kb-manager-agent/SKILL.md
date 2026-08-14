@@ -6,7 +6,7 @@ description: |
   可被其他技能（connect / review / ingest / normalize）通过 Skill 工具显式调用，也可由用户直接调用执行单项能力。
   触发词（中文）：建 MOC / 推荐关系 / 找孤立笔记 / 修死链 / 刷新价值 / 结构漂移
   Triggers (EN): build moc / recommend relations / find orphans / repair deadlinks / refresh value / structure drift
-version: v0.3
+version: v1.8.0
 phase: v0.3
 applies_to: 读写 frontmatter（value.reuse / value.ks）· 写入 06_wiki/mocs/ · 只读全库快照
 source_of_truth:
@@ -196,7 +196,7 @@ manager_agent.build_moc(payload: { scope: "ai-engineering" })
 1. 若未给 candidate_pool，扫描同 domain 笔记作为候选池
 2. **相似度计算**：
    - 主路径：embedding 余弦（如 runtime 提供）
-   - **降级**：标签 Jaccard × 0.6 + 标题关键词重叠 × 0.4
+   - **降级**：按 [`references/scoring.md`](../../references/scoring.md)「无 embedding 降级相似度公式」（标签 Jaccard × 0.6 + 标题关键词重叠 × 0.4）
 3. **关系类型推断**：
    - 相似度 > 0.85 + 标题近义 → `evolves`（A 由 B 演化）
    - 相似度 > 0.85 + 内容对立语义（"X 好" vs "X 不好"）→ `contradicts`
@@ -242,7 +242,9 @@ manager_agent.build_moc(payload: { scope: "ai-engineering" })
 
 **输出**：死链清单 + 每条的修复建议
 
-### 3.6 `refresh_value`（v0.2 简化版）
+### 3.6 `refresh_value`（写回型操作 · 非纯函数）
+
+> **写回型操作（非纯函数）**：本 intent 会把计算结果写回笔记 frontmatter（`value.reuse` / `value.ks`），是 §6 不变量「纯函数式」的两个例外之一（另一个是 `detect_structure_drift`）。
 
 **输入**：`{ snapshot: Note[], query_log?: QueryLogEntry[] }`
 
@@ -356,7 +358,7 @@ KS = confidence × log2(1 + reuse) × impact
 
 | 缺失依赖 | 降级行为 |
 |---------|---------|
-| 无 embedding 服务 | 相似度降为标签 Jaccard + 标题关键词重叠 |
+| 无 embedding 服务 | 相似度按 [`references/scoring.md`](../../references/scoring.md)「无 embedding 降级相似度公式」计算（标签 Jaccard × 0.6 + 标题关键词重叠 × 0.4） |
 | 无查询日志 | refresh_value 仅用入链数；KS 中 reuse 项降级 |
 | Louvain 算法不可用 | MOC 聚类降为按 tag.topic 分组 |
 | maturity 字段缺失（旧 v0.1 笔记） | refresh_value KS 排序跳过；stale_applied 退化为 updated 时间 |

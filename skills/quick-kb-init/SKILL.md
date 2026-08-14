@@ -4,7 +4,7 @@ description: |
   初始化一个 quick-knowledge 知识库 vault。在当前目录（或指定 vault 根）按 PARA + 系统层模型创建完整目录骨架，铺设系统文件、配置与默认模板。
   触发词（中文）：初始化知识库 / 初始化 KB / quick-kb-init / 建知识库
   Triggers (EN): init knowledge base / setup kb / initialize kb
-version: v0.1
+version: v1.8.0
 phase: v0.1
 applies_to: vault 根目录
 source_of_truth:
@@ -49,7 +49,7 @@ source_of_truth:
    - 输出提示：
 
    ```
-   ⚠ 已检测到 quick-knowledge vault（初始化于 2026-08-13，schema v1 / skill v1.4.1）。
+   ⚠ 已检测到 quick-knowledge vault（初始化于 2026-08-13，schema v1 / skill v1.8.0）。
      - 如需重新初始化，请手动删除 .kb-initialized 与 99_system/ 后重试。
      - 如需升级配置，编辑 99_system/config/kb.config.yaml。
    ```
@@ -114,8 +114,8 @@ source_of_truth:
 99_system/
 ├── skills/                # 软链或复制本框架技能（v0.1 仅创建空目录）；v0.3+ 含 manager/memory/research 三类 agent skill
 ├── templates/
-│   ├── zh/                # v1.4 铺设全部 12 个模板
-│   └── en/                # v1.4 铺设全部 12 个模板
+│   ├── zh/                # v1.4 铺设全部 14 个模板
+│   └── en/                # v1.4 铺设全部 14 个模板
 ├── attachments/
 ├── workflows/             # v1.7 创建 .gitkeep（供 query-log.jsonl 用）
 ├── prompts/
@@ -152,9 +152,9 @@ domains:                           # 已注册领域（与 02_areas/ 子目录�
 #   ai-engineering: [rag, agent, eval]
 ```
 
-#### 3.2 `99_system/templates/{zh,en}/` 下铺设全部 12 个模板
+#### 3.2 `99_system/templates/{zh,en}/` 下铺设全部 14 个模板
 
-将仓库 `templates/zh/` 与 `templates/en/` 下的全部 12 个模板文件复制到 vault 的 `99_system/templates/{zh,en}/`：
+将仓库 `templates/zh/` 与 `templates/en/` 下的全部 14 个模板文件复制到 vault 的 `99_system/templates/{zh,en}/`：
 
 **基础 4 类（v0.1 起即有）**：
 
@@ -174,14 +174,23 @@ domains:                           # 已注册领域（与 02_areas/ 子目录�
 - `pattern.md`
 - `moc.md`
 
-两种语言各 12 个文件，共 24 个。**已存在同名文件则跳过，不覆盖。**
+两种语言各 14 个文件，共 28 个。**已存在同名文件则跳过，不覆盖。**
 
 #### 3.2.1 `99_system/config/frontmatter-schema.json`（v1.5 WP3 起）
 
-将仓库 `references/frontmatter-schema-v1.json` 复制到 vault 的 `99_system/config/frontmatter-schema.json`。
+schema 源按优先级探测（v1.8 WP1 起，与 §3.3 模板三级回退同构）：
+
+| 优先级 | 源 | 探测路径 |
+|--------|-----|---------|
+| ① 最高 | 技能自带 | `skills/quick-kb-init/references/frontmatter-schema-v1.json`（v1.8 起随技能包分发，与仓库根源字节级一致） |
+| ② 中 | 仓库根 | `$QUICK_KB_REPO_ROOT/references/frontmatter-schema-v1.json` |
+
+命中即复制到 vault 的 `99_system/config/frontmatter-schema.json`。
 
 - 作用：所有技能产出的笔记由 normalize `schema_check` 子动作按此 schema 校验
 - **已存在同名文件则跳过，不覆盖**（upgrade 场景由 §3.7 比对版本）
+- 复制成功后在 `.kb-initialized` 记录 schema 指纹（SHA-256 前 8 位，见步骤 5 字段表）
+- ①② 均不可达时，**禁止自行编写 schema 内容**，只能落盘占位声明文件并 ⚠（见 §3.3「禁止即兴生成条款」）
 
 #### 3.3 模板路径三级回退
 
@@ -189,9 +198,9 @@ domains:                           # 已注册领域（与 02_areas/ 子目录�
 
 | 优先级 | 源 | 探测路径 | 适用场景 |
 |--------|-----|---------|---------|
-| ① 最高 | 技能自带 | `skills/quick-kb-init/templates/{zh,en}/<filename>` | 技能目录包含 `templates/` 子目录（推荐，随技能包分发） |
+| ① 最高 | 技能自带 | `skills/quick-kb-init/templates/{zh,en}/<filename>` | v1.8 WP1 起技能包自带全部模板文件，此级常规命中（推荐，随技能包分发） |
 | ② 中 | 仓库根 | `$QUICK_KB_REPO_ROOT/templates/{zh,en}/<filename>` | 环境变量 `QUICK_KB_REPO_ROOT` 指向 quick-knowledge 仓库根 |
-| ③ 兜底 | SKILL 内联 | 本 SKILL.md 内嵌的模板文本（与 `templates/zh/` 字节级一致） | 以上两级均不存在时（如纯提示词场景，无文件系统） |
+| ③ 兜底 | 占位模板 | （无源文件，由 init 生成占位） | ①② 均未命中时，写入占位模板（仅 frontmatter + 标题）并在报告 ⚠ 高亮（见下方兜底范围澄清） |
 
 **探测逻辑**：
 
@@ -199,6 +208,10 @@ domains:                           # 已注册领域（与 02_areas/ 子目录�
 2. 命中第一级可用源即从该源复制，**不为同一文件降级到更低优先级**。
 3. 若某文件在所有级别均不可用，写入占位模板（仅 frontmatter + 标题），并在报告中标 ⚠。
 4. **幂等**：目标已存在同名文件则跳过，不覆盖。
+
+> **兜底范围澄清（v1.8 WP1）**：本 SKILL.md 仅内嵌 **4 个系统文件**的文本（§3.4 `06_wiki/_index.md`、§3.5 `00_inbox/_readme.md`、§3.6 `02_areas/<domain>/_moc.md`、步骤 5 `.kb-initialized`），**14 个笔记模板不内嵌**。①② 均未命中时：4 个系统文件仍以内嵌文本写入，笔记模板按探测逻辑第 3 条写占位模板并 ⚠ 高亮。
+
+**禁止即兴生成条款（v1.8 WP1）**：若模板 / schema 的 ①② 级源均不可达，**禁止自行编写 schema 或模板内容**——即兴生成的第三套 schema / 模板会污染下游所有技能。此时只能落盘占位声明文件（仅 frontmatter + 标题 + 一行「模板/schema 源不可达」说明），并在报告中 ⚠ 高亮提示用户：设置 `QUICK_KB_REPO_ROOT` 环境变量，或重装自带 `templates/` 与 `references/` 的技能包。
 
 #### 3.4 `06_wiki/_index.md`（全局导航页占位）
 
@@ -285,17 +298,20 @@ domain: {{domain}}
 - **版本一致** → 走步骤 1 原有逻辑（提示已初始化，结束流程）。
 - **版本不一致（需升级）** → 执行以下补缺操作，**全部幂等**：
 
+> **版本判定口径（v1.8 WP1）**：`skill_version` 以 **17 个技能的统一版本号**为准（v1.8.0 起统一），不逐技能比较——逐技能比较时新旧版本交错（如部分 v0.1、部分 v1.7）会导致 upgrade 误判。
+
 | 动作 | 细则 | 幂等保证 |
 |------|------|---------|
 | 补缺失模板 | 按 §3.3 三级回退探测，将 vault `99_system/templates/{zh,en}/` 中缺失的模板文件补齐 | 已存在同名文件则跳过，不覆盖 |
 | **模板完整性校验（v1.5 WP1）** | 对 vault 内已存在的每个模板文件计算 SHA-256，与仓库源 `templates/{zh,en}/<name>.md` 比对。**不一致**（用户手改或旧版残留）→ 在 upgrade 报告标 ⚠，**询问**用户是否覆盖（默认不覆盖，保留用户改动） | SHA-256 一致则跳过；不一致未确认则不动 |
-| 补缺失 schema | 将 `references/frontmatter-schema-v1.json` 复制到 vault `99_system/config/frontmatter-schema.json`（若缺失） | 已存在则跳过 |
+| 补缺失 schema | 按 §3.2.1 源优先级（① 技能自带 / ② 仓库根）将 `frontmatter-schema-v1.json` 复制到 vault `99_system/config/frontmatter-schema.json`（若缺失） | 已存在则跳过 |
+| **schema 指纹校验（v1.8 WP1）** | 计算 vault 内 `frontmatter-schema.json` 的 SHA-256 前 8 位，与当前权威源（§3.2.1 命中的 ① 或 ②）指纹比对，并核对 `.kb-initialized.schema_sha256`。**不一致**（用户手改或曾即兴生成）→ upgrade 报告标 ⚠，**询问**用户是否以权威版覆盖（默认不覆盖） | 指纹一致则跳过；不一致未确认则不动 |
 | 补缺失目录 | 按 §2 骨架清单检查 `00_inbox/` ~ `99_system/` 下的目录，缺失则创建并放 `.gitkeep` | 已存在目录则跳过 |
 | 合并 config 新字段 | 读取 `99_system/config/kb.config.yaml`，将当前技能版本新增的字段（如 `domain_taxonomy`）以注释默认值形式追加 | 已存在同名字段则跳过，不覆盖已有值 |
 
 **升级完成后**：
 
-1. 更新 `.kb-initialized` 的 `schema_version` 与 `skill_version` 为当前值。
+1. 更新 `.kb-initialized` 的 `schema_version` 与 `skill_version` 为当前值，并刷新 `schema_sha256` 指纹（v1.8 WP1）。
 2. 输出升级报告，列出补缺的文件 / 目录 / config 字段。
 3. 结束流程（不进入后续步骤 4 ~ 6）。
 
@@ -325,22 +341,24 @@ domain: {{domain}}
 ```yaml
 ---
 schema_version: 1
-skill_version: v1.4.1
+skill_version: v1.8.0
 initialized_at: 2026-08-13
 language: zh
 domains: general,programming/python
 runtime_hint: claude-code
+schema_sha256: 5e3ffca2
 ---
 ```
 
 | 字段 | 说明 |
 |------|------|
 | `schema_version` | vault 结构 schema 版本号（整数递增），用于 upgrade 子流程判断是否需补缺 |
-| `skill_version` | 初始化时使用的技能版本号（如 `v1.4.1`） |
+| `skill_version` | 初始化时使用的技能版本号（如 `v1.8.0`；v1.8.0 起为 17 技能统一版本号，见 §3.7 版本判定口径） |
 | `initialized_at` | 初始化日期（`YYYY-MM-DD`） |
 | `language` | 模板语言（`zh` / `en`） |
 | `domains` | 初始化时注册的领域列表（逗号分隔） |
 | `runtime_hint` | init 时检测到的 runtime（`claude-code` / `codex` / `cursor` / `opencode` / `unknown`），供后续诊断 |
+| `schema_sha256` | 所复制 `99_system/config/frontmatter-schema.json` 的 SHA-256 前 8 位指纹（v1.8 WP1），供 upgrade 子流程校验 schema 权威性 |
 
 ### 步骤 6 · 输出报告
 
@@ -355,7 +373,7 @@ runtime_hint: claude-code
   系统文件：
     - 99_system/config/kb.config.yaml
     - 99_system/config/frontmatter-schema.json（v1.5 WP3）
-    - 99_system/templates/{zh,en}/ × 12 each（共 24 个）
+    - 99_system/templates/{zh,en}/ × 14 each（共 28 个）
     - 06_wiki/_index.md
     - 00_inbox/_readme.md
     - 02_areas/{{domain}}/_moc.md × N
@@ -384,7 +402,7 @@ runtime_hint: claude-code
 | `07_principles/` | 创建但不写 | v0.3 认知资产 |
 | `04_projects/`, `03_goals/`, `06_wiki/mocs/`, `06_wiki/maps/` | 创建但不写 | v0.2+ connect / v0.3 goal/project |
 | `98_archive/` | 创建但不写 | v0.3+ project / v0.4 archive |
-| `99_system/templates/en/` | ✓ 铺设 12 个模板 | init（v1.4 起，与 zh 同步） |
+| `99_system/templates/en/` | ✓ 铺设 14 个模板 | init（v1.4 起，与 zh 同步） |
 
 > **理由**：完整骨架让用户从 day 1 看到最终形态，避免后续升级时频繁迁移目录结构。v0.1 不使用的目录靠 `_moc.md` 占位或 `.gitkeep` 标注用途。
 
@@ -405,7 +423,7 @@ runtime_hint: claude-code
 | 目录名冲突（已有同名非空目录） | 保留原内容，仅补缺的子目录与 `.gitkeep` |
 | 磁盘空间不足 | 报错并清理已写入的临时文件（保持幂等） |
 | 模板源缺失（仓库未带 `templates/zh/`） | 写入占位模板（仅 frontmatter + 标题），并在报告中标 ⚠ |
-| 模板源全缺失（①②③ 三级探测均未命中） | 内联模板兜底（与 `templates/zh/` 字节级一致），并在报告中标 ⚠ |
+| 模板源全缺失（①② 两级均未命中） | 4 个系统文件用 SKILL 内嵌文本写入；笔记模板落盘占位声明文件并 ⚠ 提示设置 `QUICK_KB_REPO_ROOT` 或重装技能包（**禁止即兴生成**，见 §3.3 条款） |
 
 ---
 
@@ -413,9 +431,10 @@ runtime_hint: claude-code
 
 - [ ] vault 根含 `.kb-initialized` 与 `_readme.md`
 - [ ] `99_system/config/kb.config.yaml` 存在且 `language` 字段有效
-- [ ] `99_system/templates/zh/` 与 `99_system/templates/en/` 各含 12 个模板文件（共 24 个）
+- [ ] `99_system/templates/zh/` 与 `99_system/templates/en/` 各含 14 个模板文件（共 28 个）
 - [ ] `99_system/config/frontmatter-schema.json` 存在（v1.5 WP3，normalize schema_check 依赖）
-- [ ] **upgrade 场景**：24 个模板 SHA-256 已与仓库源比对，不一致项已 ⚠ 标注（v1.5 WP1）
+- [ ] **upgrade 场景**：28 个模板 SHA-256 已与仓库源比对，不一致项已 ⚠ 标注（v1.5 WP1）
+- [ ] `.kb-initialized` 记录 `schema_sha256` 指纹（SHA-256 前 8 位）；upgrade 场景已与权威源比对，不一致项已 ⚠ 询问（v1.8 WP1）
 - [ ] `00_inbox/`、`02_areas/`、`01_resources/`、`07_principles/`、`06_wiki/`、`05_outputs/`、`03_goals/`、`04_projects/`、`98_archive/`、`99_system/` 顶层目录齐全
 - [ ] 每个空叶子目录含 `.gitkeep`
 - [ ] 每个领域至少一个 `_moc.md`
