@@ -84,7 +84,7 @@ source_of_truth:
    - 留空：经验复用建议（待 step 5 填）
 
 4. 主动召回（核心 · 调 `quick-kb-memory-agent` intent=`proactive_suggest`，event_type=`new_project_init`）：
-   - memory-agent 内部候选集限 type∈{project, experience}，按 §3.5 score 公式排序（experience 失败案例权重提升，prefer_failures=true）
+   - 入参/返回结构见 memory-agent SKILL.md §0 契约
    - 限流：库内 < 50 条时关闭；同事件去重
 
 5. 把召回结果写入 _readme.md 的「经验复用建议」段：
@@ -101,6 +101,10 @@ source_of_truth:
    - 在 decisions/<YYYY-MM-DD>-<topic>.md 用 decision.md 模板
    - 必填：problem / options / chosen / reason / expected
    - 留空：actual / lesson（待 archive 补）
+   - **DECISION 编号规则（v1.7 WP5-E）**：
+     - 项目内自增，格式 `DEC-001` / `DEC-002` ...
+     - 跨项目不重复利用编号
+     - 归档时编号保留
 
 7. 询问关联 goal（若 goal 提供）：
    - 在 _readme.md 的 relations.supports 引用
@@ -241,7 +245,7 @@ source_of_truth:
    |------|---------|--------|------|---------------------|
    | [[decisions/001]] | ... | ... | ±X% | [[experience/...]] |
 
-7. 引用清理（调 `quick-kb-manager-agent` intent=`repair_deadlinks` 可后续做）：
+7. 引用清理（可选 · 调 `quick-kb-manager-agent` intent=`repair_deadlinks`；返回结构见其 §0）：
    - 顶层 _moc.md 移除项目入口或迁到 archive 区
    - goal 的「关联项目」段标注「已归档」
 ```
@@ -258,7 +262,7 @@ source_of_truth:
    - _moc.md（索引骨架）
    - notes/ decisions/ progress/ refs/（空目录）
 
-🧠 经验召回（new_project_init 事件 · 由 quick-kb-memory-agent 按 §3 规则执行）：
+🧠 经验召回（new_project_init 事件 · 由 quick-kb-memory-agent 执行；规则见其 SKILL.md §3.4）：
    - 高相关 experience: 2 条
    - 可应用 pattern: 1 条
    - 失败教训: 1 条

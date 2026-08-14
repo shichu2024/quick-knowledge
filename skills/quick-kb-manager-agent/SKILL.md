@@ -24,6 +24,78 @@ source_of_truth:
 
 ---
 
+## 0. 被调用契约
+
+本技能通过 Skill 工具调用，入参与返回结构严格如下：
+
+```
+manager_agent(
+  intent: "tidy_inbox" | "build_moc" | "recommend_relations"
+        | "detect_orphans" | "repair_deadlinks" | "refresh_value"
+        | "proactive_remind" | "detect_structure_drift",
+  payload: {
+    inbox_notes?: Note[],             // tidy_inbox 用
+    scope?: string,                    // build_moc 用（domain/tag/note-path）
+    note?: Note,                       // recommend_relations 用
+    candidate_pool?: Note[],           // recommend_relations 用
+    snapshot?: Note[],                 // detect_orphans / repair_deadlinks / refresh_value / detect_structure_drift 用
+    query_log?: QueryLogEntry[],       // refresh_value 用
+    event?: "ingest_new" | "review_done" | "stale_applied_notes",  // proactive_remind 用
+    context?: Record<string, unknown> // proactive_remind 用
+  },
+  options: {
+    max_results?: number,              // 默认 5
+    threshold?: number,                // 默认 0.6（相似度阈值）
+    window_months?: number             // detect_structure_drift 用，默认 6
+  }
+) → ManagerAgentResult
+```
+
+**返回结构**（ManagerAgentResult）：
+
+```typescript
+interface ManagerAgentResult {
+  found: Array<{
+    // 通用 Note 字段，或特定 intent 的专用结构：
+    cluster?: string,                   // tidy_inbox 用
+    notes?: Note[],                    // tidy_inbox 用
+    suggested_priority?: "high" | "medium" | "low",  // tidy_inbox 用
+    path?: string,                     // build_moc 用
+    action?: "created" | "updated",   // build_moc 用
+    target?: string,                   // recommend_relations 用（wikilink）
+    type?: string,                     // recommend_relations 用（supports/evolves/contradicts/supersedes）
+    similarity?: number,               // recommend_relations 用
+    reason?: string,                   // recommend_relations / repair_deadlinks 用
+    suggested_action?: string          // repair_deadlinks / detect_structure_drift 用
+  }>,
+  conflicts?: Array<{                  // recommend_relations 产出 contradicts 候选
+    a: Note,
+    b: Note,
+    context_a: string,
+    context_b: string
+  }>,
+  reasoning: string,                   // 可解释性（为什么这么聚类/推荐/标记）
+  suggestions?: Array<{               // proactive_remind / detect_structure_drift 输出
+    type: "promote_to_domain" | "split_subdomain" | string,
+    target_tag?: string,
+    reason: string,
+    recommended_action: string,
+    severity?: "info" | "warning"
+  }>,
+  degraded?: boolean,                  // 是否走了降级路径
+  meta: { agent: "manager", latency_ms?: number, version: "v0.3" }
+}
+```
+
+**字段约定**：
+- `refresh_value` 会写回 `value.reuse` 和 `value.ks` 到 frontmatter（v0.3 新增）
+- `build_moc` 产出写入 `06_wiki/mocs/` 目录，基于 `templates/zh/moc.md`
+- `recommend_relations` 相似度 > 0.85 建议 evolves/contradicts，> 0.6 建议 supports
+- `detect_structure_drift` 触发条件：子领域近 6 月 ≥ 30 条 OR 占比 ≥ 40%
+- `proactive_remind` 遵守限流：单次调用 ≤ 3 条，库 < 50 条关闭
+
+---
+
 ## 1. 能力清单
 
 | intent | v0.2 | v0.3 | 输入 | 输出 |

@@ -28,12 +28,12 @@ source_of_truth:
 ### 做
 
 - 扫描 inbox 候选（单条 / 子目录 / 全 inbox；6 类源）
-- 调 `quick-kb-research-agent`（intent=`extract_atoms`）抽取原子观点（一笔记一观点；按 §2.2 规则含"且/并且/同时"的复合句优先拆分）
+- 调 `quick-kb-research-agent` intent=`extract_atoms` 抽取原子观点（规则见其 SKILL.md §3.2）
 - 分类去向：concept → `02_areas/<domain>/`、resource → `01_resources/<category>/`、idea（仍待消化）→ 留 inbox，标 `status: draft`
 - 补全 **v0.2 完整 frontmatter**（含 relations/context/value.reuse）
 - `source.note` 用 wikilink 指回 inbox 原始素材
-- 置信度初值由 research-agent 按 §2.2 给出（单源 30-40 / 多源 60-75 / 一手 80-95）
-- **冲突检测**：调 `quick-kb-manager-agent.recommend_relations` 扫描同 domain 已入库笔记，发现对立候选 → 调 `quick-kb-memory-agent.present_conflicts` 呈现 → 提示建立 contradicts 关系
+- 置信度初值由 research-agent 给出（0-100 整数量纲；规则见其 SKILL.md §3.2）
+- **冲突检测**：调 `quick-kb-manager-agent.recommend_relations` 扫描同 domain 已入库笔记，发现对立候选 → 调 `quick-kb-memory-agent.present_conflicts`（返回结构见其 §0）呈现 → 提示建立 contradicts 关系
 
 ### 不做
 
@@ -86,11 +86,11 @@ source_of_truth:
 操作：
 
 1. 阅读 inbox 笔记正文
-2. 调 research-agent 按 §2.2 原子化规则拆分（每条只表达一个可独立成立的观点；含"且/并且/同时"的复合句优先拆分）
-3. 对每条原子观点（research-agent 返回值含）：
+2. 调 research-agent 按其 SKILL.md §3.2 原子化规则拆分（每条只表达一个可独立成立的观点；含"且/并且/同时"的复合句优先拆分）
+3. 对每条原子观点（返回结构见 research-agent §0 契约）：
    - `note_type`：`concept` 或 `resource`
    - `title` / `body` / `tags` / `source_excerpt`
-   - `confidence`（research-agent 按 §2.2 confidence 初值规则给出）
+   - `confidence`（0-100 量纲）
    - `domain`（单层或嵌套，如 `programming/python`）
 
 > **嵌套 domain 决策（v1.4+）**：当 `kb.config.yaml.domain_taxonomy` 命中顶层 key 且能从 tags/title 推断子域 → 推断嵌套 domain（`key/sub`）；未配置 taxonomy 或未命中 → 单层（向后兼容）。
@@ -98,7 +98,7 @@ source_of_truth:
 #### 2.3 原子化拆分
 
 - 抽取得到 N 条原子笔记 → 拆为 N 条
-- `depth=quick` → 不拆，整篇转一条 resource（调 research-agent intent=`summarize` 生成摘要）
+- `depth=quick` → 不拆，整篇转一条 resource（调 research-agent intent=`summarize`；返回结构见其 §0）
 
 #### 2.4 分类去向
 
@@ -112,7 +112,7 @@ source_of_truth:
 
 > v0.2 不产出 decision/goal/project/principle/belief/pattern/experience/moc/review/daily 类型。
 
-#### 2.5 补全 v0.2 完整 frontmatter
+#### 2.5 补全 v0.2 完整 frontmatter（v1.7 WP2-D）
 
 严格按 [`references/frontmatter-v0.2.md`](../../references/frontmatter-v0.2.md)：
 
@@ -123,7 +123,7 @@ type: concept                       # 或 resource
 created: {{today}}
 updated: {{today}}
 tags:                               # 由 suggested_tags 转正，对照 kb.config.yaml 词表
-  - {{domain}}/{{topic}}
+  - {{domain}}/{{topic}}            # v1.7 强制：必须为 inline array 格式 [tag1, tag2]
 status: active                      # 默认 active；字段不全 → draft
 domain: {{domain}}
 confidence: {{初值}}                # 0-100 整数 · 单源 30-40 / 多源 60-75 / 一手 80-95（AGENTS_SPEC §2.2）
@@ -141,6 +141,10 @@ source:
 ---
 ```
 
+**v1.7 强制规则（WP2-D）**：
+- `tags` 必须为 inline array 格式 `[tag1, tag2]`，禁止 YAML block list 格式
+- 写入前检测：若为 block list → 自动转换为 inline array
+
 **严禁**写入：`maturity` / `value.impact` / `value.uniqueness`（v0.3 字段）。
 
 #### 2.6 正文生成
@@ -151,21 +155,16 @@ source:
 
 操作：
 
-1. 取本笔记 `domain` 下所有已入库笔记作为候选池传入 manager-agent
-2. manager-agent 内部按 §1.2 计算相似度与判定（无 embedding 时降级为：标签 Jaccard + 标题关键词重叠）
-3. manager-agent 返回候选（按 §1.2 阈值）：
-   - 相似度 > 0.6 进候选
-   - 标题近义 → `evolves`
-   - 内容对立 → `contradicts`
-   - 相似度 > 0.85 → 提示合并或 `evolves`（需用户确认）
-4. 输出候选列表（target / type / similarity）
+1. 取本笔记 `domain` 下所有已入库笔记作为候选池
+2. 调用及返回结构见 manager-agent SKILL.md §0 契约（相似度 > 0.6 进候选；> 0.85 建议 evolves/contradicts）
+3. 输出候选列表（target / type / similarity）
 
 - supports/evolves/supersedes 候选 → 自动写入 relations（相似度 > 0.85 的 evolves 提示用户确认）
 - **contradicts 候选** → 进入步骤 3 冲突检测流程
 
 ### 步骤 3 · 冲突检测与主动提醒（V2 关键）
 
-> manager-agent.recommend_relations 发现对立候选 → memory-agent.present_conflicts 按 §4.2 冲突感知协议处理（同时呈现双方 + 各自 context）。
+> manager-agent.recommend_relations 发现对立候选 → 调 memory-agent.present_conflicts（返回结构见其 §0）按冲突感知协议处理（同时呈现双方 + 各自 context）。
 
 #### 3.1 检测规则
 
@@ -190,7 +189,38 @@ source:
   → 请补充各自的 context（推荐：[[02_areas/ai-engineering/microservices]] 的 context = "大团队、多团队并行"）
 ```
 
-### 步骤 4 · 写入并反馈
+### 步骤 4 · 关系反向补全与写入（v1.7）
+
+#### 4.1 关系反向补全（v1.7 WP2-A）
+
+对每条新增笔记的 `relations.supports` / `evolves` / `supersedes`：
+- 复用 `quick-kb-connect SKILL.md` §5.2.1 的反向补全表（见下表）
+- 在目标笔记 frontmatter 写入对应反向键
+- 反向补全幂等——已存在不重复追加
+- 写入失败（目标笔记不可写）→ 仅在报告列「⚠ 反向补全失败清单」，不阻断入库
+
+**反向补全表（引用 connect §5.2.1）**：
+
+| 正向（A→B） | 自动补的反向（B→A） |
+|-------------|---------------------|
+| `evolves` | `evolved_by` |
+| `supersedes` | `superseded_by` |
+| `derived_from` | `source_of` |
+| `refines` | `refined_by` |
+| `supports` / `contradicts` | 对称，已在双方写入（保持现状） |
+
+#### 4.2 冲突消歧检测（v1.7 WP3-B）
+
+写入 `supports` 或 `contradicts` 前，检测同一对笔记是否已有反向关系：
+
+```markdown
+若 A.supports=[B] 已存在，新写 A.contradicts=[B]：
+- 暂不写入 contradicts
+- 报告：「⚠ 语义冲突：A 对 B 已 supports，是否覆盖？需补充 context」
+- 若 A.contradicts=[B] 已存在，新写 A.supports=[B]：同样提示
+```
+
+#### 4.3 写入并反馈
 
 对每条产出：
 
@@ -206,9 +236,16 @@ source:
   value.reuse: 0
 ```
 
+### 步骤 4.5 · inbox 素材归档（v1.7 WP2-B）
+
+入库成功后，对源 inbox 笔记：
+- 在 frontmatter 追加 `status: ingested` + `ingested_to: "[[02_areas/...]]"`
+- 移动到 `00_inbox/_processed/<原子目录>/`（保留 mtime）
+- 不删除（保留追溯链，需归档时调 archive）
+
 ### 步骤 5 · 主动提醒（manager 事件子集）
 
-调 `quick-kb-manager-agent`（intent=`proactive_remind`，event=`ingest_new`）触发主动提醒：
+调 `quick-kb-manager-agent` intent=`proactive_remind`（event=`ingest_new`；返回结构见其 §0）触发主动提醒：
 
 - 提示建立 `supports`/`evolves` 关系（已在 §2.7 完成）
 - 库 < 50 条时关闭
@@ -230,16 +267,13 @@ source:
 
 > 💡 **下一步**：运行 `quick-kb-connect` 建立 relations 与 MOC，把刚入库的笔记接入知识图谱。
 
-### 步骤 7 · 更新 inbox 原始素材（非破坏性）
+### 步骤 7 · 更新 inbox 原始素材（v1.7 已移至步骤 4.5）
 
-在原始素材顶部追加 callout（不改正文）：
+本步骤已合并到步骤 4.5「inbox 素材归档」：
 
-```markdown
-> [!info] 已入库
-> - [[02_areas/ai-engineering/rag-architecture]]（concept · 2026-08-09）
->   - relations: supports [[Vector Database]] / evolves [[RAG 基础概念]]
-> - [[01_resources/articles/...]]（resource · 2026-08-09）
-```
+- 在原始素材 frontmatter 追加 `status: ingested` + `ingested_to: "[[02_areas/...]]"`
+- 移动到 `00_inbox/_processed/<原子目录>/`
+- 不删除（保留追溯链）
 
 ---
 
@@ -290,12 +324,12 @@ source:
 ## 8. 自检清单
 
 - [ ] 每条产出笔记的 `source.note` 指回 inbox 原始素材
-- [ ] inbox 原始素材未被删除，顶部追加 callout
+- [ ] inbox 原始素材已移至 `00_inbox/_processed/` 且 frontmatter 含 `status: ingested`
 - [ ] frontmatter 含完整 v0.2 字段（含 relations/context/value.reuse）
 - [ ] 无 v0.3 字段（maturity/value.impact/value.uniqueness）
 - [ ] 抽取失败的笔记标 `status: draft`
 - [ ] 原子观点拆分（二选一 · v1.5 WP8）：
-      · 正常态：调 quick-kb-research-agent（intent=extract_atoms，按 §2.2 规则）
+      · 正常态：调 quick-kb-research-agent intent=extract_atoms（规则见其 SKILL.md §3.2）
       · 降级态：手动按「含且/并且/同时的复合句优先拆」+ ⚠ 标注；confidence 给保守值 30-40
 - [ ] 冲突检测（二选一 · v1.5 WP8）：
       · 正常态：调 manager-agent.recommend_relations + memory-agent.present_conflicts
@@ -303,6 +337,12 @@ source:
 - [ ] contradicts 候选已建立双向关系 + 提示补充 context
 - [ ] 文件名 kebab-case
 - [ ] 处理报告含统计 + 下一步建议
+- [ ] **v1.7 新增**（WP2）：
+      · [ ] 关系反向补全已执行（目标笔记含反向键）
+      · [ ] inbox 素材已归档至 `_processed/`
+      · [ ] tags 格式为 inline array
+- [ ] **v1.7 新增**（WP3-B）：
+      · [ ] supports/contradicts 冲突消歧检测已执行
 
 ---
 

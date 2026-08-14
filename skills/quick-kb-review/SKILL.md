@@ -30,7 +30,7 @@ source_of_truth:
 ### 做
 
 - 周期快照采集（daily/weekly/monthly/quarterly/yearly/adhoc）
-- 调 `quick-kb-manager-agent`（intent=`refresh_value`）刷新 `value.reuse`（入链数 + 查询命中数 + Connect 推荐频次，按 §1.1 规则）
+- 调 `quick-kb-manager-agent` intent=`refresh_value`（返回结构见其 §0）刷新 `value.reuse`（入链数 + 查询命中数 + Connect 推荐频次）
 - 四维度分析：knowledge / project / goal / daily
 - 健康报告 + 待办清单（按优先级）
 - 主动提醒（manager 事件子集）：Review 完成 → 提示处理高价值低复用笔记
@@ -85,6 +85,15 @@ quick-kb-manager-agent(
 ```
 
 写回每条笔记的 `value.reuse`。
+
+**recency_factor 计算（v1.7）**：在 refresh_value 时按 `references/scoring.md` §recency 规则计算时效性因子：
+
+- `updated` 距今 ≤ 30 天 → 1.0
+- 30-90 天 → 0.8
+- 90-180 天 → 0.65
+- > 180 天 → 0.5
+
+该因子用于 KS 排序（review 的 KS 排序在 v0.3 启用）。
 
 ### 步骤 3 · 四维度分析
 

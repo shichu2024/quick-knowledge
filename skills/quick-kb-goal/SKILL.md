@@ -87,19 +87,16 @@ source_of_truth:
    └── progress/          # 进展日志
 
 4. 学习路径推荐（path_source=recommend）：
-   4.1 调 `quick-kb-research-agent`（intent=`summarize`，length=`detailed`）生成路径：
-       - 输入：目标描述 + domain 公开知识摘要
-       - 按 §2.2 summarize 规则组织为「基础 → 进阶 → 实战」三层
-   4.2 库内关联：扫库内已存在的相关 concept 笔记
-       （按 domain tag + 标题关键词匹配）
+   4.1 调 `quick-kb-research-agent` intent=`summarize`（length=`detailed`）生成路径：
+       - 入参/返回结构见 research-agent SKILL.md §0 契约
+   4.2 库内关联：扫库内已存在的相关 concept 笔记（按 domain tag + 标题关键词匹配）
    4.3 路径节点写入 goal.md「学习路径」段：
        1. 基础概念（X 周） → [[已有 concept 1]] / [建议 Capture 缺口]
        2. 进阶主题（X 周） → [[已有 concept 2]]
        3. 实战项目（X 周） → [建议新开 project]
 
 5. 主动召回（核心 · 调 `quick-kb-memory-agent` intent=`proactive_suggest`，event_type=`new_goal_create`）：
-   - memory-agent 内部限定候选集为 domain 内的 principle/belief/experience
-   - 按 §3.5 score 公式排序，取相关度最高的 N 条
+   - 入参/返回结构见 memory-agent SKILL.md §0 契约
    - 写入 goal.md「相关笔记」段：
       ### 领域原则
       - [[principle/xxx]] · 适用性
@@ -184,7 +181,7 @@ source_of_truth:
    - 是否要 Capture 这次学习的经验？
    - 是否要立进阶目标？
 
-5. 引用清理（调 `quick-kb-manager-agent` intent=`repair_deadlinks` 可后续做）：
+5. 引用清理（可选 · 调 `quick-kb-manager-agent` intent=`repair_deadlinks`；返回结构见其 §0）：
    - 顶层 _moc.md 移除目标入口或迁到 archive 区
    - 关联 project 的 relations.supports 标注「已达成/已取消」
 ```
@@ -196,7 +193,7 @@ source_of_truth:
 ```
 1. 校验：03_goals/<slug>/goal.md 存在
 2. 备份当前路径到 goal.md 的「路径历史」段（追加，不删除）
-3. 重新调 `quick-kb-research-agent`（intent=`summarize`）生成路径（基于当前库内笔记 + 已完成里程碑，按 §2.2 规则）
+3. 重新调 `quick-kb-research-agent` intent=`summarize`（返回结构见其 §0）生成路径（基于当前库内笔记 + 已完成里程碑）
 4. 新路径写入「学习路径」段
 5. 询问用户：是否保留旧里程碑节点？
 ```
@@ -220,7 +217,7 @@ source_of_truth:
    - 失败教训: 1 条
    已写入「相关笔记」段
 
-📚 学习路径（由 quick-kb-research-agent 生成，按 §2 规则）：
+📚 学习路径（由 quick-kb-research-agent 生成；规则见其 SKILL.md §3.4）：
    1. 基础（2 周） → [[已有 concept]] / [Capture 缺口: X]
    2. 进阶（3 周） → ...
    3. 实战（4 周） → [新开 project]

@@ -25,6 +25,69 @@ source_of_truth:
 
 ---
 
+## 0. 被调用契约
+
+本技能通过 Skill 工具调用，入参与返回结构严格如下：
+
+```
+memory_agent(
+  intent: "recall_similar" | "check_beliefs" | "detect_repeat_mistakes"
+        | "proactive_suggest" | "present_conflicts",
+  payload: {
+    current_context: string,           // 当前任务/情境的自然语言描述
+    constraints?: string,              // 团队/阶段/技术栈
+    candidate_plan?: string,           // check_beliefs / detect_repeat_mistakes 用
+    event_type?: "new_project_init" | "new_goal_create" | "capture_topic_match" | "ingest_conflict_detected",  // proactive_suggest 用
+    recalled?: Note[]                  // present_conflicts 用（对其他召回结果二次加工）
+  },
+  options: {
+    max_results?: number,              // 默认 5
+    min_similarity?: number,           // 默认 0.55
+    recency_weight?: number,           // 默认 0.20，范围 0-1
+    prefer_failures?: boolean          // 默认 true
+  }
+) → MemoryAgentResult
+```
+
+**返回结构**（MemoryAgentResult）：
+
+```typescript
+interface MemoryAgentResult {
+  found: Array<{
+    // Note 基础字段（path/title/tags/type/confidence/frontmatter）
+    similarity: number,                // 0-1
+    recency_days: number,             // 距今天数
+    score: number,                    // 综合分（§4 公式计算）
+    why: string,                      // 为什么召回（单条解释）
+    consistency?: "aligned" | "conflict" | "neutral",  // check_beliefs 用
+    repeat_risk?: "high" | "medium"   // detect_repeat_mistakes 用
+  }>,
+  conflicts?: Array<{                 // 召回结果中涉及 contradicts 时
+    a: Note,
+    b: Note,
+    context_a: string,
+    context_b: string
+  }>,
+  reasoning: string,                   // 可解释性（必须含「为什么召回/为什么冲突」）
+  suggestions?: Array<{               // proactive_suggest 输出
+    event: string,
+    message: string,
+    related_notes: Note[],
+    severity: "info" | "warning"
+  }>,
+  degraded?: boolean,                 // 是否走了降级路径
+  meta: { agent: "memory", latency_ms?: number, version: "v0.3" }
+}
+```
+
+**字段约定**：
+- `score` 按 §4 公式计算（几何平均 + 类型系数 + 失败系数）
+- `recency_factor` 使用 `max(0.3, 1 - days/365)` 不归零
+- `check_beliefs` 对每条候选标注 `consistency` 于 `why` 字段
+- `present_conflicts` 必须同时呈现双方，不输出「应该选 A/B」判断
+
+---
+
 ## 1. 能力清单（v0.3 全量）
 
 | intent | 输入 | 输出 |

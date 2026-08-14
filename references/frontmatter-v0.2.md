@@ -45,6 +45,8 @@ supersedes: references/frontmatter-v0.1.md（v0.1 子集仍兼容，v0.2 起技�
 | **`relations`** | ✓（结构存在，子键可空） | object | 类型化关系（见 §3） | §6.7 |
 | **`context`** | 可选 | string | 自由文本适用上下文 | §6.8 |
 | **`value`** | ✓（结构存在，子键可空） | object | 价值维度（见 §4） | §6.6 |
+| **`outcome`** | experience 类型必填（v1.7 WP3-D） | string | 正面/负面/中性 + 简述结果 | §8.4 |
+| **`trigger`** | experience 类型必填（v1.7 WP3-D） | string | 触发情境（供 detect_repeat_mistakes 用） | §8.4 |
 
 ### 2.1 显式排除（v0.3+ 才允许）
 

@@ -33,9 +33,9 @@ source_of_truth:
 
 ### 做
 
-- 调 `quick-kb-manager-agent`（intent=`recommend_relations`）推荐类型化关系（supports/contradicts/evolves/supersedes），按 §1.2 阈值
+- 调 `quick-kb-manager-agent` intent=`recommend_relations`（返回结构见其 §0）推荐类型化关系（supports/contradicts/evolves/supersedes）
 - 写入 `relations`（supports/contradicts/evolves/supersedes），不再写扁平 `related`
-- 调 `quick-kb-manager-agent`（intent=`build_moc`）生成 `06_wiki/mocs/<domain>-moc.md`
+- 调 `quick-kb-manager-agent` intent=`build_moc`（返回结构见其 §0）生成 `06_wiki/mocs/<domain>-moc.md`
 - 接 json-canvas 生成 `06_wiki/maps/<domain>.canvas`（Obsidian 缺失跳过）
 - 更新 `06_wiki/_index.md` 全局导航
 
@@ -77,22 +77,12 @@ action：all
 
 ### 步骤 2 · 双链补全（action=links 或 all）
 
-对每条笔记，调：
+对每条笔记，调 `quick-kb-manager-agent` intent=`recommend_relations`：
 
-```
-quick-kb-manager-agent(
-  intent: "recommend_relations",
-  payload: { note: {{当前笔记}}, candidate_pool: {{范围内其他笔记}} }
-) → {
-  found: [
-    { target: "[[Vector Database]]", type: "supports", similarity: 0.72 },
-    { target: "[[模块化单体]]", type: "contradicts", similarity: 0.78 },
-    { target: "[[RAG 基础概念]]", type: "evolves", similarity: 0.88 }
-  ]
-}
-```
+- 入参/返回结构见 manager-agent SKILL.md §0 契约
+- 返回候选列表（target / type / similarity / reason）
 
-#### 2.1 写入策略
+#### 2.1 写入策略（v1.7 含 WP3-A/B 循环与冲突检测）
 
 | 关系 | 相似度 | interactive=true | interactive=false |
 |------|--------|-----------------|------------------|
@@ -100,6 +90,23 @@ quick-kb-manager-agent(
 | evolves | > 0.85 | **必须确认**（演化关系强） | 自动写入 + 报告 |
 | supersedes | 候选 status=deprecated | 提示用户确认 | 自动写入 |
 | contradicts | 对立语义 + 高相似度 | **必须确认** + 提示声明 context | 自动写入 + 警告 |
+
+**v1.7 WP3-A 循环检测（双向 evolves）**：
+```markdown
+写入 A→B 前检测 B 是否已含 A→B 或反向 evolves：
+若检测到循环：
+- 不写入
+- 报告：「⚠ 关系循环：A evolves B 与 B evolves A 冲突，请改用 supersedes 或拆分」
+- 建议用户手动消歧
+```
+
+**v1.7 WP3-B 冲突消歧（supports + contradicts）**：
+```markdown
+写入 supports 或 contradicts 前，检测同一对笔记是否已有反向关系：
+若 A.supports=[B] 已存在，新写 A.contradicts=[B]：
+- 暂不写入 contradicts
+- 报告：「⚠ 语义冲突：A 对 B 已 supports，是否覆盖？需补充 context」
+```
 
 #### 2.2 V1 兼容
 
@@ -114,14 +121,10 @@ quick-kb-manager-agent(
 
 ### 步骤 3 · MOC 生成（action=moc 或 all）
 
-```
-quick-kb-manager-agent(
-  intent: "build_moc",
-  payload: { scope: "{{domain}}" }
-) → {
-  found: [{ path: "06_wiki/mocs/<domain>-moc.md", action: "created" | "updated" }]
-}
-```
+调 `quick-kb-manager-agent` intent=`build_moc`：
+
+- 入参/返回结构见 manager-agent SKILL.md §0 契约
+- 返回 MOC 路径与聚类说明
 
 #### 3.1 模板
 
@@ -208,6 +211,20 @@ quick-kb-manager-agent(
 - 反向补全**幂等**——已存在不重复追加。
 - 删除 A 中正向关系后，B 的反向键**不自动删除**（保留人工痕迹，仅在报告列「孤儿反向键」）。
 
+#### 5.2.2 v1.7 WP3-C evolves/supersedes 候选推荐
+
+build_moc 时，对同 domain + 同 type 的笔记对，若满足以下条件标记为 evolves/supersedes 候选（不自动写入，仅提示）：
+- tag Jaccard ≥ 0.7
+- created 时间差 > 30 天
+- 标题语义相似（关键词重叠）
+
+**提示格式**：
+```markdown
+⚠ evolves/supersedes 候荐：
+  - [[新笔记]] 可能是 [[旧笔记]] 的演进（相似度 X，时间差 Y 天）
+  - 建议用户确认后手动添加 evolves 关系
+```
+
 ### 5.3 Canvas 路径
 
 `06_wiki/maps/<domain>.canvas`（Obsidian 缺失时不创建）
@@ -248,6 +265,12 @@ quick-kb-manager-agent(
 - [ ] Canvas 在 Obsidian 缺失时正确跳过
 - [ ] 全局导航 `06_wiki/_index.md` 已更新
 - [ ] **MOC 字段 vs frontmatter 一致性自检**——生成 MOC 后立即 diff，不一致直接 fail（不再仅警告）
+- [ ] **v1.7 WP3-A 新增**：
+      · [ ] 循环关系检测已执行（双向 evolves 100% 被拒绝）
+- [ ] **v1.7 WP3-B 新增**：
+      · [ ] supports/contradicts 冲突消歧检测已执行
+- [ ] **v1.7 WP3-C 新增**：
+      · [ ] evolves/supersedes 候选推荐已生成（若适用）
 
 ---
 

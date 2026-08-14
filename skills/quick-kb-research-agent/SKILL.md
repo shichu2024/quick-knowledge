@@ -23,6 +23,65 @@ source_of_truth:
 
 ---
 
+## 0. 被调用契约
+
+本技能通过 Skill 工具调用，入参与返回结构严格如下：
+
+```
+research_agent(
+  intent: "process_resource" | "extract_atoms" | "cross_verify" | "summarize",
+  payload: {
+    source_text?: string,              // process_resource / summarize 用
+    url?: string,                      // process_resource 用
+    file_path?: string,                // process_resource 用
+    text?: string,                     // extract_atoms / summarize 用
+    hint?: { domain?: string, known_tags?: string[] },  // extract_atoms 用
+    candidates?: Note[],               // cross_verify 用
+    existing_notes?: Note[]            // cross_verify 用
+  },
+  options: {
+    summary_length?: "short" | "medium" | "detailed",  // process_resource / summarize 用
+    max_atoms?: number                 // process_resource / extract_atoms 用
+  }
+) → ResearchAgentResult
+```
+
+**返回结构**（ResearchAgentResult）：
+
+```typescript
+interface ResearchAgentResult {
+  found: Array<{
+    type: "summary_card" | "atom_note" | "verification_report",
+    body?: string,                     // summary_card 用
+    length?: number,                   // summary_card 用（300/800/字数）
+    note_type?: "concept" | "resource", // atom_note 用
+    title?: string,                    // atom_note 用
+    tags?: string[],                   // atom_note 用
+    confidence?: number,               // atom_note 用（0-100 量纲）
+    source_excerpt?: string,           // atom_note 用
+    candidate?: Note,                  // verification_report 用
+    adjusted_confidence?: number,      // verification_report 用
+    related_existing?: string[],        // verification_report 用（wikilinks）
+    suggested_relation?: string,        // verification_report 用（supports/evolves/contradicts/supersedes）
+    reason?: string                    // verification_report 用
+  }>,
+  conflicts?: Array<{                  // cross_verify 产出：对立候选
+    candidate: Note,
+    conflicting_existing: Note
+  }>,
+  reasoning: string,                   // 可解释性（为什么这么抽取/判定）
+  degraded?: boolean                   // 是否走了降级路径（抓取失败标 partial）
+  meta: { agent: "research", latency_ms?: number, version: "v0.2" }
+}
+```
+
+**字段约定**：
+- `confidence` 严格使用 0-100 整数量纲（v1.5 WP2 全局统一）
+- `partial: true` 时在 reasoning 中说明「基于已有正文片段生成」
+- `type: "summary_card"` 必带 `length` 字段（short/medium/detailed 对应 300/800/大纲）
+
+---
+
 ## 1. 能力清单（v0.2 全量）
 
 | intent | 输入 | 输出 |

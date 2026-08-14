@@ -140,7 +140,7 @@ source_of_truth:
 | 死链数 | 3 | 8 | -5 |
 | 平均 inbox 周转 | 4.2 天 | 6.8 天 | ↓ 2.6 天 |
 
-## Type 分布
+## Type distribution
 
 | type | 数量 | 占比 |
 |------|------|------|
@@ -162,6 +162,19 @@ applied    : 28 ███████████
 teachable  : 11 ████
 deprecated :  3 █
 ```
+
+## Maturity 转换漏斗（v1.7）
+
+| 当前态 | 笔记数 | 上游来源 | 转换率 |
+|--------|--------|---------|--------|
+| captured | 18 | — | — |
+| understood | 12 | captured→understood | 67% |
+| validated | 15 | understood→validated | 125% |
+| applied | 28 | validated→applied | 187% |
+| teachable | 11 | applied→teachable | 39% |
+| deprecated | 3 | any→deprecated | — |
+
+⚠ 停滞态（笔记数 > 0 且转换率 = 0%）：无
 
 ## 置信度分布
 

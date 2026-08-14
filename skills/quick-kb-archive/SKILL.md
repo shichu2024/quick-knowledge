@@ -69,7 +69,7 @@ source_of_truth:
 |------|------|------|------|
 | 目标 `target` | 是 | — | 笔记路径 / wikilink / 批量清单（逗号分隔） |
 | 操作 `action` | 否 | `archive` | `archive` / `unarchive` / `check`（仅状态检查） |
-| 原因 `reason` | 否 | — | 用户自定义归档原因（写入 archive_index） |
+| 原因 `reason` | 否 | — | 用户自定义归档原因（写入 archive_index）；**v1.7 WP5-F：建议从 kb.config.yaml 的 archive_reasons 词表中选择** |
 
 ---
 
@@ -94,6 +94,16 @@ source_of_truth:
    - 用户确认后进入迁移
 
 4. 迁移（**copy + stub 模式 · v1.5 WP5 定档**）：
+   4.0 **goal/project status 传播（v1.7 WP7-C）**：
+       - 若归档对象 type=goal：
+         · 扫描 goal frontmatter.linked_projects（若存在）
+         · 对每个关联 project：
+           - 若 project status=active → 在报告提示「⚠ 关联 project <X> 仍 active，是否一并归档？」
+           - 不自动归档（避免误操作），仅提示
+       - 若归档对象 type=project：
+         · 扫描 project 关联的 goal（通过 frontmatter.relations.supports）
+         · 若 goal status=active → 在报告提示「⚠ 本项目关联的 goal <X> 仍 active，是否一并归档？」
+         · 不自动归档，仅提示
    4.1 决定归档目标路径：98_archive/<type>/<原相对路径>
        · 98_archive/concepts/<...>
        · 98_archive/resources/<...>
@@ -143,6 +153,25 @@ source_of_truth:
      「⚠ [[concept/X]] 参与 contradicts 关系（对方：[[concept/Y]]）
       → 建议人工评估：归档后该矛盾对是否已被某 experience 消解？
       （archive 技能不知 lesson 上下文，不自动修改 relations）」
+
+10. project archive lesson 派生半自动化（v1.7 WP7-D）：
+    若归档对象 type=project：
+    - 扫描项目 decisions/ 目录的 ADR 文件
+    - 对每条含 lesson 字段的 ADR（lesson 非空/非 null）：
+      · 在 07_principles/<domain>/ 生成 experience 笔记草稿
+      · 草稿 frontmatter：
+        - type: experience
+        - status: draft（需用户确认后改为 active）
+        - title: <ADR.lesson 一句话>
+        - outcome: <ADR.actual>（若已填）
+        - trigger: <ADR.context>
+        - relations.derived_from: [[<原 ADR>]]
+      · 草稿正文：
+        - 事件经过：从 ADR.options + chosen + reason 提炼
+        - 结果：ADR.actual
+        - 教训：ADR.lesson
+      · 在归档报告中列出：「📝 派生 experience 草稿：[[...]]」
+    - 对不含 lesson 的 ADR 跳过，不生成草稿
 
 10. 输出汇总报告
 ```

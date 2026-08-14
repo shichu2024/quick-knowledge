@@ -62,6 +62,8 @@ source_of_truth:
 
 每个空目录放置 `.gitkeep` 占位文件（仅一行注释：`# 占位 · 由 quick-kb-init 创建`），保证 git 跟踪。
 
+**v1.7 补充**：`99_system/workflows/` 目录必须创建 `.gitkeep`，因为 `quick-kb-query` 会向该目录写入 `.query-log.jsonl`（见 query SKILL §步骤 7）。
+
 骨架清单（按创建顺序）：
 
 ```
@@ -115,7 +117,7 @@ source_of_truth:
 │   ├── zh/                # v1.4 铺设全部 12 个模板
 │   └── en/                # v1.4 铺设全部 12 个模板
 ├── attachments/
-├── workflows/
+├── workflows/             # v1.7 创建 .gitkeep（供 query-log.jsonl 用）
 ├── prompts/
 └── config/
 
@@ -299,29 +301,21 @@ domain: {{domain}}
 
 > upgrade 子流程是 init 的「增量补缺」模式：只补不删、只补不改，确保用户自定义内容永不被破坏。
 
-### 步骤 4 · 写入 vault 根 `_readme.md`
+### 步骤 4 · 写入 vault 根 `_index.md`（v1.7 WP5-D）
 
 ```markdown
-# {{vault-name}} · quick-knowledge vault
+# {{vault-name}}
 
-> 此 vault 由 [quick-knowledge](https://github.com/shichu2024/quick-knowledge) 初始化。
-> 初始化日期：{{date}} ｜ 阶段：v0.1 ｜ 语言：{{language}}
+本 vault 使用 quick-knowledge 体系。
 
-## 快速开始
+## 入口
 
-1. **采集**：`quick-kb-capture "想法"` 或 `quick-kb-capture <URL>`
-2. **入库**：`quick-kb-ingest 00_inbox/`
-3. **日志**：`quick-kb-daily`
+- 采集新素材 → quick-kb-capture
+- 查询笔记 → quick-kb-query
+- 周期复盘 → quick-kb-review
+- 仪表盘 → quick-kb-stats
 
-完整指南见 [docs/quick-start.md](docs/quick-start.md)（v0.4 提供）。
-
-## 目录结构
-
-见 [docs/DESIGN.md §4](docs/DESIGN.md#4-目录结构)。
-
-## 配置
-
-编辑 [99_system/config/kb.config.yaml](99_system/config/kb.config.yaml)。
+完整技能列表见 99_system/_index.md。
 ```
 
 ### 步骤 5 · 写入 `.kb-initialized` 标记

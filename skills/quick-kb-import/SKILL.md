@@ -59,7 +59,8 @@ source_of_truth:
 | 路径 `path` | 是 | — | 外部源根目录（或 Notion 导出 zip 解压后路径） |
 | 过滤 `filter` | 否 | — | 文件名 glob（如 `*.md`）或子目录限定 |
 | 重复策略 `dedupe` | 否 | `skip` | `skip`（跳过）/ `overwrite`（覆盖）/ `rename`（加后缀） |
-| 试运行 `dry_run` | 否 | `false` | 仅扫描报告，不写入 inbox |
+| 操作 `action` | 否 | `run` | `run`（执行导入）/ `dry-run`（仅输出预览报告，不写文件） |
+| 原因 `reason` | 否 | — | 归档原因（当 action=dry-run 时仅用于报告展示） |
 
 ---
 
@@ -128,10 +129,11 @@ source_of_truth:
        - created / updated: 从原笔记或文件 mtime
        - captured_at: <import date>（标识为导入）
        - status: 原 status 若有效则保留，否则 inbox（type 确定则 draft）
-       - confidence: 全局统一 **0-100 整数量纲**（见 `references/frontmatter-v0.2.md` §2）
-         · 原 confidence 若在 [0,100] → 保留（取整）
-         · 若在 (0,1] → 视为 0-1 量纲，× 100 取整（如 0.85 → 85）
-         · 缺失 → 默认 50
+       - confidence: 全局统一 **0-100 整数量纲**（见 `references/frontmatter-v0.2.md` §2；v1.7 WP7-A 量纲自动转换）
+         · 原 confidence ∈ (0,1] → 视为 0-1 量纲，× 100 取整（如 0.85 → 85）
+         · 原 confidence > 1 → 视为 0-100，保留（取整）
+         · 原 confidence 缺失 → 默认 60（外部文档未经验证）
+         · 在 import-report 标注每条迁移：「obsidian confidence 0.8 → 80」
        - tags: 原 tags 直接迁移
        - domain: 缺失（待 ingest 时填）
        - source: 统一 schema `{ type: import, from: <obsidian|notion|logseq>, path: <原路径>, captured_at: <date> }`
@@ -165,9 +167,16 @@ source_of_truth:
    - 失败原因清单（frontmatter 损坏等）
    - 推荐下一步：quick-kb-ingest 批量入库
 
-5. 提示用户：
+5. 提示用户（v1.7 WP2-C · 强制建议）：
    「导入完成。建议运行 quick-kb-ingest 把 00_inbox/imported/ 的笔记入库为正式 concept/resource/...
     或运行 quick-kb-normalize 规整 frontmatter 后再 ingest」
+
+**v1.7 强制提示（import 写完后输出末尾强建议）**：
+```markdown
+> 已导入 N 条到 00_inbox/_imports/<source>/。
+> 下一步：调用 quick-kb-ingest（scope=00_inbox/_imports/<source>/）将其入库。
+> （import 不自动触发 ingest，避免批量导入时一次性 ingest 失败回滚困难）
+```
 ```
 
 ---

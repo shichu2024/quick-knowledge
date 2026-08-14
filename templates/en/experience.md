@@ -30,7 +30,8 @@ source:
 derived_from: "[[{{source Decision Ledger}}]]"  # v0.3 derivation relation field
 # no domain (cognitive assets are cross-cutting)
 event_date: {{event date}}     # optional · distinguish from created
-outcome: success | failure | mixed   # result type · failure weighted ×1.2 in quick-kb-memory-agent recall
+outcome: {{positive/negative/neutral + brief result}}  # v1.7 WP3-D: required, for detect_repeat_mistakes
+trigger: {{trigger situation}}                             # v1.7 WP3-D: required, for detect_repeat_mistakes (e.g. "high-pressure deploy", "short delivery cycle")
 ---
 
 # {{event in one sentence}}

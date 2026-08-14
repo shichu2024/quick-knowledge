@@ -4,6 +4,51 @@
 
 ---
 
+## v1.7.0 · 2026-08-14 · 自动化与跨技能集成（WP1-WP7）
+
+**摘要**：基于测试5（155 笔记 / 215 改进点）+ 测试6（22 笔记 / 36 完善点）两份独立报告交叉比对，经 §0 校准过滤后落地 24 条真问题，归为 7 WP。核心改进：agent 被调用契约硬化、ingest 全链路补强（反向补全 + inbox 清理 + tags 硬化）、关系循环/冲突检测、polish_mode 自动化、模板与 slug 协议补齐、仪表盘 maturity 漏斗 + recency_factor、导入归档协议完善。**无 BREAKING CHANGE**。
+
+### 工作包
+
+| WP | 内容 | 影响 |
+|----|------|------|
+| WP1 | research/memory/manager 三个 agent SKILL 顶部增设 §0 被调用契约段（声明所有 intent 的入参 + 返回结构）；ingest/goal/project/advisor/connect/query 5+1 个调用方 SKILL 改为引用契约而非重述返回结构 | 9 SKILL.md |
+| WP2 | ingest 新增步骤 4.1 关系反向补全（复用 connect §5.2.1 表）+ 步骤 4.5 inbox 素材归档（移至 `00_inbox/_processed/`，frontmatter 加 `status: ingested` + `ingested_to`）+ §2.5 强制 inline-array tags；import 写完加强提示调用 ingest（不自动触发，避免批量回滚） | ingest / import SKILL.md |
+| WP3 | connect §2.1 写入策略加循环检测（双向 evolves 拒绝）+ supports/contradicts 冲突消歧；ingest §4.2 同步冲突消歧；connect §5.2.2 新增 evolves/supersedes 候选推荐（tag Jaccard ≥ 0.7 + 时间差 > 30 天）；experience 模板补 outcome + trigger 必填字段；frontmatter-v0.2.md §2 同步声明 | connect / ingest SKILL.md + experience 模板（zh/en）+ frontmatter-v0.2.md |
+| WP4 | capture + daily 新增 `polish_mode` 参数（confirm / auto / skip），kb.config.yaml 新增 `polish.default_mode`；daily §4 wikilink 生成硬化（匹配范围限定 02/07/03/04 + basename 完全匹配 + 标题 ≤ 3 字符跳过 + 同日志去重 + 用户已手写不重复） | capture / daily SKILL.md + kb.config.yaml |
+| WP5 | 新建 `references/slug-rules.md`；新建 `templates/{zh,en}/progress.md` + `retrospective.md`；init 修改 vault 根 `_index.md` 为使用指引；project SKILL 增 DEC 编号规则；archive SKILL + kb.config.yaml 增归档原因受控词表（completed/cancelled/low_reuse/low_confidence/superseded/absorbed/ingested/stale） | init / project / archive SKILL.md + kb.config.yaml + slug-rules.md + 4 新模板 |
+| WP6 | init 新增创建 `99_system/workflows/.gitkeep`（供 query-log.jsonl 用）；query 自检清单加查询日志检查；stats 输出新增 Maturity 转换漏斗 + 停滞态告警；review refresh_value 加 recency_factor 计算（≤30天→1.0 / 30-90→0.8 / 90-180→0.65 / >180→0.5）；scoring.md §3.2 同步分段规则 | init / query / stats / review SKILL.md + scoring.md |
+| WP7 | import confidence 量纲自动转换（0-1 → ×100，>1 保留，缺失 60）+ 新增 `action` 参数（run / dry-run）；archive 归档 goal 时扫描 linked_projects 仅提示不自动归档；project archive 扫描 ADR 提取 actual/lesson 生成 experience 草稿（status: draft 待确认） | import / archive SKILL.md |
+
+### 文件清单
+
+| 类型 | 文件 |
+|------|------|
+| 新增 references | `references/slug-rules.md` |
+| 新增模板 | `templates/{zh,en}/progress.md`、`templates/{zh,en}/retrospective.md` |
+| 新增 dev doc | `docs/dev/v1.7-automation-and-integration.md` |
+| 修改 SKILL.md × 17 | 全部 17 个 SKILL（3 agent + 14 业务技能） |
+| 修改 references | `references/frontmatter-v0.2.md`、`references/scoring.md` |
+| 修改配置 | `examples/demo-vault/99_system/config/kb.config.yaml` |
+| 修改模板 | `templates/{zh,en}/experience.md` |
+
+### 校准过滤（不修复清单）
+
+测试报告原条目 251 条 → 经 §0 校准过滤后真问题 24 条。明确不修复的关键条目：
+- 「Agent 不可执行」—— Claude Code harness 约束，非技能缺陷
+- 「归档 wikilink 后缀破坏 Obsidian」—— v1.6.0 WP9 已修
+- 「非对称关系不自动反向补全」—— connect §5.2.1 已实现（真问题是 ingest 未调用，归 WP2）
+- 「归档全库扫描需手动」—— archive §6 已实现
+- confidence/maturity schema 不一致 —— v1.5.0 WP2-4 已修
+
+详见 `docs/dev/v1.7-automation-and-integration.md` §0 校准 + §11 不修复清单。
+
+### 评测
+
+capture split=test **9/9 hard（100%）**；flow split=train (6:1:1 seed 1) **2/4 hard / soft 0.69**（within known variance）。均无退化。
+
+---
+
 ## v1.6.0 · 2026-08-13 · canvas / wikilink 规范化（WP9）
 
 **摘要**：为 canvas 文件与 wikilink 写法建立跨技能一致性规范。引入两份 references 文件作为 connect / archive / stats 的共同真相源。**无 BREAKING CHANGE**。

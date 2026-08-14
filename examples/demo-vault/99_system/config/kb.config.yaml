@@ -13,3 +13,20 @@ domains:
 # domain_taxonomy:
 #   ai-engineering: [rag, agent, eval, prompt]
 #   general: [meta, tooling]
+
+# polish（v1.7+ · AI 润色提议配置）
+polish:
+  default_mode: confirm  # confirm（三选一确认）/ auto（自动采纳扩写版）/ skip（不润色）
+  threshold_chars: 50     # 字符数阈值（低于此值可能触发润色判定）
+
+# archive_reasons（v1.7 WP5-F · 归档原因受控词表）
+# archive 技能的 reason 参数应从此词表中选择
+archive_reasons:
+  - completed      # 项目/目标完成
+  - cancelled      # 主动取消
+  - low_reuse      # 复用价值低
+  - low_confidence # 置信度低且无验证可能
+  - superseded     # 被演进
+  - absorbed       # 被合并到其他笔记
+  - ingested       # inbox 素材已入库
+  - stale          # 超过保留期未更新

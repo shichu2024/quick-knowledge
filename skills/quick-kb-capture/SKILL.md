@@ -69,6 +69,7 @@ source_of_truth:
 | `capture_type` | — | — | **frontmatter 字段**（非入参），取值 ∈ `{idea, web-clip, pdf, meeting, ai-dialog, reading}`。等于源类型字面值；PDF 写 `pdf`（即使落入 `reading/` 目录）。详见 [`references/polish-rules.md`](../../references/polish-rules.md) §1.1 |
 | `source_hint` | 否 | string | 用户标注来源（「同事 X 说的」「某书第 3 章」） |
 | `suggested_tags` | 否 | string[] | 用户主动给的候选标签；未给则 AI 推断 |
+| `polish_mode` | 否 | enum | 润色模式：`confirm`（三选一，默认）/ `auto`（采纳扩写版）/ `skip`（不润色）。覆盖 `kb.config.yaml` 中 `polish.default_mode` 配置 |
 
 > `content` / `url` / `file_path` 至少一个。组合给出时按主导源处理，其他作为附注。
 
@@ -137,6 +138,13 @@ polish 触发判定**严格**按下面的**决策表**逐步走（不许用单�
 
 #### 执行流程
 
+**判定 `polish_mode` 参数**（v1.7+）：
+- **`polish_mode=skip`**：跳过润色流程，直接走原流程
+- **`polish_mode=auto`**：跳过三选一交互，直接采纳润色版（LLL 生成润色版后自动写入）
+- **`polish_mode=confirm`**（默认）：执行原三选一流程
+
+**confirm 模式流程**（默认）：
+
 1. 读取 `kb.config.capture_ai.polish_prompt_{lang}`（zh / en，缺失走内置默认）
 2. 调 LLM 生成润色版（保留原意、补充具体细节、限 200 字内、第一人称语气）
 3. 向用户呈现三选一：
@@ -158,10 +166,20 @@ polish 触发判定**严格**按下面的**决策表**逐步走（不许用单�
 5. **用户选 [2] 保留原文**：走原流程，frontmatter 不加润色字段
 6. **用户选 [3] 再改一版**：根据用户补充要求重新生成（上限 `polish_max_rounds` 默认 3 轮）
 
+**auto 模式流程**（v1.7+）：
+
+1. 调 LLM 生成润色版（同上）
+2. 跳过三选一，直接写入润色版：
+   - 正文写润色版
+   - frontmatter 加 `ai_polished: true`
+   - frontmatter `source.original_text` 存用户原始输入
+3. 输出时注明「✓ 自动采纳润色版（polish_mode=auto）」
+
 #### 降级
 
 - LLM 不可用 → 跳过润色提议，走原流程
-- 用户长时间未选 → 默认 [2] 保留原文（不阻塞采集）
+- `polish_mode=auto` 时润色失败 → 降级为保留原文，frontmatter 不加润色字段
+- 用户长时间未选（confirm 模式） → 默认 [2] 保留原文（不阻塞采集）
 - 润色版与原文相似度 > 0.9（无实质扩展）→ 自动跳过，走原流程
 
 #### 单轮 eval / 自动化场景下的 polish 流程（v1.2+ 补充）

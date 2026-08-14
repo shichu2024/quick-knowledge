@@ -30,7 +30,8 @@ source:
 derived_from: "[[{{源 Decision Ledger}}]]"  # v0.3 派生关系字段
 # 不写 domain（认知资产横切）
 event_date: {{事件发生日期}}    # 可选 · 与 created 区分
-outcome: success | failure | mixed   # 结果类型 · failure 在 quick-kb-memory-agent 召回时加权 ×1.2
+outcome: {{正面/负面/中性 + 简述结果}}  # v1.7 WP3-D：必填，供 detect_repeat_mistakes 用
+trigger: {{触发情境}}                   # v1.7 WP3-D：必填，供 detect_repeat_mistakes 用（如"高压上线"、"短交付周期"）
 ---
 
 # {{事件一句话}}

@@ -82,10 +82,10 @@ reuse_factor      = log2(1 + value.reuse) / log2(1 + max_reuse_in_pool)
 
 ### 步骤 3 · 冲突检测
 
-对召回结果，调 `quick-kb-memory-agent`（intent=`present_conflicts`）扫描每条笔记的 `relations.contradicts`：
+对召回结果，调 `quick-kb-memory-agent` intent=`present_conflicts`：
 
-- 若 A 在召回中且 A.contradicts 包含 B → memory-agent 把 B 也加入召回（即使 B 原本相似度较低）
-- memory-agent 返回 conflicts 列表（结构同 AGENTS_SPEC §4.2）
+- 入参/返回结构见 memory-agent SKILL.md §0 契约
+- 返回 conflicts 列表（同时呈现双方 + 各自 context）
 
 ### 步骤 4 · 回答生成
 
@@ -209,6 +209,7 @@ RAG 的核心是检索后生成 [[RAG 架构设计]]。
 - [ ] 召回为 0 → 明确「未找到」+ capture 建议
 - [ ] hybrid 模式库内/推测分段清晰
 - [ ] 查询日志已落 jsonl
+- [ ] 落查询日志：确认 99_system/workflows/.query-log.jsonl 存在且已追加本次查询
 - [ ] 不修改任何笔记
 - [ ] 归档命中是否标注 (📄 已归档)
 

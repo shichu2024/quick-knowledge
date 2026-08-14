@@ -34,7 +34,7 @@ source_of_truth:
 
 ### 做
 
-- 调 `quick-kb-memory-agent` skill（intent=`recall_similar`）召回相关 experience/pattern/decision；score 排序由 memory-agent 按 `docs/AGENTS_SPEC.md` §3.5 公式计算（experience 失败案例权重提升）
+- 调 `quick-kb-memory-agent` intent=`recall_similar`（返回结构见其 §0 契约）召回相关 experience/pattern/decision
 - 扫描 `07_principles/{principles,beliefs}/`，对每条判定与候选方案的 aligned/conflict/neutral 关系
 - 检索相关 concept（domain 内的方法支撑，走简单 Grep/标签匹配）
 - 候选方案与失败 experience 冲突时显式警告
@@ -72,21 +72,19 @@ source_of_truth:
 ```
 1. 解析 situation + constraints → 提取关键概念和领域 domain
 2. 经验召回：
-   - 调 `quick-kb-memory-agent`（intent=`recall_similar`，候选限 type∈{experience,pattern,decision}）
-   - memory-agent 内部按 §3.5 计算 score（几何平均 + 类型系数 + 失败系数，prefer_failures=true）
+   - 调 `quick-kb-memory-agent` intent=`recall_similar`（候选限 type∈{experience,pattern,decision}；返回结构见其 §0）
    - 取 score 最高的 max_results=5 条
 
 3. 信念核对：
-   - 调 `quick-kb-memory-agent`（intent=`check_beliefs`）对 principle/belief 逐条判定 aligned/conflict/neutral
+   - 调 `quick-kb-memory-agent` intent=`check_beliefs`（返回结构见其 §0）对 principle/belief 逐条判定 aligned/conflict/neutral
    - 若 candidate_plan 缺省 → 先推演 2-3 个再核对
 
 4. 检索 concept（domain 内）：作为方法支撑
    → 用 Grep/Glob 在 02_areas/<domain>/ 按 domain tag 搜
 
-5. 冲突检测（调 `quick-kb-memory-agent` intent=`detect_repeat_mistakes` + `present_conflicts`）：
-   - 若 options 与某条 failure experience 的 lesson 冲突 → 标 ⚠（memory-agent 输出 repeat_risk）
-   - 若 options 与某条 principle 的陈述方向相反 → 标 ⚠
-   - 召回结果含 contradicts → memory-agent.present_conflicts 输出双方对照
+5. 冲突检测：
+   - 调 `quick-kb-memory-agent` intent=`detect_repeat_mistakes`（返回结构见其 §0）
+   - 调 `quick-kb-memory-agent` intent=`present_conflicts`（返回结构见其 §0）输出双方对照
 
 6. 缺口判断：
    - 若关键决策缺乏经验支撑（召回 < 2 条 OR 召回 confidence 均低）
@@ -103,7 +101,7 @@ source_of_truth:
 ## 你要做的：<situation 一句话>
 
 ### 你的历史
-> 由 `quick-kb-memory-agent.recall_similar` 召回，按 §3.5 score 公式排序（experience 失败案例权重提升）。
+> 由 `quick-kb-memory-agent.recall_similar` 召回（排序公式见其 SKILL.md §4）。
 > 候选集：`07_principles/{experiences,patterns,principles,beliefs}/` + `05_outputs/daily/`。
 
 - [[experience/BI-engine-plugin-isolation]] · 相关点：<...>
@@ -184,7 +182,7 @@ source_of_truth:
 
 ## 9. 幂等保证
 
-- 同一 `situation` 多次调用，输出顺序一致（memory-agent 按 §3.5 score 公式排序）
+- 同一 `situation` 多次调用，输出顺序一致（memory-agent 召回公式见其 SKILL.md §4）
 - 召回结果只读，不修改任何笔记
 - 缺口提示文本一致（基于召回数量阈值，非随机）
 
@@ -192,8 +190,8 @@ source_of_truth:
 
 ## 10. 自检清单
 
-- [ ] （正常态）调用了 `quick-kb-memory-agent` 而非全库盲搜（候选集限定 07_principles/ + 05_outputs/daily/）
-- [ ] （正常态）memory-agent 按 §3.5 score 公式排序（experience 失败案例排前）
+- [ ] （正常态）调用了 `quick-kb-memory-agent`（返回结构见其 §0 契约；候选集限定 07_principles/ + 05_outputs/daily/）
+- [ ] （正常态）memory-agent 按其 SKILL.md §4 score 公式排序（experience 失败案例排前）
 - [ ] （降级态 · v1.5 WP6）memory-agent 不可用时手动扫描 4 类认知资产（principles/beliefs/patterns/experiences）+ ⚠ 标注
 - [ ] 输出含三段：你的历史 / 你的原则 / 建议路径
 - [ ] 候选与失败 experience 冲突时显式 ⚠ 警告
