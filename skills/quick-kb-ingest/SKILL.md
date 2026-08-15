@@ -1,10 +1,10 @@
 ---
 name: quick-kb-ingest
 description: |
-  把 inbox 素材正式入库为 02_areas/resources 笔记：调 quick-kb-research-agent 抽取原子观点、补全 v0.2 完整 frontmatter（含 relations/context/value.reuse）、链接原始素材、给置信度初值、调 quick-kb-manager-agent + quick-kb-memory-agent 做冲突检测。
+  把 inbox 素材正式入库为 01_resources/<category>/（resource）或 02_areas/<domain>/（concept）笔记：调 quick-kb-research-agent 抽取原子观点、补全 v0.2 完整 frontmatter（含 relations/context/value.reuse）、链接原始素材、给置信度初值、调 quick-kb-manager-agent + quick-kb-memory-agent 做冲突检测。
   触发词（中文）：处理 inbox / 入库 / 把这条归档 / 消化这条 / 这条入库
   Triggers (EN): process inbox / ingest this / promote this note
-version: v1.8.2
+version: v1.9.0
 phase: v0.2
 applies_to: 00_inbox/ → 02_areas/ / 01_resources/
 source_of_truth:

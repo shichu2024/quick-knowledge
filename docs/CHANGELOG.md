@@ -4,6 +4,34 @@
 
 ---
 
+## v1.9.0 · 2026-08-15 · 测试9契约对齐包（6 项）
+
+**摘要**：基于测试9报告（v1.8.2 真实技能 · 18/18 行为不变量通过 · 25 待完善项）校准，确认真问题 6 条落地，主打跨技能契约对齐（报告最低分维度 7.3/10）。**无 BREAKING CHANGE**。
+
+### 修复清单
+
+| # | 内容 | 影响 |
+|---|------|------|
+| 1 | 入库路径真相源统一：init inbox readme 文案与 ingest 描述由「02_areas/resources」改为「01_resources/<category>/（resource）/ 02_areas/<domain>/（concept）」，与 ingest 实际写入规则（§分类去向）一致 | init / ingest SKILL.md |
+| 2 | 98_archive 子目录词表对齐：init 骨架补建 concepts/resources/ideas/decisions（与既有 projects/goals/reviews/materials 并列 8 目录）；archive §4.1 路径清单补 projects/goals/reviews 三行，两处词表一致；子目录缺失自动创建 | init / archive SKILL.md |
+| 3 | maturity 初始化责任落定：normalize 字段补全由「v0.3+ 笔记」限定改为**全量笔记**补 `maturity: captured`（ingest 禁写 + stats KS 依赖 + promote_maturity 跳过无值笔记三角断点的唯一解）；manager-agent 降级表联动（建议先跑 normalize） | normalize / manager-agent SKILL.md |
+| 4 | stats/review 缺失率分母排除规则：排除含 `capture_type` 的 inbox 采集素材（设计上无 type/status，实测被计入致 32.4% 失真）；inbox 素材另报「inbox frontmatter 覆盖率」；review 同口径同步；stats KS 段补冷启动说明（全部 captured 时 KS 恒空不算异常 + 指引 promote_maturity） | stats / review SKILL.md |
+| 5 | promote_maturity applied 晋升证据双语化：中文「应用/落地/实践/上线」+ 英文 applied/deployed/in production/shipped，另接受 `value.reuse > 0` 作为等价证据（消除英文笔记永不晋升） | manager-agent SKILL.md |
+| 6 | init 模板铺设计数硬校验：铺设后实测清点（ls 计数 = 14/语言），≠ 14（含「只铺 4 个」假象）→ ⚠⚠ 阻断级告警 + 缺失清单 + 处置指引；自检清单升级为实测清点。修复实测漏洞：执行方在模板源不可达时即兴生成 4 个核心模板造成「已铺设」假象，计数校验是唯一程序化拦截。顺带修正 §3.2 模板清单漏列 progress/retrospective（标题 14 但清单只列 12） | init SKILL.md |
+| + | daily wikilink 候选集补 `06_wiki/mocs/**`（测试9 #15 的次要有效部分；07_principles 已在 v1.7 WP4 范围内） | daily SKILL.md |
+
+### 校准结论（不修复清单）
+
+- 测试9 #9（顶层 _moc 引用）/ #12（goal `[[README]]` 死链）：仓库与 demo-vault 均未复现，判定执行方自写
+- #15 大部分不成立：daily 匹配范围已含 07_principles（v1.7 WP4）
+- 冷启动三件套（#10/#14/#22：memory 种子清单 / advisor 降级模板 / experience 快捷入口）与可执行脚本（#5/#8）、agent 调用断言（#6）：有效增强，进 v1.9.x/v2.0 路线图
+
+### 评测
+
+capture split=test **8/9 hard / soft 0.96**；flow split=train (6:1:1 seed 1) 两次运行 **1/4 → 2/4 hard / soft 0.77~0.79**（复跑恢复基线 2/4·0.79；单次 1/4 系 J 类已知方差——失败用例 soft 0.57~0.78 均为边界未过，失败原因如 source 字段写成字符串数组，与本次改动无关）。均无退化。
+
+---
+
 ## v1.8.2 · 2026-08-15 · 增强候选落地（4 项）
 
 **摘要**：将 v1.8.1 校准中识别的 4 项有效增强建议落地。**无 BREAKING CHANGE**。

@@ -6,7 +6,7 @@ description: |
   可被其他技能（connect / review / ingest / normalize）通过 Skill 工具显式调用，也可由用户直接调用执行单项能力。
   触发词（中文）：建 MOC / 推荐关系 / 找孤立笔记 / 修死链 / 刷新价值 / 结构漂移
   Triggers (EN): build moc / recommend relations / find orphans / repair deadlinks / refresh value / structure drift
-version: v1.8.2
+version: v1.9.0
 phase: v0.3
 applies_to: 读写 frontmatter（value.reuse / value.ks）· 写入 06_wiki/mocs/ · 只读全库快照
 source_of_truth:
@@ -359,7 +359,7 @@ KS = confidence × log2(1 + reuse) × impact
 |--------|---------|----------------|
 | captured | → understood | confidence ≥ 60 且 inlink_count ≥ 1 |
 | understood | → validated | confidence ≥ 70 且 inlink_count ≥ 2 |
-| validated | → applied | relations 非空 且 applied 证据（正文含「应用/落地/实践」段落） |
+| validated | → applied | relations 非空 且 applied 证据：正文含应用段落（**双语关键词**：中文「应用/落地/实践/上线」，英文 applied / deployed / in production / shipped；v1.9.0——纯中文关键词会导致英文笔记永不晋升）或 value.reuse > 0（已被引用复用） |
 | applied | → teachable | inlink_count ≥ 5 且 confidence ≥ 75 |
 | 任意非终态 | ⚠ 停滞提示 | stalled_days ≥ stale_days 且无晋升信号 |
 | applied/teachable | → deprecated 建议 | 与既有笔记建立 supersedes 被取代关系 |
@@ -405,7 +405,7 @@ KS = confidence × log2(1 + reuse) × impact
 | 无 embedding 服务 | 相似度按 [`references/scoring.md`](../../references/scoring.md)「无 embedding 降级相似度公式」计算（标签 Jaccard × 0.6 + 标题关键词重叠 × 0.4） |
 | 无查询日志 | refresh_value 仅用入链数；KS 中 reuse 项降级 |
 | Louvain 算法不可用 | MOC 聚类降为按 tag.topic 分组 |
-| maturity 字段缺失（旧 v0.1 笔记） | refresh_value KS 排序跳过；stale_applied 退化为 updated 时间；promote_maturity 跳过该笔记 |
+| maturity 字段缺失（旧 v0.1 笔记） | refresh_value KS 排序跳过；stale_applied 退化为 updated 时间；promote_maturity 跳过该笔记并建议「先跑 quick-kb-normalize 补 maturity: captured（v1.9.0 起全量补全）」 |
 | 本技能完全不可用 | 调用方技能自行做基于规则的最小检查（如 connect 只建标题共现关系） |
 
 ---

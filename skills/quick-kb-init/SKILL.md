@@ -4,7 +4,7 @@ description: |
   初始化一个 quick-knowledge 知识库 vault。在当前目录（或指定 vault 根）按 PARA + 系统层模型创建完整目录骨架，铺设系统文件、配置与默认模板。
   触发词（中文）：初始化知识库 / 初始化 KB / quick-kb-init / 建知识库
   Triggers (EN): init knowledge base / setup kb / initialize kb
-version: v1.8.2
+version: v1.9.0
 phase: v0.1
 applies_to: vault 根目录
 source_of_truth:
@@ -122,10 +122,14 @@ source_of_truth:
 └── config/
 
 98_archive/
-├── projects/
+├── projects/               # 对象归档（v0.4 骨架）
 ├── goals/
 ├── reviews/
-└── materials/
+├── materials/
+├── concepts/               # 笔记归档（v1.9.0 与 quick-kb-archive §4.1 词表对齐）
+├── resources/
+├── ideas/
+└── decisions/
 ```
 
 ### 步骤 3 · 生成系统文件
@@ -174,7 +178,17 @@ domains:                           # 已注册领域（与 02_areas/ 子目录�
 - `pattern.md`
 - `moc.md`
 
+**进展/复盘 2 类（v1.7 WP5 起）**：
+
+- `progress.md`
+- `retrospective.md`
+
 两种语言各 14 个文件，共 28 个。**已存在同名文件则跳过，不覆盖。**
+
+**铺设后计数硬校验（v1.9.0）**：复制完成后**必须**清点 `99_system/templates/zh/` 与 `en/` 的文件数——
+
+- 两目录均 = 14 → 通过
+- 任一目录 ≠ 14（含 = 4 的「v0.1 子集」假象）→ **初始化报告标 ⚠⚠ 阻断级告警**：列出缺失文件清单 + 处置指引（设置 `QUICK_KB_REPO_ROOT` / 重装完整技能包 / 重跑 `quick-kb-init` 触发 upgrade 补缺）。**禁止以「部分模板可用」静默通过**——实测中执行方在源不可达时会即兴生成 4 个核心模板造成「已铺设」假象，计数校验是该偏差的唯一程序化拦截
 
 #### 3.2.1 `99_system/config/frontmatter-schema.json`（v1.5 WP3 起）
 
@@ -259,7 +273,7 @@ tags:
 ## 工作流
 
 1. `quick-kb-capture "想记的东西"` → 写入 inbox 子目录
-2. `quick-kb-ingest 00_inbox/clips/某条.md` → 入库到 02_areas/resources
+2. `quick-kb-ingest 00_inbox/clips/某条.md` → 入库到 `01_resources/<category>/`（resource）或 `02_areas/<domain>/`（concept）
 3. inbox 原始素材**永不删除**，由 review 闭环统一清理
 ```
 
@@ -431,7 +445,7 @@ schema_sha256: 5e3ffca2
 
 - [ ] vault 根含 `.kb-initialized` 与 `_readme.md`
 - [ ] `99_system/config/kb.config.yaml` 存在且 `language` 字段有效
-- [ ] `99_system/templates/zh/` 与 `99_system/templates/en/` 各含 14 个模板文件（共 28 个）
+- [ ] `99_system/templates/zh/` 与 `99_system/templates/en/` 各含 14 个模板文件（共 28 个）——**实测清点**（ls 计数），≠ 14 时按 §3.2 计数硬校验输出 ⚠⚠ 阻断级告警，不得静默通过
 - [ ] `99_system/config/frontmatter-schema.json` 存在（v1.5 WP3，normalize schema_check 依赖）
 - [ ] **upgrade 场景**：28 个模板 SHA-256 已与仓库源比对，不一致项已 ⚠ 标注（v1.5 WP1）
 - [ ] `.kb-initialized` 记录 `schema_sha256` 指纹（SHA-256 前 8 位）；upgrade 场景已与权威源比对，不一致项已 ⚠ 询问（v1.8 WP1）

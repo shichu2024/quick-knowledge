@@ -4,7 +4,7 @@ description: |
   低摩擦采集：把用户的想法、网页 URL、PDF、会议转写、AI 对话、阅读笔记快速写入 inbox。v0.2 接入 defuddle 抓取干净正文；新增 PDF/会议/AI 对话/阅读四类源；主动提醒（memory 事件）推迟 v0.3。v1.2 新增「AI 润色提议」步骤——对用户手敲输入主动生成扩写版，三选一确认。
   触发词（中文）：记一下 / 快记 / 收藏这个 / 抓这个网页 / 保存这段 / 记个想法 / 抓 PDF / 保存对话
   Triggers (EN): capture this / save this / clip this page / quick note / capture pdf
-version: v1.8.2
+version: v1.9.0
 phase: v1.2
 applies_to: 00_inbox/
 source_of_truth:

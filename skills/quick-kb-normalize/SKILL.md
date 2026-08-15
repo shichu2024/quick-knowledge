@@ -5,7 +5,7 @@ description: |
   幂等（多次运行结果一致）+ 可解释（每条改动带 why）+ 可回滚（写 diff 到 _normalize_log/）+ dry-run 预览。
   触发词（中文）：规整笔记 / normalize / 批量修复 / 迁移 related / 重组领域
   Triggers (EN): normalize notes / batch fix frontmatter / migrate related field / regroup domains
-version: v1.8.2
+version: v1.9.0
 phase: v1.4
 applies_to: 读写 frontmatter（不改正文）· 跨 inbox / areas / principles
 source_of_truth:
@@ -79,7 +79,7 @@ source_of_truth:
        - created / updated 缺失 → 取文件 mtime
        - confidence 缺失 → 50（默认 · 0-100 量纲，见 frontmatter-v0.2.md §2）
        - confidence 存在且 0 < x ≤ 1 → 视为 0-1 量纲误写，× 100 取整 + 写入 diff log「⚠ 量纲迁移 0.{x} → {x*100}」（v1.5 WP2）
-       - maturity 缺失 → captured（v0.3+ 笔记）
+       - maturity 缺失 → captured（**全量笔记** · v1.9.0：不再限定「v0.3+ 笔记」——ingest 禁写 maturity（v0.2 边界）+ stats KS 需 maturity + promote_maturity 跳过无值笔记，normalize 是 maturity 初始化唯一落点；补全记 why「maturity 初始化 captured」）
        - value 缺失 → { reuse: 0, impact: 3, uniqueness: 3 }
        - relations 缺失 → { supports: [], contradicts: [], evolves: [], supersedes: [] }
        - context 缺失 → ""（留空，由用户后续填）

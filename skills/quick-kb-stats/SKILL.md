@@ -5,7 +5,7 @@ description: |
   只读，不改笔记。
   触发词（中文）：KB 统计 / 健康度 / 仪表盘 / vault 状态
   Triggers (EN): kb stats / vault health / dashboard
-version: v1.8.2
+version: v1.9.0
 phase: v0.4
 applies_to: 只读全库 · 输出 05_outputs/reviews/adhoc/
 source_of_truth:
@@ -81,6 +81,7 @@ source_of_truth:
 
 - `title` / `type` / `created` / `updated` / `status` / `confidence`
 - 注：`maturity` / `value` / `relations` / `context` 为 v0.2+ 字段，对 v0.1 旧笔记不视为缺失
+- **分母排除规则（v1.9.0）**：`00_inbox/` 下含 `capture_type` 的采集素材**设计上无** `type` / `status` 等字段——缺失率分母**仅计正式笔记**（排除含 `capture_type` 的 inbox 素材），inbox 素材另报「inbox frontmatter 覆盖率」（含 `captured_at` + `capture_type` 即合规）。避免把设计性缺字段计为 32%+ 的失真缺失率
 - **本字段集为全技能统一的缺失率口径**（quick-kb-review 复盘复用）：报告输出该指标时注明「口径：quick-kb-stats §4.1」，确保同 vault 双技能计算结果必然相等
 
 ---
@@ -106,6 +107,7 @@ source_of_truth:
    - 若 frontmatter 已有 value.ks → 直接读
    - 否则实时计算：KS = confidence × log2(1 + reuse) × impact
    - 仅 maturity ≥ applied 的笔记参与排序
+   - **冷启动说明（v1.9.0）**：新库全部笔记 maturity=captured（ingest 禁写、由 normalize 初始化）时 KS 恒空——报告中输出提示「冷启动：尚无 applied+ 笔记，跑 quick-kb-manager-agent intent=promote_maturity 评估晋升」，不算异常
 
 6. inbox 周转时长：
    - 扫已离开 inbox 的笔记（status ≠ inbox 且 captured_at 存在）

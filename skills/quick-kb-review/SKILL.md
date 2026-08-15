@@ -4,7 +4,7 @@ description: |
   周期复盘 + 知识库健康检查。快照采集、刷新 value.reuse、四维度（knowledge/project/goal/daily）分析、健康报告 + 待办清单。KS 排序、结构演化、deprecated 自动降级推迟 v0.3。
   触发词（中文）：复盘本周 / 复盘这个月 / 年度复盘 / 扫一下孤立笔记 / KB 体检
   Triggers (EN): weekly review / monthly review / kb health check
-version: v1.8.2
+version: v1.9.0
 phase: v0.2
 applies_to: 05_outputs/reviews/<period>/ + 各笔记 value.reuse
 source_of_truth:
@@ -102,7 +102,7 @@ quick-kb-manager-agent(
 - **孤立笔记率**：调 `quick-kb-manager-agent`（intent=`detect_orphans`）→ 无入链无出链 / 总数
 - **重复嫌疑**：调 `quick-kb-manager-agent`（intent=`recommend_relations`）找相似度 > 0.85 但未建立 evolves/supersedes 的对
 - **死链**：调 `quick-kb-manager-agent`（intent=`repair_deadlinks`）
-- **frontmatter 缺失率**：与 `quick-kb-stats` §4.1 同口径——必填字段集为 `title` / `type` / `created` / `updated` / `status` / `confidence`（`maturity` / `value` / `relations` / `context` 为 v0.2+ 字段，对 v0.1 旧笔记不视为缺失）；扫描范围跳过 `98_archive/` 与 `99_system/`（除非显式 scope）。健康指标表中该指标注明「口径：quick-kb-stats §4.1」，与 stats 计算结果必然相等
+- **frontmatter 缺失率**：与 `quick-kb-stats` §4.1 同口径——必填字段集为 `title` / `type` / `created` / `updated` / `status` / `confidence`（`maturity` / `value` / `relations` / `context` 为 v0.2+ 字段，对 v0.1 旧笔记不视为缺失）；扫描范围跳过 `98_archive/` 与 `99_system/`（除非显式 scope）；**分母排除含 `capture_type` 的 inbox 采集素材**（v1.9.0，设计上无 type/status）。健康指标表中该指标注明「口径：quick-kb-stats §4.1」，与 stats 计算结果必然相等
 - **inbox 周转**：从 query-log 与 inbox 时间戳估算 captured_at → ingest 间隔
 
 #### 3.2 value 维度（v0.2 简化版）

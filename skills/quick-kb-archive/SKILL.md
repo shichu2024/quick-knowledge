@@ -6,7 +6,7 @@ description: |
   通用归档不派生 experience；仅当归档对象 type=project 时，执行 lesson → experience 草稿半自动化（status: draft，需用户确认后激活）。
   触发词（中文）：归档 / archive / 把 X 收起来
   Triggers (EN): archive / put away / move to archive
-version: v1.8.2
+version: v1.9.0
 phase: v0.4
 applies_to: 写 98_archive/ · 更新 wikilinks · 不删笔记
 source_of_truth:
@@ -110,6 +110,10 @@ source_of_truth:
        · 98_archive/ideas/<...>
        · 98_archive/decisions/<...>（孤立 decision，非项目内）
        · 98_archive/materials/<...>（过期素材）
+       · 98_archive/projects/<...>（type=project）
+       · 98_archive/goals/<...>（type=goal）
+       · 98_archive/reviews/<...>（type=review/retrospective）
+       > 子目录词表与 init §2 骨架一致（v1.9.0 对齐）；目标子目录不存在时自动创建并放 .gitkeep
    4.2 **copy**：完整内容复制到归档路径（保留原 frontmatter 全字段 + 正文）
    4.3 **stub**：原位置文件改写为 stub，含：
        - frontmatter：status: archived + updated: <date> + archive_meta 段（见 5）
