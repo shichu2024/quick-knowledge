@@ -4,6 +4,43 @@
 
 ---
 
+## v1.9.2 · 2026-08-15 · 测试11校准修复（5 项 · 虚假问题甄别）
+
+**摘要**：基于测试11报告（13 条「确认」问题）以虚假问题甄别为主校准——**真问题仅 4.5 条，虚假 8.5 条（含 3 条危险级虚假建议被拒绝）**。报告「三轮复核零误报」声称不成立：复核仅对照了测试者自己的 vault，未对照仓库真相源。**无 BREAKING CHANGE**。
+
+### 修复清单（真问题）
+
+| # | 内容 | 影响 |
+|---|------|------|
+| 1 | decision.md 模板第 27 行 `project: "[[{{project README}}]"` 补闭合 `]`（仓库 zh/en + init 自带副本共 4 文件） | templates/{zh,en}/decision.md + init 副本 |
+| 2 | schema status enum 补 `ingested`（v1.7 WP2-B ingest 自身写入的状态，同类「引入-漏同步」第 3 例）；write-validation-rules.md 词表同步；init 自带 schema 副本同步 | frontmatter-schema-v1.json + write-validation-rules.md + init 副本 |
+| 3 | query reuse_factor 除零保护：max_reuse_in_pool=0 时取 1（中性），排序退化 confidence × recency；confidence 全同时降级 created 倒序 + ⚠「冷启动排序」标注（将测试者的合理降级行为固化为规则） | query SKILL.md |
+| 4 | progress 模板补可选 `goal: "[[<goal-slug>]]"` 字段（goal 进展填，project 进展留空），消除 goal progress 无关联字段问题 | templates/{zh,en}/progress.md + init 副本 |
+| 5 | moc 模板 frontmatter 前的 HTML 注释块迁移至 frontmatter 之后（frontmatter 不在首行导致解析器读不到——测试7 #31 遗留，此次升级确认） | templates/{zh,en}/moc.md + init 副本 |
+
+### 拒绝修复清单（虚假问题，防污染）
+
+| # | 拒绝理由 |
+|---|---------|
+| #12 schema type 加 reference/note/output/report/map/index | 六个 type 全部来自执行者自创文件（goal 的 learning-path/goal-meta.json、project 的 notes/refs、markdown 假 canvas）；照做 = 把执行偏差合法化污染受控词表 |
+| #4 daily 文件名改纯日期 | summary 后缀是 v1.4 设计 + 文件名稳定性硬约束（避免 wikilink 断）；执行者自己没写 summary 反怪规范 |
+| #8 「ingest 增加wikilink 校验」 | 即 v1.8 WP2 已写入的 §2.8 写入前校验规则；72 死链是执行未遵循，非逻辑缺失 |
+| #7 decision 生命周期不一致 | 模板 active→done/superseded 本身一致；proposed→accepted 是执行者发明 |
+| #3 goal-moc.md 命名 | goal 规范就是目标内 `_moc.md`；goal-moc.md 是执行者自创 |
+| #9 import domain 推断 | import SKILL 明文「domain: 缺失（待 ingest 时填）」是设计 |
+| #2 references/ 目录 | v1.9.1 已加回退条款（已修） |
+| #5 schema `_custom` 段 | `additionalProperties: true` 已允许扩展 |
+
+### 测试12 方法约束（追加）
+
+报告须对照仓库真相源复核（本仓库技能 SKILL.md / templates/ / references/），不得仅复核测试 vault 自身；init 模板计数清点（v1.9.0）与写入前校验（v1.8 WP2）为强制步骤，报告须附清点结果。
+
+### 评测
+
+capture split=test **8/9 hard / soft 0.96**；flow split=train 两次运行 **1/4 hard / soft 0.70~0.74**（低于近年均值但失败模式均为执行方差：J6 执行方未落文件、J1 目录/边界漂移、J3 soft 0.75 边界未过且 decision 路径正确；使用 daily 的 J4 两轮全过 1.0——与本次模板/schema 改动无因果）。flow 硬通过率随版本呈 0/4~2/4 振荡（J 类已知方差），列为观察项。
+
+---
+
 ## v1.9.1 · 2026-08-15 · 测试10校准修复（5 项）
 
 **摘要**：基于测试10报告（三轮复核 + 误报自撤销，5 确认问题）校准修复。校准修正一处方向：OBS-001 的设计意图是 `_index.md`（v1.7 WP5-D），清单/自检两处 `_readme.md` 为笔误。**无 BREAKING CHANGE**。

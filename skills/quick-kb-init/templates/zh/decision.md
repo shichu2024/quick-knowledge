@@ -24,7 +24,7 @@ value:
   reuse: 0
   impact: 4                   # 决策影响通常较高
 source: []
-project: "[[{{project README}}]"   # 所属项目 wikilink
+project: "[[{{project README}}]]"   # 所属项目 wikilink
 ---
 
 # 决策 {{编号}}：{{决策标题}}

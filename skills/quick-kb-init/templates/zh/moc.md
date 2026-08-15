@@ -1,9 +1,3 @@
-<!--
-模板：MOC 主题索引（中文 · v0.2）
-用途：领域/专题索引页，由 quick-kb-connect 写入 06_wiki/mocs/<domain>-moc.md。
-特性：quick-kb-manager-agent.build_moc 按标签共现 + wikilink 图谱聚类生成；用户可手动调整。
-真相源：references/frontmatter-v0.2.md · docs/DESIGN.md §6 · docs/SKILLS_SPEC.md §4
--->
 ---
 title: {{domain}} · MOC
 type: moc                              # required
@@ -21,6 +15,13 @@ relations:                             # required 结构 · MOC 与领域笔记�
 value:
   reuse: 0                             #   MOC 通常 reuse 较高（被多次引用）
 ---
+
+<!--
+模板：MOC 主题索引（中文 · v0.2）
+用途：领域/专题索引页，由 quick-kb-connect 写入 06_wiki/mocs/<domain>-moc.md。
+特性：quick-kb-manager-agent.build_moc 按标签共现 + wikilink 图谱聚类生成；用户可手动调整。
+真相源：references/frontmatter-v0.2.md · docs/DESIGN.md §6 · docs/SKILLS_SPEC.md §4
+-->
 
 # {{domain}} · 主题索引
 

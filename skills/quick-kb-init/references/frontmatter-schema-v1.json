@@ -23,7 +23,7 @@
     "status": {
       "type": "string",
       "enum": ["inbox", "draft", "active", "done", "cancelled", "archived",
-               "in-progress", "blocked", "superseded"]
+               "in-progress", "blocked", "superseded", "ingested"]
     },
     "domain": { "type": "string" },
     "confidence": {

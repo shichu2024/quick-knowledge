@@ -24,7 +24,7 @@ value:
   reuse: 0
   impact: 4                   # decisions typically high impact
 source: []
-project: "[[{{project README}}]"
+project: "[[{{project README}}]]"
 ---
 
 # Decision {{num}}: {{decision title}}

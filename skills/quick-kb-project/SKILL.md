@@ -4,7 +4,7 @@ description: |
   项目全生命周期管理。init：建目录 + README + 主动召回相似项目经验；update：追加进展；archive：补 Decision Ledger + lesson 派生 experience + 迁移归档。
   触发词（中文）：开个项目 / 项目 X / 归档项目
   Triggers (EN): new project / archive project
-version: v1.9.1
+version: v1.9.2
 phase: v0.3
 applies_to: 写 04_projects/<slug>/ · 98_archive/projects/ · 07_principles/experiences/（派生）
 source_of_truth:

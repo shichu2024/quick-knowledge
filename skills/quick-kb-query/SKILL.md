@@ -4,7 +4,7 @@ description: |
   基于库内笔记回答事实型问题，强制引用。strict 模式默认（每句结论挂 [[]]）；召回含 contradicts 时同时呈现双方 + context（ADR-011）；召回为 0 明确说「未找到」，不编造。
   触发词（中文）：我笔记里… / 找一下… / 关于 X 怎么说 / KB 查
   Triggers (EN): search my notes / what do I have on / kb query
-version: v1.9.1
+version: v1.9.2
 phase: v0.2
 applies_to: 读全库 · 落简易查询日志
 source_of_truth:
@@ -76,6 +76,9 @@ score = confidence_factor × recency_factor × reuse_factor
 confidence_factor = confidence / 100
 recency_factor    = max(0.3, 1 − days_since_updated / 365)
 reuse_factor      = log2(1 + value.reuse) / log2(1 + max_reuse_in_pool)
+                    # 除零保护（v1.9.2）：max_reuse_in_pool = 0（冷启动全库 reuse=0）时
+                    # reuse_factor 取 1（中性），排序退化为 confidence × recency；
+                    # 若 confidence 亦全部相同 → 降级为 created 倒序并在输出 ⚠ 标注「冷启动排序」
 ```
 
 > v0.2 简化排序；v0.3 启用完整公式（含类型加权、prefer_failures，见 `docs/AGENTS_SPEC.md` §3.5）。
