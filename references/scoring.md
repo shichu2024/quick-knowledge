@@ -125,6 +125,21 @@ similarity = 标签 Jaccard × 0.6 + 标题关键词重叠 × 0.4
 
 > **统一理由**：同一对笔记在不同技能中的 similarity 必须相等（跨技能一致性）；此前 manager-agent 用 0.6/0.4、memory-agent/query 各自定义，导致同一 vault 内排序不可复现（dev doc v1.8 §0.2 N3）。降级精度下降仅影响推荐质量，不影响公式本身。
 
+### 5.1 降级态推荐阈值（v1.9.1）
+
+**实测分布（测试10）**：中英文混合 vault（标签英文、上下文中文）下，降级公式输出集中在 **0.1-0.25**——若沿用正常态阈值（0.45-0.65），召回率趋近于零（61 项输出全部 degraded 且无命中）。降级态必须**同步下调阈值**，各技能统一执行：
+
+| 技能 | 正常态阈值 | 降级态阈值 | 说明 |
+|------|-----------|-----------|------|
+| memory-agent `recall_similar` / `check_beliefs`（min_similarity） | 0.55 | **0.35** | 主召回 |
+| memory-agent `detect_repeat_mistakes` | 0.65 | **0.45** | 重复错误检测（需更高精度） |
+| memory-agent 隐式冲突检测（present_conflicts） | 0.65 | **0.75**（提高，v1.8.2） | 防误报，方向相反 |
+| manager-agent `recommend_relations`（threshold） | 0.6 | **0.40** | 关系推荐候选 |
+| query 召回阈值 | 0.4 | **0.30** | 查询召回 |
+| advisor | 继承 memory-agent | 继承 memory-agent | — |
+
+> 阈值下调的代价是误报率上升——降级态输出必须携带 ⚠「降级模式：阈值已下调至 X，结果精度低于正常态」标注，由用户自行判断。embedding 可用后自动恢复正常态阈值。
+
 ---
 
 ## 6. 版本历史

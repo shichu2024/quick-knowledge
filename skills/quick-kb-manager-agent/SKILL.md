@@ -6,7 +6,7 @@ description: |
   可被其他技能（connect / review / ingest / normalize）通过 Skill 工具显式调用，也可由用户直接调用执行单项能力。
   触发词（中文）：建 MOC / 推荐关系 / 找孤立笔记 / 修死链 / 刷新价值 / 结构漂移
   Triggers (EN): build moc / recommend relations / find orphans / repair deadlinks / refresh value / structure drift
-version: v1.9.0
+version: v1.9.1
 phase: v0.3
 applies_to: 读写 frontmatter（value.reuse / value.ks）· 写入 06_wiki/mocs/ · 只读全库快照
 source_of_truth:
@@ -46,7 +46,7 @@ manager_agent(
   },
   options: {
     max_results?: number,              // 默认 5
-    threshold?: number,                // 默认 0.6（相似度阈值）
+    threshold?: number,                // 默认 0.6（相似度阈值）· 降级态 0.40（scoring.md §5.1）
     window_months?: number,            // detect_structure_drift 用，默认 6
     stale_days?: number                // promote_maturity 用（停滞判定天数），默认 90
   }
@@ -402,11 +402,15 @@ KS = confidence × log2(1 + reuse) × impact
 
 | 缺失依赖 | 降级行为 |
 |---------|---------|
-| 无 embedding 服务 | 相似度按 [`references/scoring.md`](../../references/scoring.md)「无 embedding 降级相似度公式」计算（标签 Jaccard × 0.6 + 标题关键词重叠 × 0.4） |
+| 无 embedding 服务 | 相似度按 [`references/scoring.md`](../../references/scoring.md)「无 embedding 降级相似度公式」计算（标签 Jaccard × 0.6 + 标题关键词重叠 × 0.4）；**阈值同步下调**（threshold 0.6→0.40，见 scoring.md §5.1） |
 | 无查询日志 | refresh_value 仅用入链数；KS 中 reuse 项降级 |
 | Louvain 算法不可用 | MOC 聚类降为按 tag.topic 分组 |
 | maturity 字段缺失（旧 v0.1 笔记） | refresh_value KS 排序跳过；stale_applied 退化为 updated 时间；promote_maturity 跳过该笔记并建议「先跑 quick-kb-normalize 补 maturity: captured（v1.9.0 起全量补全）」 |
 | 本技能完全不可用 | 调用方技能自行做基于规则的最小检查（如 connect 只建标题共现关系） |
+
+**降级可观测性（v1.9.1）**：多项调用结束时在输出末尾附**降级模式汇总**——「⚠ 本次 N 项输出中 X 项 degraded（Y%），原因：<...>」。
+
+**references 链接回退（v1.9.1）**：对 `references/scoring.md` 的链接为**仓库相对路径**——技能独立安装时不可达，按本文件内联的降级公式与阈值执行，不影响功能。
 
 ---
 

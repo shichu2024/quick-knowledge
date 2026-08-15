@@ -4,6 +4,32 @@
 
 ---
 
+## v1.9.1 · 2026-08-15 · 测试10校准修复（5 项）
+
+**摘要**：基于测试10报告（三轮复核 + 误报自撤销，5 确认问题）校准修复。校准修正一处方向：OBS-001 的设计意图是 `_index.md`（v1.7 WP5-D），清单/自检两处 `_readme.md` 为笔误。**无 BREAKING CHANGE**。
+
+### 修复清单
+
+| # | 内容 | 影响 |
+|---|------|------|
+| 1 | OBS-001：init 报告文件清单与自检清单统一为 vault 根 `_index.md`（与步骤 4 / v1.7 WP5-D 设计一致，`_readme.md` 为笔误） | init SKILL.md |
+| 2 | OBS-002：init runtime_hint 可选值增加 `kimi-code` | init SKILL.md |
+| 3 | OBS-004：ingest 步骤 3 示例 wikilink 由标题格式（`[[Vector Database]]` 等）改为 kebab-case slug + 「禁止标题格式」注释——消除示例与写入校验规则的矛盾（v1.8 校验层的示例级漏洞） | ingest SKILL.md |
+| 4 | OBS-006（校准为半真）：memory-agent / manager-agent 增加「references 链接回退」条款（仓库相对路径独立安装不可达时按 SKILL 内联公式执行）；两 agent 增加**降级可观测性**——多项调用末尾附降级模式汇总（N 项中 X 项 degraded + 原因），消除测试10「61 项全 degraded 无整体感知」问题 | memory-agent / manager-agent SKILL.md |
+| 5 | OBS-007（测试10 最有价值发现）：`references/scoring.md` 新增 §5.1「降级态推荐阈值表」——中英混合 vault 降级公式输出实测集中 0.1-0.25，正常态阈值（0.45-0.65）下零召回；降级态统一下调：memory min_similarity 0.55→0.35、detect_repeat_mistakes 0.65→0.45、manager threshold 0.6→0.40、query 召回 0.4→0.30（隐式冲突 0.75 保持防误报）；各技能降级段联动引用 + 降级输出强制 ⚠ 标注 | scoring.md + memory-agent / manager-agent / query SKILL.md |
+
+### 校准备注
+
+- OBS-005（误报撤销）与 OBS-003（执行偏差）无需技能改动
+- 测试10 未标记的执行偏差（供测试11 参考）：03_projects/04_goals 目录倒置、maturity 词表误用 structured/mastered、daily 平铺路径、inbox 素材平铺
+- 架构级建议（依赖文件清单 / 覆盖矩阵 / 全局 wikilink 规范）：进路线图（降级汇总已并入本次）
+
+### 评测
+
+capture split=test **9/9 hard（100%）**；flow split=train (6:1:1 seed 1) 两次运行 **0/4 → 2/4 hard / soft 0.61~0.83**（复跑恢复并超过基线 2/4·0.79；单次 0/4 为 J 类已知方差——J6 执行方未落文件、J3/J4 边界未过 soft 0.75+，与本次阈值/文档改动无关）。均无退化。
+
+---
+
 ## v1.9.0 · 2026-08-15 · 测试9契约对齐包（6 项）
 
 **摘要**：基于测试9报告（v1.8.2 真实技能 · 18/18 行为不变量通过 · 25 待完善项）校准，确认真问题 6 条落地，主打跨技能契约对齐（报告最低分维度 7.3/10）。**无 BREAKING CHANGE**。

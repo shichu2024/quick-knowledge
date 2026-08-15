@@ -4,7 +4,7 @@ description: |
   初始化一个 quick-knowledge 知识库 vault。在当前目录（或指定 vault 根）按 PARA + 系统层模型创建完整目录骨架，铺设系统文件、配置与默认模板。
   触发词（中文）：初始化知识库 / 初始化 KB / quick-kb-init / 建知识库
   Triggers (EN): init knowledge base / setup kb / initialize kb
-version: v1.9.0
+version: v1.9.1
 phase: v0.1
 applies_to: vault 根目录
 source_of_truth:
@@ -371,7 +371,7 @@ schema_sha256: 5e3ffca2
 | `initialized_at` | 初始化日期（`YYYY-MM-DD`） |
 | `language` | 模板语言（`zh` / `en`） |
 | `domains` | 初始化时注册的领域列表（逗号分隔） |
-| `runtime_hint` | init 时检测到的 runtime（`claude-code` / `codex` / `cursor` / `opencode` / `unknown`），供后续诊断 |
+| `runtime_hint` | init 时检测到的 runtime（`claude-code` / `codex` / `cursor` / `opencode` / `kimi-code` / `unknown`），供后续诊断 |
 | `schema_sha256` | 所复制 `99_system/config/frontmatter-schema.json` 的 SHA-256 前 8 位指纹（v1.8 WP1），供 upgrade 子流程校验 schema 权威性 |
 
 ### 步骤 6 · 输出报告
@@ -391,7 +391,7 @@ schema_sha256: 5e3ffca2
     - 06_wiki/_index.md
     - 00_inbox/_readme.md
     - 02_areas/{{domain}}/_moc.md × N
-    - _readme.md（vault 根）
+    - _index.md（vault 根 · v1.7 WP5-D，与步骤 4 一致）
     - .kb-initialized
 
   下一步：
@@ -443,7 +443,7 @@ schema_sha256: 5e3ffca2
 
 ## 7. 自检清单（执行后）
 
-- [ ] vault 根含 `.kb-initialized` 与 `_readme.md`
+- [ ] vault 根含 `.kb-initialized` 与 `_index.md`（v1.7 WP5-D · 使用指引导航页）
 - [ ] `99_system/config/kb.config.yaml` 存在且 `language` 字段有效
 - [ ] `99_system/templates/zh/` 与 `99_system/templates/en/` 各含 14 个模板文件（共 28 个）——**实测清点**（ls 计数），≠ 14 时按 §3.2 计数硬校验输出 ⚠⚠ 阻断级告警，不得静默通过
 - [ ] `99_system/config/frontmatter-schema.json` 存在（v1.5 WP3，normalize schema_check 依赖）

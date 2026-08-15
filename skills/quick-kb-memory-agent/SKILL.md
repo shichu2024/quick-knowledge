@@ -6,7 +6,7 @@ description: |
   可被 advisor / project / goal / ingest 通过 Skill 工具调用，也可由用户直接调用。
   触发词（中文）：我以前怎么做过… / 我的信念库 / 重复踩坑检测 / 召回相似经验
   Triggers (EN): recall similar / check beliefs / repeat mistakes / memory recall
-version: v1.9.0
+version: v1.9.1
 phase: v0.3
 applies_to: 只读 `07_principles/{experiences,patterns}/` + `05_outputs/daily/` · 不写入笔记
 source_of_truth:
@@ -42,7 +42,7 @@ memory_agent(
   },
   options: {
     max_results?: number,              // 默认 5
-    min_similarity?: number,           // 默认 0.55
+    min_similarity?: number,           // 默认 0.55 · 降级态 0.35（scoring.md §5.1）
     recency_weight?: number,           // 默认 0.20，范围 0-1
     prefer_failures?: boolean          // 默认 true
   }
@@ -119,7 +119,7 @@ memory_agent(
   },
   options: {
     max_results?: number,              // 默认 5
-    min_similarity?: number,           // 默认 0.55
+    min_similarity?: number,           // 默认 0.55 · 降级态 0.35（scoring.md §5.1）
     recency_weight?: number,           // 默认 0.20，范围 0-1
     prefer_failures?: boolean          // 默认 true
   }
@@ -162,7 +162,7 @@ interface MemoryNote extends Note {
 
 **处理**：
 1. 对候选集中每条笔记，计算 `similarity`（embedding 余弦；降级公式见 [`references/scoring.md`](../../references/scoring.md)「无 embedding 降级相似度公式」）
-2. 过滤 `similarity < min_similarity`（默认 0.55）
+2. 过滤 `similarity < min_similarity`（默认 0.55；**降级态 0.35**，见 [`scoring.md`](../../references/scoring.md) §5.1——中英混合 vault 下降级公式输出集中 0.1-0.25，沿用 0.55 会零召回）
 3. 按 §4 公式计算 `score` 并排序
 4. 取前 `max_results` 条
 5. 若结果中存在 `relations.contradicts` 对 → 填充 `conflicts`
@@ -205,7 +205,7 @@ interface MemoryNote extends Note {
 
 **处理**：
 1. 计算 similarity
-2. 仅保留 similarity > 0.65（高于默认 0.55，避免误报）
+2. 仅保留 similarity > 0.65（正常态；**降级态 0.45**，见 [`scoring.md`](../../references/scoring.md) §5.1）
 3. 对每条失败 experience，提取其 `lesson` 字段
 4. 判断 `candidate_plan` 是否触发同类失败模式（关键词匹配 + 语义相似度）
 5. 命中的标 `repeat_risk: high | medium`
@@ -402,9 +402,13 @@ score = 0.68^0.45 × 0.836^0.20 × 1.0^0.15 × 0.85^0.20
 | 缺失依赖 | 降级行为 |
 |---------|---------|
 | 库内笔记 < 50 条 | `proactive_suggest` 全部关闭；其他 intent 返回 `degraded: true` + reasoning：「库内经验不足，以下基于有限样本」 |
-| 无 embedding 服务 | similarity 按 [`references/scoring.md`](../../references/scoring.md)「无 embedding 降级相似度公式」计算（标签 Jaccard × 0.6 + 标题关键词重叠 × 0.4） |
+| 无 embedding 服务 | similarity 按 [`references/scoring.md`](../../references/scoring.md)「无 embedding 降级相似度公式」计算（标签 Jaccard × 0.6 + 标题关键词重叠 × 0.4）；**阈值同步下调**（min_similarity 0.55→0.35 等，见 scoring.md §5.1） |
 | 07_principles/ 目录不存在 | check_beliefs 返回空 + reasoning「未启用认知资产层」 |
 | 本技能完全不可用 | 调用方技能（advisor/project/goal）退化为「只查 concept 不调经验」的 RAG，并明确告知用户 |
+
+**降级可观测性（v1.9.1）**：多项调用结束时在输出末尾附**降级模式汇总**——「⚠ 本次 N 项输出中 X 项 degraded（Y%），原因：<无 embedding / 库容不足 / 目录缺失>」，禁止逐项标 degraded 而无汇总（测试10 实测 61 项全部 degraded 但用户无整体感知）。
+
+**references 链接回退（v1.9.1）**：本 SKILL.md 对 `references/scoring.md` 的链接为**仓库相对路径**——技能独立安装（技能包外无 `references/` 目录）时该链接不可达，此时**按本文件内联的降级公式与阈值执行**（上文已完整给出），不影响功能。
 
 ---
 
@@ -426,6 +430,7 @@ score = 0.68^0.45 × 0.836^0.20 × 1.0^0.15 × 0.85^0.20
 - [ ] recency_factor 使用 `max(0.3, ...)` 不归零
 - [ ] present_conflicts 同时呈现双方，不输出选择建议
 - [ ] （v1.8.2）隐式冲突命中仅提示 + 标 source: implicit，不自动写 contradicts；降级态阈值提高到 0.75
+- [ ] （v1.9.1）降级态 min_similarity 0.35 / detect_repeat_mistakes 0.45（scoring.md §5.1）；多项调用末尾附降级模式汇总
 - [ ] proactive_suggest 遵守限流（≤3 / 库<50 关闭 / 同事件去重）
 - [ ] 无 embedding 服务时 similarity 按评分文件降级公式计算（见 §6.2）
 - [ ] 每条 MemoryNote 都带 `why`，MemoryResult 都带 `reasoning`

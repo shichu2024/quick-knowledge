@@ -4,7 +4,7 @@ description: |
   把 inbox 素材正式入库为 01_resources/<category>/（resource）或 02_areas/<domain>/（concept）笔记：调 quick-kb-research-agent 抽取原子观点、补全 v0.2 完整 frontmatter（含 relations/context/value.reuse）、链接原始素材、给置信度初值、调 quick-kb-manager-agent + quick-kb-memory-agent 做冲突检测。
   触发词（中文）：处理 inbox / 入库 / 把这条归档 / 消化这条 / 这条入库
   Triggers (EN): process inbox / ingest this / promote this note
-version: v1.9.0
+version: v1.9.1
 phase: v0.2
 applies_to: 00_inbox/ → 02_areas/ / 01_resources/
 source_of_truth:
@@ -249,10 +249,10 @@ source:
   类型：concept | 状态：active | 置信度：60
   来源：00_inbox/clips/20260809-1000-<slug>.md
   标签：ai/rag · eng/architecture
-  relations：
-    supports: [[Vector Database]]
-    evolves: [[RAG 基础概念]]
-  context: "通用 RAG 架构；创业团队请参考 [[轻量 RAG 方案]]"
+  relations：                          # wikilink 一律用目标文件 basename（kebab-case slug），禁止标题格式
+    supports: [[vector-database-selection]]
+    evolves: [[rag-basic-concepts]]
+  context: "通用 RAG 架构；创业团队请参考 [[lightweight-rag-solution]]"
   value.reuse: 0
 ```
 

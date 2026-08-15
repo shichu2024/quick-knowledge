@@ -4,7 +4,7 @@ description: |
   基于库内笔记回答事实型问题，强制引用。strict 模式默认（每句结论挂 [[]]）；召回含 contradicts 时同时呈现双方 + context（ADR-011）；召回为 0 明确说「未找到」，不编造。
   触发词（中文）：我笔记里… / 找一下… / 关于 X 怎么说 / KB 查
   Triggers (EN): search my notes / what do I have on / kb query
-version: v1.9.0
+version: v1.9.1
 phase: v0.2
 applies_to: 读全库 · 落简易查询日志
 source_of_truth:
@@ -146,7 +146,7 @@ RAG 的核心是检索后生成 [[RAG 架构设计]]。
 
 ### 步骤 6 · 未命中提示
 
-召回 < 阈值（默认相似度 < 0.4 全部候选）：
+召回 < 阈值（默认相似度 < 0.4 全部候选；**降级态 0.30**，见 [`scoring.md`](../../references/scoring.md) §5.1）：
 
 ```
 库内未找到关于「X」的笔记。
