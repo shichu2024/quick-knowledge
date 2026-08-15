@@ -6,7 +6,7 @@ description: |
   重复检测基于 (title + domain) 或 source.url。
   触发词（中文）：导入 / import / 从 Obsidian / 从 Notion / 从 Logseq
   Triggers (EN): import from / migrate from / ingest external
-version: v1.8.0
+version: v1.8.1
 phase: v0.4
 applies_to: 读外部源 · 写 00_inbox/ · 不删原库
 source_of_truth:

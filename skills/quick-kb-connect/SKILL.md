@@ -4,7 +4,7 @@ description: |
   建立双链、生成 MOC、绘制知识地图（canvas）。调 quick-kb-manager-agent 推荐关系与构建 MOC；写入类型化 relations（不再写扁平 related）；生成 06_wiki/mocs/<domain>-moc.md；接 json-canvas 生成 .canvas（Obsidian 缺失跳过）。
   触发词（中文）：连一下 / 建个 MOC / 给这领域建索引 / 画个知识地图 / 连接笔记
   Triggers (EN): connect these / build moc / map this domain / link notes
-version: v1.8.0
+version: v1.8.1
 phase: v0.2
 applies_to: 06_wiki/ + 各笔记 frontmatter.relations
 source_of_truth:

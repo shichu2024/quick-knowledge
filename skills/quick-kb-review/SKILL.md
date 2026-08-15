@@ -4,7 +4,7 @@ description: |
   周期复盘 + 知识库健康检查。快照采集、刷新 value.reuse、四维度（knowledge/project/goal/daily）分析、健康报告 + 待办清单。KS 排序、结构演化、deprecated 自动降级推迟 v0.3。
   触发词（中文）：复盘本周 / 复盘这个月 / 年度复盘 / 扫一下孤立笔记 / KB 体检
   Triggers (EN): weekly review / monthly review / kb health check
-version: v1.8.0
+version: v1.8.1
 phase: v0.2
 applies_to: 05_outputs/reviews/<period>/ + 各笔记 value.reuse
 source_of_truth:

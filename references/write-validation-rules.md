@@ -21,8 +21,9 @@ source_of_truth:
 |--------|------|---------|
 | 必填字段 | `title` / `type` / `created` / `updated` / `status` 全部存在且非空 | 缺 `status` |
 | `confidence` | **0-100 整数**；禁止 0-1 小数（0.85 → 应写 85） | `confidence: 0.85` |
-| `type` | ∈ schema enum（concept / resource / idea / daily / moc / review / principle / belief / pattern / experience / decision / goal / project） | `type: note` |
-| `status` | ∈ schema enum（inbox / draft / active / done / cancelled / archived） | `status: published` |
+| 行内注释 | **落盘 frontmatter 禁止携带 `# 说明` 行内注释**——模板/SKILL 示例中的注释是填写指引，不得照抄进实际笔记（污染源见 normalize 步骤 2.1 剥离规则） | `confidence: 80 # verified` |
+| `type` | ∈ schema enum（concept / resource / idea / daily / moc / review / principle / belief / pattern / experience / decision / goal / project / progress / retrospective） | `type: note` |
+| `status` | ∈ schema enum（inbox / draft / active / done / cancelled / archived / in-progress / blocked / superseded；progress 用 in-progress / blocked / done，decision 用 active / done / superseded） | `status: published` |
 | `relations` | **类型化 dict**：键 ∈ `supports` / `contradicts` / `evolves` / `supersedes` / `evolved_by` / `superseded_by` / `derived_from` / `derived_to` / `source_of` / `refines` / `refined_by`，值为 wikilink 字符串数组；**禁止 array 格式**（如 `relations: ["[[X]]"]`）与自创关系类型（如 `complements`） | `relations: { complements: [] }` |
 | `maturity` | 写入时必须 ∈ 6 态词表：`captured` / `understood` / `validated` / `applied` / `teachable` / `deprecated` | `maturity: mature` |
 | 自创字段 | **禁止** schema（[`frontmatter-schema-v1.json`](./frontmatter-schema-v1.json)）之外自创字段；不确定的字段不写，缺字段值 → 标 `status: draft` | `author_tier: expert` |

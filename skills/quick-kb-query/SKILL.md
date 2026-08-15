@@ -4,7 +4,7 @@ description: |
   基于库内笔记回答事实型问题，强制引用。strict 模式默认（每句结论挂 [[]]）；召回含 contradicts 时同时呈现双方 + context（ADR-011）；召回为 0 明确说「未找到」，不编造。
   触发词（中文）：我笔记里… / 找一下… / 关于 X 怎么说 / KB 查
   Triggers (EN): search my notes / what do I have on / kb query
-version: v1.8.0
+version: v1.8.1
 phase: v0.2
 applies_to: 读全库 · 落简易查询日志
 source_of_truth:

@@ -4,6 +4,35 @@
 
 ---
 
+## v1.8.1 · 2026-08-15 · 测试8校准修复（3 项）
+
+**摘要**：基于测试8完备性报告（68 条 issues）对照仓库实态校准——报告 vault 系按不存在的结构构建（`_system/`、forming/developing 词表、knowledge-map.md 等），量化指标不可作证据；68 条中确认真 bug 2 + 部分有效 1，另复核发现 1 个报告未发现的 schema 缺口。**无 BREAKING CHANGE**。
+
+### 修复清单
+
+| # | 内容 | 影响 |
+|---|------|------|
+| 1 | archive SKILL.md 重复步骤编号修复（两个「10.」→ 第二个改 11，v1.7 WP7-D 插入未重排） | archive SKILL.md |
+| 2 | schema type enum 补 `progress` / `retrospective`（v1.7 WP5 模板漏同步，自身模板产出会被 schema_check 判违规）；status enum 补 `in-progress` / `blocked` / `superseded`（progress 模板与 decision 模板实际使用值）；write-validation-rules.md 词表同步；init 技能自带 schema 副本同步 | frontmatter-schema-v1.json + write-validation-rules.md + init 副本 |
+| 3 | 行内注释治理：normalize 步骤 2.1 新增「行内注释剥离」（`confidence: 80 # verified` → `confidence: 80`）+ schema_check 检查项 #10；write-validation-rules.md 新增「落盘 frontmatter 禁止携带行内注释」规则（模板/SKILL 示例注释为填写指引，不得照抄） | normalize SKILL.md + write-validation-rules.md |
+
+### 校准结论（不修复清单）
+
+- relations「两种格式并存」（报告 A 级建议）：仓库 goal/project SKILL 与模板全部 typed keys，list-of-objects 不存在——执行者自写
+- MOC 嵌套命名死链 / import 去重仅 title / Decision Ledger 缺 status / advisor 空报告 / capture 润色无自动化：均已在 v1.4~v1.7 实现或从未存在
+- 孤立率 74.1% / confidence 注释率 48.9% 等量化指标：基于幻觉 vault，无效
+- maturity 自动晋升 / confidence 协商 / query 零召回建议 capture / 隐式冲突检测：有效增强建议，进路线图（v1.9 候选）
+
+### 测试方法约束（测试9 起）
+
+以 `skills/` 目录或 `QUICK_KB_REPO_ROOT` 真实安装运行；报告强制含 §自审（测试7 做法）。
+
+### 评测
+
+capture split=test **9/9 hard（100%）**；flow split=train (6:1:1 seed 1) **2/4 hard / soft 0.76**（hard 在已知方差内，soft 0.69~0.79 区间）。均无退化。
+
+---
+
 ## v1.8.0 · 2026-08-14 · E2E 校准与写入校验层（WP1-WP5）
 
 **摘要**：基于测试7全技能 E2E 报告（17 技能 / 41 reported issues，报告 §九已自审重审），对照仓库实态二次校准：报告判定的「schema 矛盾」实为 init 资源定位链断裂后执行方即兴生成第三套 schema 所致；12 条误报的共同根因是写入前无校验层。核心改进：init 技能包资源自包含、全写入型技能接入写入前校验（frontmatter + wikilink 目标存在性）、跨技能口径统一（import 目录名 / 缺失率口径 / 降级相似度公式）、archive 语义矛盾修正、17 技能版本元数据统一。**无 BREAKING CHANGE**。
