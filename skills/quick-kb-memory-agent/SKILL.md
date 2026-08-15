@@ -6,7 +6,7 @@ description: |
   可被 advisor / project / goal / ingest 通过 Skill 工具调用，也可由用户直接调用。
   触发词（中文）：我以前怎么做过… / 我的信念库 / 重复踩坑检测 / 召回相似经验
   Triggers (EN): recall similar / check beliefs / repeat mistakes / memory recall
-version: v1.8.1
+version: v1.8.2
 phase: v0.3
 applies_to: 只读 `07_principles/{experiences,patterns}/` + `05_outputs/daily/` · 不写入笔记
 source_of_truth:
@@ -268,16 +268,20 @@ interface MemoryNote extends Note {
 
 **处理**：
 1. 扫描 recalled 中每条笔记的 `relations.contradicts`
-2. 若双方都在 recalled 中（或被 contradicts 指向的笔记在库内） → 构造 `Conflict`
-3. 提取双方的 `context` 字段（必填，缺失则用 type+tags 退化）
-4. **不擅自选边**，不输出「应该选哪个」
+2. 若双方都在 recalled 中（或被 contradicts 指向的笔记在库内） → 构造 `Conflict`（显式冲突）
+3. **隐式冲突检测（v1.8.2）**：显式 contradicts 扫描无命中时，对 recalled 中同 domain 且主题相近（相似度 ≥ 0.65）的笔记对比 `context` 与核心论断：
+   - 双方 context 不同且论断方向相反（如「应该 X」vs「不该 X」） → 构造 `Conflict`，`source: "implicit"` 标注
+   - 隐式命中仅提示「⚠ 疑似冲突（语义层）」，**不自动写 contradicts 关系**——由用户确认后调 quick-kb-connect 显式建立
+   - 无 embedding 降级时（scoring.md 公式），隐式检测阈值提高到 ≥ 0.75 降低误报
+4. 提取双方的 `context` 字段（必填，缺失则用 type+tags 退化）
+5. **不擅自选边**，不输出「应该选哪个」
 
 **输出**：
 
 ```typescript
 {
   found: Note[],                       // 原样透传
-  conflicts: Conflict[],
+  conflicts: Array<Conflict & { source?: "explicit" | "implicit" }>,
   reasoning: "检测到上下文冲突：A 适用于 <context_a>，B 适用于 <context_b>。请基于当前情境选择；若处于中间区间，建议 Capture 决策后跟踪 actual。"
 }
 ```
@@ -286,6 +290,7 @@ interface MemoryNote extends Note {
 - **必须同时呈现双方**
 - **必须标注各自 context**
 - **不在 reasoning 中给出「应该选 A/B」的判断**
+- **隐式命中不自动写 contradicts**（只提示，显式化走用户确认）
 
 ---
 
@@ -420,6 +425,7 @@ score = 0.68^0.45 × 0.836^0.20 × 1.0^0.15 × 0.85^0.20
 - [ ] score 公式按 §4 实现（几何平均 + 类型系数 + 失败系数）
 - [ ] recency_factor 使用 `max(0.3, ...)` 不归零
 - [ ] present_conflicts 同时呈现双方，不输出选择建议
+- [ ] （v1.8.2）隐式冲突命中仅提示 + 标 source: implicit，不自动写 contradicts；降级态阈值提高到 0.75
 - [ ] proactive_suggest 遵守限流（≤3 / 库<50 关闭 / 同事件去重）
 - [ ] 无 embedding 服务时 similarity 按评分文件降级公式计算（见 §6.2）
 - [ ] 每条 MemoryNote 都带 `why`，MemoryResult 都带 `reasoning`

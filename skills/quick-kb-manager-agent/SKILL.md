@@ -2,11 +2,11 @@
 name: quick-kb-manager-agent
 description: |
   知识库管家 + 知识架构师（技能化封装）。维护索引、关系、价值、结构。
-  能力：tidy_inbox / build_moc / recommend_relations / detect_orphans / repair_deadlinks / refresh_value（含 KS 排序）/ proactive_remind / detect_structure_drift。
+  能力：tidy_inbox / build_moc / recommend_relations / detect_orphans / repair_deadlinks / refresh_value（含 KS 排序）/ proactive_remind / detect_structure_drift / promote_maturity（v1.8.2）。
   可被其他技能（connect / review / ingest / normalize）通过 Skill 工具显式调用，也可由用户直接调用执行单项能力。
   触发词（中文）：建 MOC / 推荐关系 / 找孤立笔记 / 修死链 / 刷新价值 / 结构漂移
   Triggers (EN): build moc / recommend relations / find orphans / repair deadlinks / refresh value / structure drift
-version: v1.8.1
+version: v1.8.2
 phase: v0.3
 applies_to: 读写 frontmatter（value.reuse / value.ks）· 写入 06_wiki/mocs/ · 只读全库快照
 source_of_truth:
@@ -32,13 +32,14 @@ source_of_truth:
 manager_agent(
   intent: "tidy_inbox" | "build_moc" | "recommend_relations"
         | "detect_orphans" | "repair_deadlinks" | "refresh_value"
-        | "proactive_remind" | "detect_structure_drift",
+        | "proactive_remind" | "detect_structure_drift"
+        | "promote_maturity",
   payload: {
     inbox_notes?: Note[],             // tidy_inbox 用
     scope?: string,                    // build_moc 用（domain/tag/note-path）
     note?: Note,                       // recommend_relations 用
     candidate_pool?: Note[],           // recommend_relations 用
-    snapshot?: Note[],                 // detect_orphans / repair_deadlinks / refresh_value / detect_structure_drift 用
+    snapshot?: Note[],                 // detect_orphans / repair_deadlinks / refresh_value / detect_structure_drift / promote_maturity 用
     query_log?: QueryLogEntry[],       // refresh_value 用
     event?: "ingest_new" | "review_done" | "stale_applied_notes",  // proactive_remind 用
     context?: Record<string, unknown> // proactive_remind 用
@@ -46,7 +47,8 @@ manager_agent(
   options: {
     max_results?: number,              // 默认 5
     threshold?: number,                // 默认 0.6（相似度阈值）
-    window_months?: number             // detect_structure_drift 用，默认 6
+    window_months?: number,            // detect_structure_drift 用，默认 6
+    stale_days?: number                // promote_maturity 用（停滞判定天数），默认 90
   }
 ) → ManagerAgentResult
 ```
@@ -108,6 +110,7 @@ interface ManagerAgentResult {
 | `refresh_value` | ✓（仅 reuse） | **✓（含 KS 排序）** | 全库快照 + 查询日志 | 更新 reuse + 重算 KS |
 | `proactive_remind` | ✓（3 manager 事件） | **✓（manager 事件基于 maturity）** | 事件 + 上下文 | 主动建议列表 |
 | `detect_structure_drift` | ✗ | **✓ 新增** | 全库快照 | 子领域升格/拆分建议 |
+| `promote_maturity` | ✗ | **✓（v1.8.2）** | 全库快照 | maturity 停滞评估 + 晋升/降级建议清单 |
 
 ---
 
@@ -340,6 +343,47 @@ KS = confidence × log2(1 + reuse) × impact
 - 不实际改 domain 字典（由用户确认后 quick-kb-init 执行）
 - 不删除原标签
 
+### 3.9 `promote_maturity`（v1.8.2 新增 · 写回型操作）
+
+**输入**：`{ snapshot: Note[], stale_days?: number = 90 }`
+
+**处理**（maturity 6 态词表：captured → understood → validated → applied → teachable；deprecated 为终态）：
+1. 对每条含 maturity 的笔记计算晋升信号：
+   - `inlink_count`：被其他笔记 `[[]]` 引用次数
+   - `confidence`：0-100（缺失按 50 计）
+   - `age_days`：created 至今天数
+   - `stalled_days`：updated 至今天数
+2. 晋升/降级建议规则（满足任一即列入清单）：
+
+| 当前态 | 建议动作 | 触发条件（任一） |
+|--------|---------|----------------|
+| captured | → understood | confidence ≥ 60 且 inlink_count ≥ 1 |
+| understood | → validated | confidence ≥ 70 且 inlink_count ≥ 2 |
+| validated | → applied | relations 非空 且 applied 证据（正文含「应用/落地/实践」段落） |
+| applied | → teachable | inlink_count ≥ 5 且 confidence ≥ 75 |
+| 任意非终态 | ⚠ 停滞提示 | stalled_days ≥ stale_days 且无晋升信号 |
+| applied/teachable | → deprecated 建议 | 与既有笔记建立 supersedes 被取代关系 |
+
+3. 输出建议清单，**写回需用户确认**：`auto_write=false`（默认）仅输出建议；`auto_write=true` 时按清单写回 maturity 并记 why
+
+**输出**：
+
+```typescript
+{
+  suggestions: Array<{
+    note: string,                  // wikilink
+    from: string, to: string,      // maturity 态
+    reason: string,                // 含 confidence / inlink_count / stalled_days 数据
+    action: "promote" | "stalled" | "deprecate"
+  }>,
+  written: boolean                 // auto_write 是否写回
+}
+```
+
+**不做**（manager 边界）：
+- 不删除笔记、不改 confidence（晋升建议只动 maturity）
+- `stalled` 建议不自动降级 maturity，仅提醒用户处理（归档走 quick-kb-archive）
+
 ---
 
 ## 4. 排序与阈值
@@ -361,7 +405,7 @@ KS = confidence × log2(1 + reuse) × impact
 | 无 embedding 服务 | 相似度按 [`references/scoring.md`](../../references/scoring.md)「无 embedding 降级相似度公式」计算（标签 Jaccard × 0.6 + 标题关键词重叠 × 0.4） |
 | 无查询日志 | refresh_value 仅用入链数；KS 中 reuse 项降级 |
 | Louvain 算法不可用 | MOC 聚类降为按 tag.topic 分组 |
-| maturity 字段缺失（旧 v0.1 笔记） | refresh_value KS 排序跳过；stale_applied 退化为 updated 时间 |
+| maturity 字段缺失（旧 v0.1 笔记） | refresh_value KS 排序跳过；stale_applied 退化为 updated 时间；promote_maturity 跳过该笔记 |
 | 本技能完全不可用 | 调用方技能自行做基于规则的最小检查（如 connect 只建标题共现关系） |
 
 ---
@@ -387,6 +431,8 @@ KS = confidence × log2(1 + reuse) × impact
 - [ ] stale_applied_notes 基于 maturity: applied 而非 updated 时间
 - [ ] detect_structure_drift 输出含 reason 数据（recent_count / share）
 - [ ] detect_structure_drift 不实际改 domain 字典
+- [ ] promote_maturity 默认 auto_write=false 仅输出建议；写回时每条含 reason（confidence / inlink_count / stalled_days）
+- [ ] promote_maturity 的 stalled 建议不自动降级 maturity（仅提醒）
 
 ---
 

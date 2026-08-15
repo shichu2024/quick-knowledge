@@ -4,7 +4,7 @@ description: |
   把 inbox 素材正式入库为 02_areas/resources 笔记：调 quick-kb-research-agent 抽取原子观点、补全 v0.2 完整 frontmatter（含 relations/context/value.reuse）、链接原始素材、给置信度初值、调 quick-kb-manager-agent + quick-kb-memory-agent 做冲突检测。
   触发词（中文）：处理 inbox / 入库 / 把这条归档 / 消化这条 / 这条入库
   Triggers (EN): process inbox / ingest this / promote this note
-version: v1.8.1
+version: v1.8.2
 phase: v0.2
 applies_to: 00_inbox/ → 02_areas/ / 01_resources/
 source_of_truth:
@@ -198,6 +198,17 @@ source:
   → 请补充各自的 context（推荐：[[02_areas/ai-engineering/microservices]] 的 context = "大团队、多团队并行"）
 ```
 
+#### 3.3 confidence 协商（v1.8.2 · research 初值 → memory 冲突调整回写）
+
+> 消除 research-agent 初值与 memory-agent 冲突检测结果之间的数据断裂：调整结果必须回写笔记 frontmatter，不依赖人工传递。
+
+1. research-agent `extract_atoms` 给出 confidence 初值（§2.5 规则）→ 写入新笔记 frontmatter
+2. 步骤 3 冲突检测完成后，按结果调整并**回写** confidence：
+   - 检出 `contradicts` 冲突且对方 confidence 更高 → 新笔记 confidence 下调（建议 −10，下限 20），在 ingest 报告记 why「冲突方 [[对方]] confidence {x} 更高」
+   - 检出 `evolves`（新笔记为演化版）→ confidence 保持或 +5（上限 95），记 why「evolves 自 [[来源]]」
+   - 无冲突命中 → 保持初值不动
+3. 回写动作与步骤 4 写入合并执行（避免二次改文件）；调整记录进 ingest 报告的「confidence 协商」段
+
 ### 步骤 4 · 关系反向补全与写入（v1.7）
 
 #### 4.1 关系反向补全（v1.7 WP2-A）
@@ -344,6 +355,7 @@ source:
       · 正常态：调 manager-agent.recommend_relations + memory-agent.present_conflicts
       · 降级态：手动 Grep 同 domain 笔记找对立语义候选 + ⚠ 标注「未启用语义冲突检测」
 - [ ] contradicts 候选已建立双向关系 + 提示补充 context
+- [ ] （v1.8.2）confidence 协商：冲突检测结果已按 §3.3 规则调整并回写，调整记录含 why
 - [ ] 文件名 kebab-case
 - [ ] 处理报告含统计 + 下一步建议
 - [ ] **v1.7 新增**（WP2）：

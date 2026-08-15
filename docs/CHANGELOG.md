@@ -4,6 +4,30 @@
 
 ---
 
+## v1.8.2 · 2026-08-15 · 增强候选落地（4 项）
+
+**摘要**：将 v1.8.1 校准中识别的 4 项有效增强建议落地。**无 BREAKING CHANGE**。
+
+### 修复清单
+
+| # | 内容 | 影响 |
+|---|------|------|
+| 1 | manager-agent 新增 `promote_maturity` intent（v1.8.2 · 写回型）：基于 confidence + 入链数 + 停滞天数评估 maturity 6 态晋升/停滞/deprecate 建议；默认 auto_write=false 仅输出建议；stalled 仅提醒不自动降级；maturity 缺失笔记跳过 | manager-agent SKILL.md（契约 + 能力清单 + §3.9 + 降级 + 自检） |
+| 2 | ingest 新增 §3.3 confidence 协商：research-agent 初值 → 冲突检测后按结果调整并回写（contradicts 且对方更高 → −10 下限 20；evolves → +5 上限 95；无命中不动），调整记录含 why，与步骤 4 写入合并执行 | ingest SKILL.md（§3.3 + 自检） |
+| 3 | query 零召回建议 capture 附预填充内容（待研究问题原句 + 查询关键词作 suggested_tags） | query SKILL.md（步骤 6） |
+| 4 | memory-agent `present_conflicts` 新增隐式冲突检测：显式 contradicts 无命中时，对同 domain 相似度 ≥ 0.65 笔记对比 context 与论断方向；隐式命中标 `source: implicit` 仅提示不自动写 contradicts（显式化走用户确认）；无 embedding 降级态阈值提高到 0.75 防误报 | memory-agent SKILL.md（§3.5 + 自检） |
+
+### 备注
+
+- query 零召回「建议 capture」本体在 v0.2 即有（步骤 6），本次仅补预填充内容——测试8 P-QRY-02 部分误报
+- 17 个 SKILL.md `version` 统一 v1.8.2
+
+### 评测
+
+flow split=train (6:1:1 seed 1) **2/4 hard / soft 0.79**（与 v1.8.0 持平）。capture split=test 两次运行 **8/9 与 7/9 hard**——失败用例在 F1 / A3.1 / G3 间漂移（A3.1 为已知 flaky；F1/G3 为模型行为边界用例），且 capture SKILL 相对 v1.8.1 仅 version 行变化，判定为后端执行方差而非回归（v1.8.0~v1.8.1 同配置为 9/9，历史亦见过 A3.1 0-100% 波动）。
+
+---
+
 ## v1.8.1 · 2026-08-15 · 测试8校准修复（3 项）
 
 **摘要**：基于测试8完备性报告（68 条 issues）对照仓库实态校准——报告 vault 系按不存在的结构构建（`_system/`、forming/developing 词表、knowledge-map.md 等），量化指标不可作证据；68 条中确认真 bug 2 + 部分有效 1，另复核发现 1 个报告未发现的 schema 缺口。**无 BREAKING CHANGE**。

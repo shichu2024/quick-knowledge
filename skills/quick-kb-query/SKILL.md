@@ -4,7 +4,7 @@ description: |
   基于库内笔记回答事实型问题，强制引用。strict 模式默认（每句结论挂 [[]]）；召回含 contradicts 时同时呈现双方 + context（ADR-011）；召回为 0 明确说「未找到」，不编造。
   触发词（中文）：我笔记里… / 找一下… / 关于 X 怎么说 / KB 查
   Triggers (EN): search my notes / what do I have on / kb query
-version: v1.8.1
+version: v1.8.2
 phase: v0.2
 applies_to: 读全库 · 落简易查询日志
 source_of_truth:
@@ -151,8 +151,11 @@ RAG 的核心是检索后生成 [[RAG 架构设计]]。
 ```
 库内未找到关于「X」的笔记。
   → 是否调用 quick-kb-capture 抓相关资料？
+    预填充：quick-kb-capture "X · 待研究"（capture_type=idea · suggested_tags 取本次查询关键词）
   → 或调用 quick-kb-advisor（v0.3）做基于经验的建议？
 ```
+
+> v1.8.2：零召回建议 capture 时附预填充内容（待研究问题原句 + 查询关键词作 suggested_tags），用户确认后直接执行。
 
 ### 步骤 7 · 落查询日志
 
