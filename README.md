@@ -27,7 +27,7 @@
 → quick-kb-capture：网页正文 → Markdown，写入 00_inbox/
 
 你：「入库这条」
-→ quick-kb-ingest：抽取原子观点，建议 concept 标签与关系，写入 concepts/
+→ quick-kb-ingest：抽取原子观点，建议 concept 标签与关系，写入 02_areas/（concept）或 01_resources/（resource）
 
 你：「我笔记里关于 RAG 怎么说？」
 → quick-kb-query：基于库内笔记回答，每句结论挂 [[引用]]
@@ -121,11 +121,12 @@ Capture   ──▶  Ingest   ──▶  Normalize  ──▶  Connect  ──�
 
 ### Frontmatter 正交字段（V2）
 
-- `status` —— 文档生命周期（6 态）
-- `maturity` —— 知识成熟度（6 态）
-- `confidence` —— 验证深度（0-100）
-- `value` —— 价值维度（{reuse, impact, uniqueness}）
-- `relations` —— 类型化关系（supports / contradicts / evolves / supersedes）
+- `status` —— 文档生命周期（10 态，含 ingested/superseded 等归档与派生态）
+- `maturity` —— 知识成熟度（6 态：captured → … → teachable）
+- `confidence` —— 验证深度（0-100 整数，全库统一量纲）
+- `value` —— 价值维度（{reuse, impact, uniqueness, ks}）
+- `relations` —— 类型化关系（4 正向键 supports / contradicts / evolves / supersedes + 反向键与派生键 derived_from / source_of / refines 等）
+- `source` —— 溯源（object 格式：type / url / note / capture_type 等，链回 inbox 原始素材）
 - `context` —— 适用情境
 
 ### Knowledge Score
@@ -140,31 +141,29 @@ KS = confidence × log2(1 + reuse) × impact
 
 ```
 quick-knowledge/
-├── skills/             # 技能（v0.1-v0.4 共 11 个）
-│   ├── quick-kb-init/
-│   ├── quick-kb-capture/
-│   ├── quick-kb-ingest/
-│   ├── quick-kb-daily/
-│   ├── quick-kb-connect/
-│   ├── quick-kb-query/
-│   ├── quick-kb-review/
-│   ├── quick-kb-advisor/         # v0.3
-│   ├── quick-kb-project/         # v0.3
-│   ├── quick-kb-goal/            # v0.3
-│   ├── quick-kb-normalize/       # v0.4
-│   ├── quick-kb-archive/         # v0.4
-│   ├── quick-kb-stats/           # v0.4
-│   └── quick-kb-import/          # v0.4
-├── agents/             # 三个 agent
-│   ├── quick-kb-manager-agent.md
-│   ├── quick-kb-research-agent.md
-│   └── quick-kb-memory-agent.md
-├── templates/          # 中英双语模板
-│   ├── zh/
-│   └── en/
-├── references/         # 字段规范、偏差检查、配置 schema
+├── skills/             # 技能（14 个技能 + 3 个 agent skill，共 17 个）
+│   ├── quick-kb-init/            # 初始化（自带模板 + schema + 指纹校验）
+│   ├── quick-kb-capture/         # 采集（5 类源 + AI 润色提议）
+│   ├── quick-kb-ingest/          # 入库（原子观点 + 写入前校验）
+│   ├── quick-kb-daily/           # 每日日志
+│   ├── quick-kb-connect/         # 双链 + MOC + canvas
+│   ├── quick-kb-query/           # 事实型问答（strict 强制引用）
+│   ├── quick-kb-review/          # 周期复盘 + 健康检查
+│   ├── quick-kb-advisor/         # 决策辅助（三段式）
+│   ├── quick-kb-project/         # 项目全生命周期 + Decision Ledger
+│   ├── quick-kb-goal/            # 目标 + 学习路径
+│   ├── quick-kb-normalize/       # 批量规整（幂等 + 可回滚）
+│   ├── quick-kb-archive/         # 安全归档（copy + stub）
+│   ├── quick-kb-stats/           # 健康仪表盘
+│   ├── quick-kb-import/          # 外部库导入（Obsidian/Notion/Logseq）
+│   ├── quick-kb-manager-agent/   # 知识库管家（9 能力）
+│   ├── quick-kb-research-agent/  # 研究员
+│   └── quick-kb-memory-agent/    # 长期记忆
+├── templates/          # 中英双语模板（14 类 × 2）
+├── references/         # 字段规范、wikilink/评分/写入校验规则、偏差检查
+├── bench/              # 行为评测（SkillOpt × golden cases）
 ├── examples/demo-vault/  # 示例 vault
-└── docs/               # 设计文档、开发文档
+└── docs/               # 设计文档、开发文档、CHANGELOG
 ```
 
 ---
@@ -181,6 +180,11 @@ quick-knowledge/
 | v1.1 | flow-restructure | ✅ 已完成 | 顶层目录 `NN_` 前缀 + 路径硬约束（⚠️ BREAKING） |
 | v1.2 | ai-polish | ✅ 已完成 | capture / daily 用户手敲输入的 AI 润色提议（三选一） |
 | v1.3 | skillopt-integration | ✅ 已完成 | 行为评测 + 技能文本优化（SkillOpt × 51 golden cases × nightly mock workflow） |
+| v1.4 | nested-domain + hardening | ✅ 已完成 | 嵌套 domain_taxonomy + 模板全量铺设（12→14）+ schema 校验 |
+| v1.5–v1.6 | consistency + 规范化 | ✅ 已完成 | confidence 0-100 统一 · JSON Schema 校验 · archive copy+stub · wikilink 命名约定 · canvas 规范 |
+| v1.7 | automation & integration | ✅ 已完成 | agent §0 契约 · polish_mode 三档 · 近似/循环检测 · 降级可观测性 |
+| v1.8 | e2e-calibration | ✅ 已完成 | init 资源自包含（模板+schema+指纹）· 全技能写入前校验层 · 口径统一 |
+| v1.8.1–v1.9.3 | 测试校准系列 | ✅ 已完成 | 13 轮外部测试报告校准：schema/词表对齐 · 降级阈值表 · 冷启动排序 · source 格式统一 object · 结构漂移防御 |
 
 详见 [docs/](./docs/) 目录。
 
@@ -194,6 +198,9 @@ v0.1–v1.2 的 CI 全是静态结构校验（frontmatter / wikilink / 占位符
 - 51 个 golden case：45 单点 × 9 维度 + 6 J 类端到端流程衔接
 - nightly mock 后端 workflow，**永不阻塞 PR merge**（non-blocking 信号）
 - 永不自动部署优化产物——SkillOpt 产出的 `best_skill.md` 经人工 review 后单独 commit
+- **发布回归**：每次发版前跑 capture / flow bench，结果记录于 [CHANGELOG](./docs/CHANGELOG.md) 对应版本的「评测」段
+
+自 v1.8 起另有一条**测试校准循环**：外部测试报告（13+ 轮）逐条对照仓库真相源复核，甄别虚假问题后仅修复真缺陷——每轮的校准结论、拒绝修复清单与方法学约束沉淀在 [docs/dev/](./docs/dev/) 各版校准文档与 CHANGELOG。
 
 详见 [`docs/dev/v1.3-skillopt-integration.md`](./docs/dev/v1.3-skillopt-integration.md)。
 
@@ -204,7 +211,8 @@ v0.1–v1.2 的 CI 全是静态结构校验（frontmatter / wikilink / 占位符
 - [DESIGN.md](./docs/DESIGN.md) —— 完整设计（真相源）
 - [SKILLS_SPEC.md](./docs/SKILLS_SPEC.md) —— 技能详细规格
 - [AGENTS_SPEC.md](./docs/AGENTS_SPEC.md) —— Agent 详细规格（含排序公式）
-- [dev/](./docs/dev/) —— 各阶段开发文档
+- [CHANGELOG.md](./docs/CHANGELOG.md) —— 版本变更记录（含每版评测结果）
+- [dev/](./docs/dev/) —— 各阶段开发文档与校准文档
 
 ---
 
@@ -219,4 +227,4 @@ v0.1–v1.2 的 CI 全是静态结构校验（frontmatter / wikilink / 占位符
 
 ## License
 
-待 v1.0 发布时确定（拟 MIT 或 Apache 2.0）。
+[MIT](./LICENSE)
