@@ -44,7 +44,7 @@ supersedes: references/frontmatter-v0.2.md（v0.2 字段仍兼容，v0.3 起知�
 | `relations` | ✓（结构） | object | 类型化关系 | §6.7 |
 | `context` | 可选 | string | 自由文本适用上下文 | §6.8 |
 | `value` | ✓（结构） | object | reuse（自动）/ impact（手填）/ uniqueness（估算） | §6.6 |
-| `source` | 可选 | list | 原始来源 | §6.1 |
+| `source` | 可选 | object（v1.9.3 起统一，同 v0.2 §2） | 原始来源 | §6.1 |
 | `domain` | 可选 | string | 所属领域（认知资产 4 类无 domain） | §6.1 |
 
 ---
@@ -173,7 +173,7 @@ value:                         # v0.3 完整
   impact: 4                    # v0.3 新增
   uniqueness: 3                # v0.3 新增
 source:
-  - note: "[[00_inbox/clips/20260809-1000-rag-article]]"
+  note: "[[00_inbox/clips/20260809-1000-rag-article]]"   # object 格式（v1.9.3 对齐 schema）
 domain: ai-engineering
 ---
 ```
@@ -203,7 +203,7 @@ value:
   impact: 5
   uniqueness: 4
 source:
-  - note: "[[04_projects/bi-engine/decisions/001-隔离方案]]"
+  note: "[[04_projects/bi-engine/decisions/001-隔离方案]]"   # object 格式（v1.9.3）
 derived_from: "[[决策 001：选型 Y]]"   # v0.3 派生关系
 # domain 字段不写（认知资产横切）
 ---

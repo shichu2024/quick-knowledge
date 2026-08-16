@@ -4,7 +4,7 @@ description: |
   每日日志：把用户口述的一句话变成结构化日志（做了什么/学到什么/想法/卡点）。描述不足时反问补充（最多 2 轮），自动生成 wikilinks，发现待入库项时建议调用 capture。v1.2 新增「AI 润色提议」——对 4 段中识别出的短句主动扩写，用户三选一确认。
   触发词（中文）：今天的日志 / 记日志 / daily / 今天做了什么
   Triggers (EN): daily log / today's notes / log today
-version: v1.9.2
+version: v1.9.3
 phase: v1.2
 applies_to: 05_outputs/daily/YYYY/MM/
 source_of_truth:

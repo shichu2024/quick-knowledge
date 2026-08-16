@@ -4,7 +4,7 @@ description: |
   把 inbox 素材正式入库为 01_resources/<category>/（resource）或 02_areas/<domain>/（concept）笔记：调 quick-kb-research-agent 抽取原子观点、补全 v0.2 完整 frontmatter（含 relations/context/value.reuse）、链接原始素材、给置信度初值、调 quick-kb-manager-agent + quick-kb-memory-agent 做冲突检测。
   触发词（中文）：处理 inbox / 入库 / 把这条归档 / 消化这条 / 这条入库
   Triggers (EN): process inbox / ingest this / promote this note
-version: v1.9.2
+version: v1.9.3
 phase: v0.2
 applies_to: 00_inbox/ → 02_areas/ / 01_resources/
 source_of_truth:
@@ -112,6 +112,14 @@ source_of_truth:
 
 > v0.2 不产出 decision/goal/project/principle/belief/pattern/experience/moc/review/daily 类型。
 
+#### 2.4b 写入前近似重复检查（v1.9.3）
+
+落盘前对目标目录（`02_areas/<domain>/` 或 `01_resources/<category>/`）既有笔记做**标题近似检查**：
+
+- 判定：slug 词集 Jaccard > 0.8，或仅差单复数 / 连字符变体（如 `rag-architecture-decision` vs `rag-architecture-decisions`）
+- 命中 → **提示用户三选一**，不自动合并：① 并入既有笔记（本条素材作为补充段落 + `source.note` 追加）② 仍新建 + 写 `relations.evolves` 关联 ③ 确认非重复，新建
+- 未命中 → 正常新建。此检查与 §2.7 关系推荐共用 manager-agent 相似度契约（阈值口径见 scoring.md §5）
+
 #### 2.5 补全 v0.2 完整 frontmatter（v1.7 WP2-D）
 
 严格按 [`references/frontmatter-v0.2.md`](../../references/frontmatter-v0.2.md)：
@@ -135,9 +143,9 @@ relations:                          # v0.2 启用 · 见 §2.7
 context: {{从正文提取，可选}}         # v0.2 启用
 value:                              # v0.2 启用 · 仅 reuse
   reuse: 0
-source:
-  - note: "[[{{inbox原始素材wikilink}}]]"   # 必须 · 链回 inbox
-  - url: {{若 web-clip，沿用原始 URL}}
+source:                               # v1.9.3 · object 格式（对齐 frontmatter-schema-v1；禁 list 格式）
+  note: "[[{{inbox原始素材wikilink}}]]"   # 必须 · 链回 inbox
+  url: {{若 web-clip，沿用原始 URL}}
 ---
 ```
 

@@ -5,7 +5,7 @@ description: |
   幂等（多次运行结果一致）+ 可解释（每条改动带 why）+ 可回滚（写 diff 到 _normalize_log/）+ dry-run 预览。
   触发词（中文）：规整笔记 / normalize / 批量修复 / 迁移 related / 重组领域
   Triggers (EN): normalize notes / batch fix frontmatter / migrate related field / regroup domains
-version: v1.9.2
+version: v1.9.3
 phase: v1.4
 applies_to: 读写 frontmatter（不改正文）· 跨 inbox / areas / principles
 source_of_truth:
@@ -84,6 +84,7 @@ source_of_truth:
        - relations 缺失 → { supports: [], contradicts: [], evolves: [], supersedes: [] }
        - context 缺失 → ""（留空，由用户后续填）
        - **行内注释剥离（v1.8.1）**：frontmatter 值后含 ` # 说明`（如 `confidence: 80 # verified`，多为照抄模板/SKILL 示例指引所致）→ 剥离 `#` 及其后注释文本，保留纯值 + 写入 diff log「strip inline comment: <字段>」
+       - **source list → object 迁移（v1.9.3）**：`source` 为 YAML list 格式（历史模板遗留，如 `- note: ...` / `- url: ...`）→ 合并为 object 格式（各 list 项的键值对平铺进同一 `source:` 字典；键冲突时保留首个 + 记 `needs_review: true`）+ 写入 diff log「source list → object」。`source` 已为 object 或缺失 → 不动
 
    2.2 标签归一（tags）：
        - 读取 kb.config.yaml.tags_vocabulary（若存在）
@@ -136,7 +137,7 @@ quick-kb-normalize action=schema_check [scope=<domain|all|legacy>] [items=<paths
 | 3 | `confidence` 非 integer 或越界 [0,100] | `confidence: 0.85`（v1.5 WP2 应为 85）/ `confidence: 150` |
 | 4 | `relations` 非 dict 格式（list 格式属违规） | `relations: [{type, target}]` |
 | 5 | `relations` 子键含非 list 值 | `supports: "[[X]]"`（应为 `["[[X]]"]`） |
-| 6 | `source` schema 不统一（含废弃字段 `kind` / `original_path` / `imported_at`） | 旧 import 笔记 |
+| 6 | `source` schema 不统一：**为 list 格式**（v1.9.3 起违规；修复走 `action=run` 步骤 2.1 source 迁移）或含废弃字段 `kind` / `original_path` / `imported_at` | 旧 import 笔记 / v1.9.3 前模板产出 |
 | 7 | `tags` 非 YAML list（字符串格式违规） | `tags: ai/rag, eng` |
 | 8 | `outcome` 非 success/failure/mixed（Decision Ledger / experience 专用） | `outcome: 成功` |
 | 9 | `derived_from` / `derived_to` 非 list（v1.5 WP4） | `derived_from: "[[X]]"`（应为 list） |
@@ -427,6 +428,7 @@ quick-kb-normalize scope=<domain|all> action=regroup [dry-run=true]
 - [ ] **schema_check**：只读不改；违规清单字段齐全（文件 / 字段 / 当前值 / 修复建议）
 - [ ] **schema_check**：confidence 0-1 量纲误写能识别（v1.5 WP2）
 - [ ] **run**：confidence 存在且 0 < x ≤ 1 时 × 100 取整 + 写 diff log（v1.5 WP2 量纲迁移）
+- [ ] **run**：source 为 list 格式时合并为 object + 写 diff log（v1.9.3 迁移）；已为 object → 幂等不动
 
 ---
 

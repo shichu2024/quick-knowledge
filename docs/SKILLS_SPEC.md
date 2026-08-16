@@ -141,9 +141,9 @@ daily 日志 / review 报告 / goal·project progress 文件名采用 `<date-tok
 ---
 title: {{自动生成的简短标题}}
 captured_at: 2026-08-08T14:30
-source:
-  - url: {{原始 URL，若有}}
-  - raw: {{原始资料路径，若有}}
+source:                              # 嵌套字典（object），禁 list 格式（v1.9.3）
+  url: {{原始 URL，若有}}
+  raw: {{原始资料路径，若有}}
 suggested_tags:    # 候选标签，Ingest 时确认
   - ai/agent
   - eng/architecture
@@ -215,9 +215,9 @@ relations:
   evolves: ["[[RAG 基础概念]]"]
   supersedes: []
 context: "通用 RAG 架构；创业团队请参考 [[轻量 RAG 方案]]"
-source:
-  - note: "[[20260808-1430-rag-article]]"
-  - url: https://example.com/rag
+source:                             # object 格式（v1.9.3 对齐 schema）
+  note: "[[20260808-1430-rag-article]]"
+  url: https://example.com/rag
 domain: ai-engineering
 ---
 

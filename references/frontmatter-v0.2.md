@@ -39,7 +39,7 @@ supersedes: references/frontmatter-v0.1.md（v0.1 子集仍兼容，v0.2 起技�
 | `updated` | ✓ | ISO date | YYYY-MM-DD | §6.1 |
 | `tags` | ✓ | string[] | 受控标签 | §6.1 |
 | `status` | ✓ | enum | inbox/draft/active/done/cancelled/archived（v0.2 完整 6 态，因引入归档概念） | §6.3 |
-| `source` | 可选 | list of `{url?, note?}` | 原始来源 | §6.1 |
+| `source` | 可选 | object `{type?, from?, url?, path?, note?, captured_at?, capture_type?, author?, published?}` | 原始来源。**v1.9.3 起统一为 object 格式**（与 [`frontmatter-schema-v1.json`](./frontmatter-schema-v1.json) 对齐；历史 list 格式由 normalize `run` 自动迁移） | §6.1 |
 | `domain` | 可选 | string | 所属领域；可含 `/` 表达嵌套（如 `programming/python`、`ai-engineering/rag`）。嵌套规则由 `kb.config.yaml.domain_taxonomy` 约束，缺省时退为单层 kebab-case。路径段全部小写 kebab-case，深度建议 ≤ 3。 | §6.1 |
 | `confidence` | 可选 | integer 0-100 | ingest 时初值；用户可改。**全局统一 0-100 整数量纲**（v1.5 WP2 定档）。历史 0-1 小数写法由 normalize 自动迁移。 | §6.5 |
 | **`relations`** | ✓（结构存在，子键可空） | object | 类型化关系（见 §3） | §6.7 |
@@ -216,8 +216,8 @@ context: "通用 RAG 架构；创业团队请参考 [[轻量 RAG 方案]]"
 value:
   reuse: 0
 source:
-  - note: "[[00_inbox/clips/20260809-1000-rag-article]]"
-  - url: https://example.com/rag
+  note: "[[00_inbox/clips/20260809-1000-rag-article]]"   # object 格式（v1.9.3）
+  url: https://example.com/rag
 ---
 ```
 

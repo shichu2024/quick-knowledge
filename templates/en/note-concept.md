@@ -23,9 +23,9 @@ relations:                             # required structure · typed relations (
 context: {{applicable context · free text · optional}}   # optional · DESIGN §6.8
 value:
   reuse: 0
-source:
-  - note: "[[{{inbox-source-wikilink}}]]"
-  # - url: https://...
+source:                                # optional · object format (v1.9.3, schema-aligned)
+  note: "[[{{inbox-source-wikilink}}]]"
+  # url: https://...
 ---
 
 # {{title}}

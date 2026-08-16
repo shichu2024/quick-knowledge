@@ -25,8 +25,8 @@ value:
   reuse: 0                     # experience reuse usually higher (recalled by quick-kb-memory-agent)
   impact: 4                    # failure lessons usually higher impact
   uniqueness: 4
-source:
-  - note: "[[{{source Decision Ledger}}]]"   # derived from which decision
+source:                           # object format (v1.9.3, schema-aligned)
+  note: "[[{{source Decision Ledger}}]]"   # derived from which decision
 derived_from: "[[{{source Decision Ledger}}]]"  # v0.3 derivation relation field
 # no domain (cognitive assets are cross-cutting)
 event_date: {{event date}}     # optional · distinguish from created

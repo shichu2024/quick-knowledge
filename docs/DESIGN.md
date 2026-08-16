@@ -294,9 +294,9 @@ relations:                             # 类型化关系（见 6.7）；related 
   evolves: []                          #   由某笔记演化而来
   supersedes: []                       #   取代了某条过期笔记
 context: "通用场景；创业团队请同时参考 [[模块化单体]]"  # 可选 · 自由文本适用上下文（见 6.8）
-source:                                # 原始来源
-  - url: https://example.com/article
-  - note: "[[原始摘录]]"
+source:                                # 原始来源 · object 格式（v1.9.3 对齐 frontmatter-schema-v1）
+  url: https://example.com/article
+  note: "[[原始摘录]]"
 domain: ai-engineering                 # 所属领域（对应 02_areas/）
 ---
 ```
@@ -678,7 +678,7 @@ relations:
   evolves: []
   supersedes: []
 context: {{适用上下文，可选}}
-source: []
+source: {}                            # object 格式（v1.9.3 对齐 schema；空时可不写）
 domain: {{domain}}
 ---
 

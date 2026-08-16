@@ -6,7 +6,7 @@ description: |
   重复检测基于 (title + domain) 或 source.url。
   触发词（中文）：导入 / import / 从 Obsidian / 从 Notion / 从 Logseq
   Triggers (EN): import from / migrate from / ingest external
-version: v1.9.2
+version: v1.9.3
 phase: v0.4
 applies_to: 读外部源 · 写 00_inbox/ · 不删原库
 source_of_truth:
@@ -150,6 +150,9 @@ source_of_truth:
                       Levenshtein(title_A, title_B) / max(len(A), len(B)) < 0.3
        · 弱键条件 B：source.url 去除 "https://"、"www."、尾部 "/" 后，
                       Jaccard(A, B) > 0.7 或包含关系成立
+       · 弱键条件 C（v1.9.3 · 跨语言）：中文标题与既有英文 slug 疑似指代同一概念
+                      —— 核心域名词重叠（如「向量数据库选型标准」vs vector-database-selection-criteria
+                      共享 vector/database/selection 词根）→ 标注疑似重复
        · 弱键命中 → 导入报告中加 ⚠「疑似重复 [[X]]，人工确认是否跳过」
 
        【强键命中后的 dedupe 策略】

@@ -25,8 +25,8 @@ value:
   reuse: 0                     # experience reuse 通常较高（被 advisor 反复召回）
   impact: 4                    # 失败教训 impact 通常更高
   uniqueness: 4
-source:
-  - note: "[[{{源 Decision Ledger}}]]"   # 派生自哪条决策
+source:                           # object 格式（v1.9.3 对齐 schema）
+  note: "[[{{源 Decision Ledger}}]]"   # 派生自哪条决策
 derived_from: "[[{{源 Decision Ledger}}]]"  # v0.3 派生关系字段
 # 不写 domain（认知资产横切）
 event_date: {{事件发生日期}}    # 可选 · 与 created 区分

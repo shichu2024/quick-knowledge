@@ -22,11 +22,11 @@ relations:
 context: {{applicable context · optional}}
 value:
   reuse: 0
-source:                                # optional · but strongly recommended for resources
-  - url: {{original url}}
-  - author: "{{author/origin}}"
-  - published: {{publish date}}
-  - note: "[[{{inbox-source-wikilink}}]]"
+source:                                # optional · strongly recommended · object format (v1.9.3, schema-aligned)
+  url: {{original url}}
+  author: "{{author/origin}}"
+  published: {{publish date}}
+  note: "[[{{inbox-source-wikilink}}]]"
 ---
 
 # {{resource title}}

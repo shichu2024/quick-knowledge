@@ -4,7 +4,7 @@ description: |
   初始化一个 quick-knowledge 知识库 vault。在当前目录（或指定 vault 根）按 PARA + 系统层模型创建完整目录骨架，铺设系统文件、配置与默认模板。
   触发词（中文）：初始化知识库 / 初始化 KB / quick-kb-init / 建知识库
   Triggers (EN): init knowledge base / setup kb / initialize kb
-version: v1.9.2
+version: v1.9.3
 phase: v0.1
 applies_to: vault 根目录
 source_of_truth:
@@ -450,6 +450,7 @@ schema_sha256: 5e3ffca2
 - [ ] **upgrade 场景**：28 个模板 SHA-256 已与仓库源比对，不一致项已 ⚠ 标注（v1.5 WP1）
 - [ ] `.kb-initialized` 记录 `schema_sha256` 指纹（SHA-256 前 8 位）；upgrade 场景已与权威源比对，不一致项已 ⚠ 询问（v1.8 WP1）
 - [ ] `00_inbox/`、`02_areas/`、`01_resources/`、`07_principles/`、`06_wiki/`、`05_outputs/`、`03_goals/`、`04_projects/`、`98_archive/`、`99_system/` 顶层目录齐全
+- [ ] **顶层目录负向断言（v1.9.3）**：vault 根下目录集合与骨架**精确匹配**——除上述 10 个顶层目录 + `_normalize_log/` + 用户文件外，不得出现自创目录（如 `08_beliefs/`、`09_patterns/`、`10_experiences/`——认知资产**只**写入 `07_principles/{principles,beliefs,patterns,experiences}/` 子目录）。发现多余顶层目录 → ⚠⚠ 报告「结构漂移：非骨架目录 <名单>」并建议删除或迁移，**不得静默保留**
 - [ ] 每个空叶子目录含 `.gitkeep`
 - [ ] 每个领域至少一个 `_moc.md`
 - [ ] 二次执行：提示已初始化，不覆盖

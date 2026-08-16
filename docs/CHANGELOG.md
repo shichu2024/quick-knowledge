@@ -4,6 +4,41 @@
 
 ---
 
+## v1.9.3 · 2026-08-16 · 测试12/13校准修复（source 格式统一 + 漂移防御）
+
+**摘要**：基于测试12/测试13 两份报告交叉校准——合计 4 条「确认问题」中**仅 1 条为真**（source list/object 格式冲突，且根因在仓库自身：ingest 模板与 frontmatter-schema-v1 不一致），另落地 1 项针对反复执行漂移的防御 + 3 项 P3 增强。**含 BREAKING CHANGE（source 格式，附迁移路径）**。
+
+### 修复清单（真问题）
+
+| # | 内容 | 影响 |
+|---|------|------|
+| 1 | **source 格式统一为 object**（测试13 #5.1，仓库内 bug）：ingest SKILL §2.5 模板、templates/{zh,en}/ × note-concept/note-resource/experience（仓库根 + init 自带副本共 12 文件）、frontmatter-v0.2.md §2 字段表 + §6 示例、frontmatter-v0.3.md 示例、DESIGN.md 两处、SKILLS_SPEC.md 两处，全部 list → object。schema（frontmatter-schema-v1.json）source properties 补 `capture_type` / `author` / `published` | ingest / 12 模板 / 2 规范 / 2 文档 / schema |
+| 2 | **normalize 增加 source 迁移**：schema_check 检查项 #6 扩展「source 为 list 格式」为违规；run 步骤 2.1 新增 list → object 合并迁移（键冲突保首 + needs_review）+ diff log；自检清单补幂等项 | normalize SKILL.md |
+| 3 | **init 顶层目录负向断言**（针对测试10「03/04 倒置」、测试12「自创 08/09/10」两轮同类执行漂移）：自检清单要求 vault 根目录集合与骨架精确匹配，多余顶层目录 → ⚠⚠ 报告结构漂移，不得静默保留 | init SKILL.md |
+| 4 | ingest 新增 §2.4b 写入前近似重复检查：slug 词集 Jaccard > 0.8 或单复数/连字符变体 → 提示三选一（并入 / 新建+evolves / 确认新建），不自动合并（将既有相似度机制前移到创建时点，堵测试12 #2 观察到的漏用） | ingest SKILL.md |
+| 5 | manager-agent detect_orphans 排除 MOC 类文件（type: moc 与 init 铺设的 _moc.md 空占位），单列「未填充 MOC 占位」提示而非计入孤立清单 | manager-agent SKILL.md |
+| 6 | import dedupe 弱键条件 C（跨语言）：中文标题与既有英文 slug 核心域名词根重叠 → ⚠ 疑似重复标注 | import SKILL.md |
+
+### 拒绝修复清单（虚假问题，防污染）
+
+| # | 拒绝理由 |
+|---|---------|
+| 测试12 #1「init 创建 08/09/10 顶级目录致路径歧义，建议删除」 | 仓库骨架只有 07_principles 四子目录，无 08/09/10——vault 中系测试执行方自创（已由 #3 负向断言防御）；照做 = 修改不存在之物 |
+| 测试12 #3「SKILL 缺 wikilink 格式规范，路径式致死链」 | references/wikilink-conventions.md（v1.6）已存在且 §5 明确 Decision Ledger 深路径对象**强制全路径**；报告列为问题的 ADR 引用恰是规范要求的形式；stats 死链口径支持 path-qualified 解析 |
+| 测试13 #5.4「MOC 会被误报孤立（被引用少）」 | 推理误解判定条件：孤立 = 入链 0 **且** 出链 0，MOC 出链众多不会命中；仅空 _moc 占位是真实边缘（已由 #5 顺带覆盖） |
+| 测试13 #5.3 冷启动体验 | 与 v1.9.0 遗留路线图「冷启动三件套」重复，不重复立项 |
+
+### 校准备注
+
+- 测试13 报告 init 段描述「6 种模板」与仓库 14 模板 + v1.9.0 计数硬校验矛盾——延续测试8「幻觉结构」问题；其唯一命中真问题（source 格式）恰为可 Grep 直接验证的硬矛盾。测试方法约束（v1.9.2 已立）继续有效。
+- examples/demo-vault 中 8 处 list 格式 source 为演示数据，不在执行链路，本轮不改（normalize run 可迁移）。
+
+### 评测
+
+capture split=test **8/9 hard / soft 0.96**（与 v1.9.2 基线持平）；flow split=train 两次运行均 **1/4 hard / soft 0.72~0.73**（v1.9.2 区间 0.70~0.74 内）。失败模式核对：J3 decision 落 `decisions/` 顶层（目录漂移）、J1 domain 写 `ai/rag`（词表漂移）、J6 soft 0.83 边界——均为已知执行方差类型，与 source 格式/模板改动无因果；J4（daily 链路）1.0 全过。
+
+---
+
 ## v1.9.2 · 2026-08-15 · 测试11校准修复（5 项 · 虚假问题甄别）
 
 **摘要**：基于测试11报告（13 条「确认」问题）以虚假问题甄别为主校准——**真问题仅 4.5 条，虚假 8.5 条（含 3 条危险级虚假建议被拒绝）**。报告「三轮复核零误报」声称不成立：复核仅对照了测试者自己的 vault，未对照仓库真相源。**无 BREAKING CHANGE**。

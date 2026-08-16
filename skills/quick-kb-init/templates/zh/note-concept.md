@@ -23,9 +23,9 @@ relations:                             # required 结构 · 类型化关系（DE
 context: {{适用上下文 · 自由文本 · 可选}}   # optional · DESIGN §6.8
 value:                                 # required 结构 · v0.2 仅 reuse
   reuse: 0                             #   自动 · 入链+推荐+查询命中；ingest 时初值 0
-source:                                # optional
-  - note: "[[{{inbox原始素材wikilink}}]]"
-  # - url: https://...
+source:                                # optional · object 格式（v1.9.3 对齐 schema）
+  note: "[[{{inbox原始素材wikilink}}]]"
+  # url: https://...
 ---
 
 # {{title}}

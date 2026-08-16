@@ -22,11 +22,11 @@ relations:                             # required 结构
 context: {{适用情境 · 可选}}
 value:
   reuse: 0
-source:                                # optional · 但 resource 强烈建议填
-  - url: {{原始链接}}
-  - author: "{{作者/出处}}"
-  - published: {{发表日期}}
-  - note: "[[{{inbox原始素材wikilink}}]]"
+source:                                # optional · 但 resource 强烈建议填 · object 格式（v1.9.3 对齐 schema）
+  url: {{原始链接}}
+  author: "{{作者/出处}}"
+  published: {{发表日期}}
+  note: "[[{{inbox原始素材wikilink}}]]"
 ---
 
 # {{资源标题}}

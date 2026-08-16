@@ -6,7 +6,7 @@ description: |
   可被其他技能（connect / review / ingest / normalize）通过 Skill 工具显式调用，也可由用户直接调用执行单项能力。
   触发词（中文）：建 MOC / 推荐关系 / 找孤立笔记 / 修死链 / 刷新价值 / 结构漂移
   Triggers (EN): build moc / recommend relations / find orphans / repair deadlinks / refresh value / structure drift
-version: v1.9.2
+version: v1.9.3
 phase: v0.3
 applies_to: 读写 frontmatter（value.reuse / value.ks）· 写入 06_wiki/mocs/ · 只读全库快照
 source_of_truth:
@@ -228,6 +228,7 @@ manager_agent.build_moc(payload: { scope: "ai-engineering" })
 **处理**：
 - 对每条笔记：入链数 = 0 AND 出链数 = 0 → 标记孤立
 - 排除 inbox 原始素材与刚 ingest < 7 天的笔记（给成长期）
+- 排除 MOC 类文件（v1.9.3）：`type: moc` 的笔记与 init 铺设的 `_moc.md` 占位（仅模板头、无正文书目）——MOC 是索引入口而非待连内容，空占位误报会让用户困惑；输出中单列「未填充 MOC 占位 N 个」提示用户运行 connect 补充，不计入孤立清单
 
 **输出**：孤立笔记清单 + 建议动作（归档 / 连接到 MOC / 删除）
 
