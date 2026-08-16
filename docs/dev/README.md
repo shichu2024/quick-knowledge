@@ -22,6 +22,10 @@
 | **v1.2** | `ai-polish` | 用户手敲输入的 AI 润色提议 | capture 步骤 2.5 + daily 步骤 3.5 + 三选一确认 + 原文保存 |
 | **v1.3** | `skillopt-integration` | 行为评测与技能文本优化 | 自定义 SkillOpt benchmark `quickkb`（dataloader + rollout + adapter + 4 scorers）+ 51 golden cases（45 单点 + 6 J 类端到端）+ nightly mock 后端 workflow |
 | **v1.4** | `nested-domain` + `test-feedback-hardening` | 嵌套 domain（已发布 v1.4.0）+ 测试反馈硬化（计划 v1.4.1+） | **Part A**：`domain_taxonomy` schema + flat→嵌套迁移 + ingest/init/connect/query/normalize 支持 + 日期类文件名 LLM 摘要 / **Part B**：init 铺全 12 模板 + schema 升级 / connect MOC 字段硬约束 + 反向关系补全 / import 量表统一 + 弱键去重 / 跨技能状态联动 / references 公开 counting/scoring/polish 规则 |
+| **v1.5–v1.6** | `cross-skill-consistency` | 测试报告校准制确立（测试4 起） | confidence 0-100 统一 / JSON Schema 校验 / project 多对一派生 / archive copy+stub / canvas 规范 / wikilink 命名约定 |
+| **v1.7** | `automation-and-integration` | agent 契约化 + 自动化 | agent §0 调用契约 / polish_mode 三档 / 循环检测 + 冲突消歧 / slug-rules / 模板 12→14 / 降级可观测性 |
+| **v1.8** | `e2e-calibration` | 写入前校验层（测试7 起） | init 资源自包含（模板+schema+指纹）/ write-validation-rules 接入 7 写入型技能 / import 口径统一 / archive 语义修正 / 17 技能版本同步 |
+| **v1.8.1–v1.9.3** | `test-calibration` | 测试校准系列（测试8~13，CHANGELOG 记录） | schema/词表对齐 / 降级阈值表 / 冷启动排序 / 虚假问题甄别方法论 / source 格式统一 object / 结构漂移防御 |
 
 ---
 
@@ -173,6 +177,12 @@ WP 标记：`WPn · <名称>`，每个 WP 含：交付物、依赖、关键实�
 - [`v1.2-ai-polish.md`](./v1.2-ai-polish.md) —— AI 润色提议（capture / daily）
 - [`v1.3-skillopt-integration.md`](./v1.3-skillopt-integration.md) —— SkillOpt 行为评测与技能文本优化（设计阶段）
 - [`v1.4-nested-domain-and-hardening.md`](./v1.4-nested-domain-and-hardening.md) —— 嵌套 domain（Part A 已实施）+ 测试反馈硬化（Part B 计划中）
+- [`v1.5-cross-skill-consistency.md`](./v1.5-cross-skill-consistency.md) —— 跨技能一致性（测试4 校准 · 9 WP，v1.4.2~v1.6.0 落地：confidence 量纲统一 / schema 校验 / archive copy+stub / canvas 与 wikilink 约定）
+- [`v1.7-automation-and-integration.md`](./v1.7-automation-and-integration.md) —— 自动化与集成（测试5/6 校准 · 7 WP：agent §0 契约 / polish_mode / 循环检测 / 模板 12→14）
+- [`v1.8-e2e-calibration.md`](./v1.8-e2e-calibration.md) —— E2E 校准与写入校验层（测试7 校准 · 5 WP：init 资源自包含 / write-validation-rules / 口径统一 / archive 语义 / 版本元数据）
+- [`v1.9.3-test12-13-calibration.md`](./v1.9.3-test12-13-calibration.md) —— source 格式统一 + 漂移防御（测试12/13 校准 · 6 WP：source object / normalize 迁移 / init 负向断言 / 近似重复 / MOC 排除 / 跨语言弱键）
+
+> v1.8.1–v1.9.2 为纯校准小版本（测试8~11），无独立 dev 文档——校准结论、拒绝修复清单与评测结果见 [`../CHANGELOG.md`](../CHANGELOG.md) 对应条目。
 
 ---
 
