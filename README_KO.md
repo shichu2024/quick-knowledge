@@ -96,6 +96,11 @@ KS = confidence × log2(1 + reuse) × impact
 | v1.1 flow-restructure | ✅ | 최상위 `NN_` 접두사 + 절대 경로 하드 제약 (⚠️ BREAKING) |
 | v1.2 ai-polish | ✅ | capture / daily 사용자 직접 입력에 대한 AI 윤문 제안 (3선택) |
 | v1.3 skillopt-integration | ✅ | 동작 테스트 + 스킬 텍스트 최적화 (SkillOpt × 51 golden cases × 야간 mock workflow) |
+| v1.4 nested-domain + hardening | ✅ | 중첩 domain_taxonomy + 템플릿 전량 배포(12→14) + schema 검증 |
+| v1.5–v1.6 consistency + 규범화 | ✅ | confidence 0-100 통일 · JSON Schema 검증 · archive copy+stub · wikilink 명명 규약 · canvas 규범 |
+| v1.7 automation & integration | ✅ | agent §0 계약 · polish_mode 3단계 · 유사/순환 검출 · 저하 관측성 |
+| v1.8 e2e-calibration | ✅ | init 리소스 자족(템플릿+schema+지문) · 전 스킬 쓰기 전 검증 · 지표 통일 |
+| v1.8.1–v1.9.3 테스트 캘리브레이션 시리즈 | ✅ | 13라운드 외부 테스트 보고서 캘리브레이션: schema/어휘 정렬 · 저하 임계값표 · 콜드스타트 정렬 · source 포맷 object 통일 · 구조 드리프트 방어 |
 
 ---
 
@@ -107,6 +112,9 @@ v0.1–v1.2의 CI는 순수 구조 검사(frontmatter / wikilink / placeholder)�
 - 51 golden cases: 45 단일 케이스 × 9 차원 + 6 J 클래스 엔드투엔드 흐름 전환
 - 야간 mock 백엔드 workflow, **PR 병합을 절대 차단하지 않음** (논블로킹 신호)
 - 자동 배포 안 함 — SkillOpt의 `best_skill.md`는 모든 커밋 전에 사람이 검토
+- **릴리스 회귀**: 매 릴리스 전 capture / flow 벤치 실행, 결과는 [CHANGELOG](./docs/CHANGELOG.md) 각 버전의「评测」섹션에 기록
+
+v1.8부터는**테스트 캘리브레이션 루프**도 운영: 외부 테스트 보고서(13+ 라운드)를 주장별로 저장소 신뢰 원천과 대조 검증하고, 검증된 실제 결함만 수정하며 허위 주장은 근거와 함께 거부 — 캘리브레이션 결론·거부 목록·방법론 제약은 [docs/dev/](./docs/dev/)의 각 버전 캘리브레이션 문서와 CHANGELOG에 기록.
 
 자세한 내용은 [`docs/dev/v1.3-skillopt-integration.md`](./docs/dev/v1.3-skillopt-integration.md).
 
@@ -117,6 +125,8 @@ v0.1–v1.2의 CI는 순수 구조 검사(frontmatter / wikilink / placeholder)�
 - [DESIGN.md](./docs/DESIGN.md) —— 전체 설계 (신뢰 원천)
 - [SKILLS_SPEC.md](./docs/SKILLS_SPEC.md) —— 스킬 상세
 - [AGENTS_SPEC.md](./docs/AGENTS_SPEC.md) —— Agent 상세 (랭킹 공식 포함)
+- [CHANGELOG.md](./docs/CHANGELOG.md) —— 버전 이력 (각 버전 벤치 결과 포함)
+- [dev/](./docs/dev/) —— 단계별 개발 문서 및 캘리브레이션 문서
 
 ---
 
@@ -131,4 +141,4 @@ v0.1–v1.2의 CI는 순수 구조 검사(frontmatter / wikilink / placeholder)�
 
 ## License
 
-v1.0 릴리스 시 결정 예정 (MIT 또는 Apache 2.0 제안).
+[MIT](./LICENSE)

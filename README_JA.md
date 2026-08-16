@@ -96,6 +96,11 @@ KS = confidence × log2(1 + reuse) × impact
 | v1.1 flow-restructure | ✅ | トップレベル `NN_` 接頭辞 + 絶対パス硬制約（⚠️ BREAKING） |
 | v1.2 ai-polish | ✅ | capture / daily のユーザー手入力に対する AI 添削提案（3 択） |
 | v1.3 skillopt-integration | ✅ | 振る舞いテスト + スキルテキスト最適化（SkillOpt × 51 golden cases × 夜間 mock workflow） |
+| v1.4 nested-domain + hardening | ✅ | ネスト domain_taxonomy + テンプレート全量展開（12→14）+ schema 検証 |
+| v1.5–v1.6 consistency + 規範化 | ✅ | confidence 0-100 統一 · JSON Schema 検証 · archive copy+stub · wikilink 命名規約 · canvas 規範 |
+| v1.7 automation & integration | ✅ | agent §0 契約 · polish_mode 3 段階 · 近似/循環検出 · デグレード可観測性 |
+| v1.8 e2e-calibration | ✅ | init リソース自己完結（テンプレート+schema+フィンガープリント）· 全スキール書き込み前検証 · メトリクス統一 |
+| v1.8.1–v1.9.3 テスト校正シリーズ | ✅ | 13 ラウンドの外部テスト報告校正：schema/語彙整合 · デグレード閾値表 · コールドスタート順位 · source フォーマット object 統一 · 構造ドリフト防御 |
 
 ---
 
@@ -107,6 +112,9 @@ v0.1–v1.2 の CI は純構造検査（frontmatter / wikilink / プレースホ
 - 51 個の golden case：45 単点 × 9 次元 + 6 J 类エンドツーエンドフロー遷移
 - 夜間 mock バックエンド workflow、**PR マージを絶対にブロックしない**（非ブロッキング・シグナル）
 - 自動デプロイしない——SkillOpt が出力した `best_skill.md` は人手 review 後に個別 commit
+- **リリース回帰**：毎回のリリース前に capture / flow ベンチを実行し、結果は [CHANGELOG](./docs/CHANGELOG.md) の各バージョン「评测」欄に記録
+
+v1.8 以降は**テスト校正ループ**も稼働：外部テスト報告（13+ ラウンド）を主張ごとにリポジトリの信頼できる情報源と照合し、検証済みの実欠陥のみ修正、虚偽の主張は根拠付きで拒否——校正結論・拒否リスト・方法論的制約は [docs/dev/](./docs/dev/) の各版校正ドキュメントと CHANGELOG に記録。
 
 詳細は [`docs/dev/v1.3-skillopt-integration.md`](./docs/dev/v1.3-skillopt-integration.md)。
 
@@ -117,6 +125,8 @@ v0.1–v1.2 の CI は純構造検査（frontmatter / wikilink / プレースホ
 - [DESIGN.md](./docs/DESIGN.md) —— 完全設計（信源）
 - [SKILLS_SPEC.md](./docs/SKILLS_SPEC.md) —— スキル詳細
 - [AGENTS_SPEC.md](./docs/AGENTS_SPEC.md) —— Agent 詳細（ランキング式含む）
+- [CHANGELOG.md](./docs/CHANGELOG.md) —— バージョン履歴（各版ベンチ結果付き）
+- [dev/](./docs/dev/) —— 各段階の開発ドキュメントと校正ドキュメント
 
 ---
 
@@ -131,4 +141,4 @@ v0.1–v1.2 の CI は純構造検査（frontmatter / wikilink / プレースホ
 
 ## License
 
-v1.0 リリース時に決定（MIT または Apache 2.0 想定）。
+[MIT](./LICENSE)

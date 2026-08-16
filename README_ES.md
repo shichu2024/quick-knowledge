@@ -96,6 +96,11 @@ KS = confidence × log2(1 + reuse) × impact
 | v1.1 flow-restructure | ✅ | Prefijo `NN_` en nivel superior + prohibición de rutas absolutas (⚠️ BREAKING) |
 | v1.2 ai-polish | ✅ | Propuesta de pulido por IA para entradas de capture / daily escritas por el usuario (3 opciones) |
 | v1.3 skillopt-integration | ✅ | Pruebas de comportamiento + optimización de texto de habilidades (SkillOpt × 51 casos golden × workflow nocturno mock) |
+| v1.4 nested-domain + hardening | ✅ | domain_taxonomy anidado + despliegue completo de plantillas (12→14) + validación schema |
+| v1.5–v1.6 consistencia + convenciones | ✅ | confidence 0-100 unificado · validación JSON Schema · archive copy+stub · convenciones wikilink · especificación canvas |
+| v1.7 automatización e integración | ✅ | Contratos §0 de agentes · polish_mode (3 niveles) · detección de duplicados/ciclos · observabilidad de degradación |
+| v1.8 e2e-calibration | ✅ | Recursos autocontenidos de init (plantillas + schema + huella) · capa de validación pre-escritura · métricas unificadas |
+| v1.8.1–v1.9.3 serie de calibración de pruebas | ✅ | 13 rondas de calibración con informes de prueba externos: alineación schema/vocabulario · tabla de umbrales de degradación · ordenación en arranque frío · formato source unificado a object · defensa contra deriva estructural |
 
 ---
 
@@ -107,6 +112,9 @@ El CI de v0.1–v1.2 era puramente estructural (frontmatter / wikilinks / placeh
 - 51 casos golden: 45 casos puntuales × 9 dimensiones + 6 transiciones de flujo J end-to-end
 - Workflow nocturno con backend mock, **nunca bloquea el merge de PR** (señal no bloqueante)
 - Nunca auto-despliega — el `best_skill.md` de SkillOpt se revisa manualmente antes de cualquier commit
+- **Regresión de versión**: los benches capture / flow se ejecutan antes de cada release; los resultados se registran en la sección「评测」de cada entrada del [CHANGELOG](./docs/CHANGELOG.md)
+
+Desde v1.8 existe también un **bucle de calibración de pruebas**: los informes de prueba externos (13+ rondas) se cotejan afirmación por afirmación contra la fuente de verdad del repositorio; solo se corrigen los defectos reales verificados y las afirmaciones falsas se rechazan con justificación documentada — las conclusiones de calibración, listas de rechazo y restricciones metodológicas quedan en los documentos de calibración de cada versión en [docs/dev/](./docs/dev/) y en el CHANGELOG.
 
 Ver [`docs/dev/v1.3-skillopt-integration.md`](./docs/dev/v1.3-skillopt-integration.md).
 
@@ -117,6 +125,8 @@ Ver [`docs/dev/v1.3-skillopt-integration.md`](./docs/dev/v1.3-skillopt-integrati
 - [DESIGN.md](./docs/DESIGN.md) —— diseño completo (fuente de verdad)
 - [SKILLS_SPEC.md](./docs/SKILLS_SPEC.md) —— especificación de habilidades
 - [AGENTS_SPEC.md](./docs/AGENTS_SPEC.md) —— especificación de agentes (con fórmula de ranking)
+- [CHANGELOG.md](./docs/CHANGELOG.md) —— historial de versiones (con resultados de bench por versión)
+- [dev/](./docs/dev/) —— documentos de desarrollo por fase y documentos de calibración
 
 ---
 
@@ -131,4 +141,4 @@ Ver [`docs/dev/v1.3-skillopt-integration.md`](./docs/dev/v1.3-skillopt-integrati
 
 ## License
 
-Se definirá en el lanzamiento v1.0 (propuesta: MIT o Apache 2.0).
+[MIT](./LICENSE)

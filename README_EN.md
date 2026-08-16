@@ -27,7 +27,7 @@ You: "Grab this article https://example.com/rag-best-practices"
 → quick-kb-capture: HTML → Markdown, writes to 00_inbox/
 
 You: "Ingest this one"
-→ quick-kb-ingest: extracts atomic viewpoints, suggests concept tags + relations
+→ quick-kb-ingest: extracts atomic viewpoints, suggests concept tags + relations, writes to 02_areas/ (concept) or 01_resources/ (resource)
 
 You: "What do my notes say about RAG?"
 → quick-kb-query: answers from library notes, every claim cited with [[wikilink]]
@@ -114,11 +114,12 @@ Capture   ──▶  Ingest   ──▶  Normalize  ──▶  Connect  ──�
 
 ### Frontmatter Orthogonal Fields (V2)
 
-- `status` — document lifecycle (6 states)
-- `maturity` — knowledge maturity (6 states)
-- `confidence` — verification depth (0-100)
-- `value` — value dimensions ({reuse, impact, uniqueness})
-- `relations` — typed relations (supports / contradicts / evolves / supersedes)
+- `status` — document lifecycle (10 states, incl. ingested/superseded and other archival/derived states)
+- `maturity` — knowledge maturity (6 states: captured → … → teachable)
+- `confidence` — verification depth (integer 0-100, unified scale library-wide)
+- `value` — value dimensions ({reuse, impact, uniqueness, ks})
+- `relations` — typed relations (4 forward keys: supports / contradicts / evolves / supersedes, plus inverse and derivation keys like derived_from / source_of / refines)
+- `source` — provenance (object format: type / url / note / capture_type etc., linking back to the original inbox material)
 - `context` — applicable context
 
 ### Knowledge Score
@@ -133,12 +134,29 @@ KS = confidence × log2(1 + reuse) × impact
 
 ```
 quick-knowledge/
-├── skills/             # 11 skills (v0.1-v0.4)
-├── agents/             # 3 agents
-├── templates/          # Bilingual templates (zh/en)
-├── references/         # Field specs, deviation checks, config schema
+├── skills/             # 14 skills + 3 agent skills (17 total)
+│   ├── quick-kb-init/            # init (self-contained templates + schema + fingerprint check)
+│   ├── quick-kb-capture/         # capture (5 source types + AI polish proposal)
+│   ├── quick-kb-ingest/          # ingest (atomic viewpoints + pre-write validation)
+│   ├── quick-kb-daily/           # daily log
+│   ├── quick-kb-connect/         # links + MOC + canvas
+│   ├── quick-kb-query/           # fact QA (strict mandatory citations)
+│   ├── quick-kb-review/          # periodic review + health check
+│   ├── quick-kb-advisor/         # decision support (3-section)
+│   ├── quick-kb-project/         # project lifecycle + Decision Ledger
+│   ├── quick-kb-goal/            # goals + learning paths
+│   ├── quick-kb-normalize/       # batch normalization (idempotent + rollbackable)
+│   ├── quick-kb-archive/         # safe archive (copy + stub)
+│   ├── quick-kb-stats/           # health dashboard
+│   ├── quick-kb-import/          # external import (Obsidian/Notion/Logseq)
+│   ├── quick-kb-manager-agent/   # librarian (9 capabilities)
+│   ├── quick-kb-research-agent/  # researcher
+│   └── quick-kb-memory-agent/    # long-term memory
+├── templates/          # Bilingual templates (14 types × 2)
+├── references/         # Field specs, wikilink/scoring/write-validation rules, deviation checks
+├── bench/              # Behavior testing (SkillOpt × golden cases)
 ├── examples/demo-vault/  # Sample vault
-└── docs/               # Design docs, dev docs
+└── docs/               # Design docs, dev docs, CHANGELOG
 ```
 
 ---
@@ -155,6 +173,11 @@ quick-knowledge/
 | v1.1 | flow-restructure | ✅ Done | Top-level `NN_` prefix + absolute-path hard ban (⚠️ BREAKING) |
 | v1.2 | ai-polish | ✅ Done | AI polish proposal for user-typed capture / daily entries (3-way choice) |
 | v1.3 | skillopt-integration | ✅ Done | Behavior testing + skill-text optimization (SkillOpt × 51 golden cases × nightly mock workflow) |
+| v1.4 | nested-domain + hardening | ✅ Done | Nested domain_taxonomy + full template rollout (12→14) + schema validation |
+| v1.5–v1.6 | consistency + conventions | ✅ Done | confidence 0-100 unification · JSON Schema validation · archive copy+stub · wikilink conventions · canvas spec |
+| v1.7 | automation & integration | ✅ Done | Agent §0 contracts · polish_mode (3 levels) · near-dup/cycle detection · degradation observability |
+| v1.8 | e2e-calibration | ✅ Done | Self-contained init resources (templates + schema + fingerprint) · pre-write validation layer · unified metrics |
+| v1.8.1–v1.9.3 | test-calibration series | ✅ Done | 13 rounds of external test-report calibration: schema/vocabulary alignment · degradation threshold table · cold-start ranking · source format unified to object · structure-drift defense |
 
 See [docs/](./docs/).
 
@@ -168,6 +191,9 @@ v0.1–v1.2 CI was purely structural (frontmatter / wikilink / placeholder check
 - 51 golden cases: 45 point cases × 9 dimensions + 6 J-class end-to-end flow transitions
 - Nightly mock-backend workflow, **never blocks PR merge** (non-blocking signal)
 - Never auto-deploys — SkillOpt's `best_skill.md` is human-reviewed before any commit
+- **Release regression**: capture / flow benches run before every release; results recorded in the "评测/Evaluation" section of each [CHANGELOG](./docs/CHANGELOG.md) entry
+
+Since v1.8 there is also a **test-calibration loop**: external test reports (13+ rounds) are cross-checked claim-by-claim against the repository source of truth; only verified real defects are fixed while false claims are rejected with documented rationale — calibration conclusions, rejection lists, and methodology constraints are captured in the per-version calibration docs under [docs/dev/](./docs/dev/) and the CHANGELOG.
 
 See [`docs/dev/v1.3-skillopt-integration.md`](./docs/dev/v1.3-skillopt-integration.md).
 
@@ -178,7 +204,8 @@ See [`docs/dev/v1.3-skillopt-integration.md`](./docs/dev/v1.3-skillopt-integrati
 - [DESIGN.md](./docs/DESIGN.md) — full design (source of truth)
 - [SKILLS_SPEC.md](./docs/SKILLS_SPEC.md) — skill specifications
 - [AGENTS_SPEC.md](./docs/AGENTS_SPEC.md) — agent specifications (with ranking formula)
-- [dev/](./docs/dev/) — per-phase dev docs
+- [CHANGELOG.md](./docs/CHANGELOG.md) — version history (with per-release bench results)
+- [dev/](./docs/dev/) — per-phase dev docs and calibration docs
 
 ---
 
@@ -193,4 +220,4 @@ See [`docs/dev/v1.3-skillopt-integration.md`](./docs/dev/v1.3-skillopt-integrati
 
 ## License
 
-To be finalized at v1.0 release (proposed: MIT or Apache 2.0).
+[MIT](./LICENSE)
