@@ -5,7 +5,7 @@ description: |
   只读，不改笔记。
   触发词（中文）：KB 统计 / 健康度 / 仪表盘 / vault 状态
   Triggers (EN): kb stats / vault health / dashboard
-version: v1.9.3
+version: v1.10.0
 phase: v0.4
 applies_to: 只读全库 · 输出 05_outputs/reviews/adhoc/
 source_of_truth:
@@ -265,6 +265,7 @@ view: table
 
 ## 11. 自检清单
 
+- [ ] **输出语言（v1.10.0）**：仪表盘报告正文遵循 `kb.config.yaml.language`（缺失 → 默认 en；规则见 [`references/write-validation-rules.md`](../../references/write-validation-rules.md) §6）
 - [ ] 总笔记数正确（不含 98_archive/system）
 - [ ] type / status / maturity / domain 分布加总 = 总数
 - [ ] 孤立率定义正确（无入链 AND 无出链）

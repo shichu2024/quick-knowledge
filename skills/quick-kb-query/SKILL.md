@@ -4,7 +4,7 @@ description: |
   基于库内笔记回答事实型问题，强制引用。strict 模式默认（每句结论挂 [[]]）；召回含 contradicts 时同时呈现双方 + context（ADR-011）；召回为 0 明确说「未找到」，不编造。
   触发词（中文）：我笔记里… / 找一下… / 关于 X 怎么说 / KB 查
   Triggers (EN): search my notes / what do I have on / kb query
-version: v1.9.3
+version: v1.10.0
 phase: v0.2
 applies_to: 读全库 · 落简易查询日志
 source_of_truth:
@@ -210,6 +210,7 @@ RAG 的核心是检索后生成 [[RAG 架构设计]]。
 
 ## 9. 自检清单
 
+- [ ] **输出语言（v1.10.0）**：回答与报告正文遵循 `kb.config.yaml.language`（缺失 → 用户提问语言；规则见 [`references/write-validation-rules.md`](../../references/write-validation-rules.md) §6）
 - [ ] strict 模式下每句结论挂引用
 - [ ] 召回含 contradicts → 双方都呈现 + 各自 context
 - [ ] 召回为 0 → 明确「未找到」+ capture 建议

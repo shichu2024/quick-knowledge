@@ -1,8 +1,8 @@
 ---
-version: v1.8.0
-updated: 2026-08-14
-phase: v1.8 写入校验层
-applies_to: 所有写入型技能（ingest / capture / connect / daily / goal / project / import）落盘前的 frontmatter 与 wikilink 校验
+version: v1.10.0
+updated: 2026-08-16
+phase: v1.8 写入校验层 + v1.10.0 语言一致性
+applies_to: 所有写入型技能（ingest / capture / connect / daily / goal / project / import）落盘前的 frontmatter 与 wikilink 校验；§6 语言一致性适用于全部技能的生成内容与报告输出
 source_of_truth:
   - references/frontmatter-schema-v1.json
   - references/wikilink-conventions.md
@@ -69,8 +69,49 @@ source_of_truth:
 
 ---
 
-## 5. 版本历史
+## 6. 语言一致性（v1.10.0）
+
+> 全库语言由 init 写入 `kb.config.yaml.language`（新库默认 `en`），全部技能读写内容时遵循本节。
+
+### 6.1 语言判定优先级
+
+```
+kb.config.yaml.language（显式库语言，最高）
+  → 用户当前输入语言（仅无 config 场景——capture/daily 的素材/口述阶段跟随用户语言）
+  → en（兜底默认）
+```
+
+### 6.2 适用于（AI 生成的结构化内容）
+
+| 对象 | 规则 |
+|------|------|
+| 笔记标题提炼 / 摘要 / 正文写作 | 用库语言写（zh 库中文，en 库英文） |
+| 文件名 slug | en → kebab-case 英文；zh → 按 [`slug-rules.md`](./slug-rules.md) 保留中文 |
+| 模板选择 | 从 `99_system/templates/<language>/` 取（两套均由 init 铺设，未铺设时按 §3 ⚠ 标注降级） |
+| 报告输出 | query / review / stats / 三 agent / advisor 的分析报告正文用库语言 |
+| MOC / 归档索引等系统生成文档 | 用库语言 |
+
+### 6.3 不适用于（保持原样）
+
+| 对象 | 理由 |
+|------|------|
+| 用户原始输入（capture 素材正文 / daily 口述） | **素材化原则**：逐字保留，永不翻译改写 |
+| frontmatter 字段名与枚举值（type/status/maturity/relations 键/source 键/domain） | 机器解析层，恒英文——语言约定只管值不管键 |
+| tags 条目 | 跟随 `tags_vocabulary` 实际内容（词表本身由用户/config 定义） |
+| 目录名 / 配置键 / 文件路径 | 技术标识，恒英文 |
+
+### 6.4 自检
+
+- [ ] 写入前已读取 `kb.config.yaml.language`；无 config 时按用户输入语言回退
+- [ ] AI 生成的标题/摘要/正文/报告与库语言一致
+- [ ] slug 语言形态与库语言匹配（en kebab-case / zh 保留中文）
+- [ ] 用户原文未被翻译改写（无论库语言为何）
+
+---
+
+## 7. 版本历史
 
 | 版本 | 日期 | 变更 |
 |------|------|------|
 | v1.8.0 | 2026-08-14 | 初始版本：frontmatter 最小校验集 / wikilink 目标存在性 / 失败处理三段式 |
+| v1.10.0 | 2026-08-16 | 新增 §6 语言一致性：库语言判定优先级 / 适用与豁免对象 / slug 语言形态 |

@@ -101,6 +101,7 @@ KS = confidence × log2(1 + reuse) × impact
 | v1.7 automation & integration | ✅ | agent §0 契約 · polish_mode 3 段階 · 近似/循環検出 · デグレード可観測性 |
 | v1.8 e2e-calibration | ✅ | init リソース自己完結（テンプレート+schema+フィンガープリント）· 全スキール書き込み前検証 · メトリクス統一 |
 | v1.8.1–v1.9.3 テスト校正シリーズ | ✅ | 13 ラウンドの外部テスト報告校正：schema/語彙整合 · デグレード閾値表 · コールドスタート順位 · source フォーマット object 統一 · 構造ドリフト防御 |
+| v1.10.0 vault-language | ✅ | 全庫言語規約：init 言語パラメータ昇格（デフォルト en）· テンプレ/生成コンテンツ/slug/レポート言語を駆動 · 原文素材化免除 |
 
 ---
 

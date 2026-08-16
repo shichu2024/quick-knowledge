@@ -14,7 +14,7 @@
 # 修改者：用户手动 / quick-kb-init upgrade
 
 # ─── 基础 ──────────────────────────────────────────
-language: zh                       # zh | en · 默认模板语言
+language: en                       # zh | en · 全库语言（v1.10.0）：模板选择 / AI 生成内容 / 文件名 slug / 报告输出（新库默认 en；旧库保持原值不迁移）
 default_domain: ai-engineering     # 新笔记缺 domain 时的默认值
 version: v0.4                      # 配置版本（用于 normalize 识别 legacy）
 

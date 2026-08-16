@@ -101,6 +101,7 @@ KS = confidence × log2(1 + reuse) × impact
 | v1.7 automatización e integración | ✅ | Contratos §0 de agentes · polish_mode (3 niveles) · detección de duplicados/ciclos · observabilidad de degradación |
 | v1.8 e2e-calibration | ✅ | Recursos autocontenidos de init (plantillas + schema + huella) · capa de validación pre-escritura · métricas unificadas |
 | v1.8.1–v1.9.3 serie de calibración de pruebas | ✅ | 13 rondas de calibración con informes de prueba externos: alineación schema/vocabulario · tabla de umbrales de degradación · ordenación en arranque frío · formato source unificado a object · defensa contra deriva estructural |
+| v1.10.0 vault-language | ✅ | Convención de idioma global: parámetro de idioma de init mejorado (por defecto en) · dirige plantillas / contenido generado / slugs / idioma de informes · exención de entrada literal del usuario |
 
 ---
 

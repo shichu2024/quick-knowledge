@@ -4,7 +4,7 @@ description: |
   初始化一个 quick-knowledge 知识库 vault。在当前目录（或指定 vault 根）按 PARA + 系统层模型创建完整目录骨架，铺设系统文件、配置与默认模板。
   触发词（中文）：初始化知识库 / 初始化 KB / quick-kb-init / 建知识库
   Triggers (EN): init knowledge base / setup kb / initialize kb
-version: v1.9.3
+version: v1.10.0
 phase: v0.1
 applies_to: vault 根目录
 source_of_truth:
@@ -30,7 +30,7 @@ source_of_truth:
 
 | 参数 | 必填 | 默认 | 说明 |
 |------|------|------|------|
-| `language` | 否 | `zh` | 模板语言：`zh` / `en`（v0.1 仅铺设 `zh`） |
+| `language` | 否 | `en` | **全库语言**（v1.10.0 起）：`zh` / `en`。驱动后续所有技能的模板选择（`99_system/templates/<language>/`）、AI 生成内容语言（标题提炼/摘要/正文写作）、文件名 slug 语言（en → kebab-case 英文，zh → 按 slug-rules 保留中文）与报告输出语言。用户消息中声明语言（如「用中文建库」）优先于本默认值。写入 `kb.config.yaml.language` 后由全部技能遵循（规则见 [`references/write-validation-rules.md`](../../references/write-validation-rules.md) §6） |
 | `domains` | 否 | `["general"]` | 初始领域列表，用于创建 `02_areas/<domain>/` 子目录；条目可含 `/` 表达嵌套（如 `programming/python`），init 会建多层目录 |
 | `obsidian` | 否 | 自动探测 | 是否生成 `.obsidian/` 基础配置（v0.1 不处理，留给 v0.2） |
 | `vault_root` | 否 | 当前工作目录 | vault 根路径；不传则在 CWD 创建 |
@@ -140,7 +140,7 @@ source_of_truth:
 # quick-knowledge vault 配置 · 由 quick-kb-init 生成
 # 完整 schema 见 docs/DESIGN.md §4.2；v0.1 仅启用基础字段。
 
-language: zh                       # zh | en（模板语言）
+language: en                       # zh | en · 全库语言（v1.10.0）：驱动模板选择 / AI 生成内容 / 文件名 slug / 报告输出（规则见 references/write-validation-rules.md §6）
 default_domain: general            # 默认领域
 domains:                           # 已注册领域（与 02_areas/ 子目录对应）
   - general
@@ -369,12 +369,14 @@ schema_sha256: 5e3ffca2
 | `schema_version` | vault 结构 schema 版本号（整数递增），用于 upgrade 子流程判断是否需补缺 |
 | `skill_version` | 初始化时使用的技能版本号（如 `v1.8.0`；v1.8.0 起为 17 技能统一版本号，见 §3.7 版本判定口径） |
 | `initialized_at` | 初始化日期（`YYYY-MM-DD`） |
-| `language` | 模板语言（`zh` / `en`） |
+| `language` | 全库语言（`zh` / `en`，v1.10.0 起驱动全部技能；此前仅控制模板） |
 | `domains` | 初始化时注册的领域列表（逗号分隔） |
 | `runtime_hint` | init 时检测到的 runtime（`claude-code` / `codex` / `cursor` / `opencode` / `kimi-code` / `unknown`），供后续诊断 |
 | `schema_sha256` | 所复制 `99_system/config/frontmatter-schema.json` 的 SHA-256 前 8 位指纹（v1.8 WP1），供 upgrade 子流程校验 schema 权威性 |
 
 ### 步骤 6 · 输出报告
+
+> v1.10.0：报告与 `_index.md` / `_readme.md` 的说明文字用所选 `language` 输出（en 库输出英文报告；目录名/配置键等技术标识不变）。
 
 ```
 ✓ quick-knowledge vault 已初始化
@@ -444,7 +446,7 @@ schema_sha256: 5e3ffca2
 ## 7. 自检清单（执行后）
 
 - [ ] vault 根含 `.kb-initialized` 与 `_index.md`（v1.7 WP5-D · 使用指引导航页）
-- [ ] `99_system/config/kb.config.yaml` 存在且 `language` 字段有效
+- [ ] `99_system/config/kb.config.yaml` 存在且 `language` 字段有效（`zh` / `en`；v1.10.0 默认 `en`，与用户声明语言一致）
 - [ ] `99_system/templates/zh/` 与 `99_system/templates/en/` 各含 14 个模板文件（共 28 个）——**实测清点**（ls 计数），≠ 14 时按 §3.2 计数硬校验输出 ⚠⚠ 阻断级告警，不得静默通过
 - [ ] `99_system/config/frontmatter-schema.json` 存在（v1.5 WP3，normalize schema_check 依赖）
 - [ ] **upgrade 场景**：28 个模板 SHA-256 已与仓库源比对，不一致项已 ⚠ 标注（v1.5 WP1）

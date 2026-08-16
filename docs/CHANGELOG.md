@@ -4,6 +4,30 @@
 
 ---
 
+## v1.10.0 · 2026-08-16 · 全库语言约定（init 语言参数升级）
+
+**摘要**：init 的 `language` 参数从「模板语言」升级为**全库语言**——驱动后续所有技能的模板选择、AI 生成内容、文件名 slug 与报告输出。新库默认 `en`（原 `zh`，⚠️ 行为变更：仅影响未显式传参且用户消息未声明语言的新初始化；存量库不迁移，保持原值）。**无存量 BREAKING**——素材化原则（用户原文逐字保留）与 frontmatter 机器字段（恒英文）显式豁免，bench 中文用例不受影响。
+
+### 功能清单
+
+| # | 内容 | 影响 |
+|---|------|------|
+| 1 | init `language` 参数：默认 `zh`→`en`，语义扩展为全库语言；用户消息声明语言优先于默认值；init 报告与 `_index.md`/`_readme.md` 说明文字按所选语言输出 | init SKILL.md |
+| 2 | `write-validation-rules.md` 新增 **§6 语言一致性**：判定优先级 `kb.config.yaml.language` > 用户当前输入语言（无 config 场景）> `en`；适用于 AI 生成结构化内容（标题/摘要/正文/报告/MOC/slug 语言形态）；豁免用户原文（素材化）、frontmatter 字段名与枚举值、tags 词表条目、目录/配置键 | write-validation-rules.md v1.10.0 |
+| 3 | 7 个报告型技能自检清单接入输出语言条款：query（回退用户提问语言）/ review / stats / manager-agent / memory-agent（回退 en）/ research-agent / advisor（回退用户提问语言）——写入型技能（capture/ingest/connect/daily/goal/project/import）经由既有写入前校验步骤引用 §6 自动继承 | 7 个 SKILL.md |
+| 4 | `kb-config-schema.md` language 注释同步（全库语言语义 + 新库默认 en） | references |
+
+### 设计要点
+
+- **回退链设计动机**：bench golden case 与 capture 素材化依赖「中文输入 → 中文原文保留」。若缺失 config 时直接强制 en 会同时破坏两者；改为「回退用户输入语言」后：显式建库语言（用户意图）> 输入语言（素材场景）> en（兜底），三方兼容。
+- slug 语言形态：en → kebab-case 英文；zh → 按 `slug-rules.md` 保留中文（slug-rules 本就允许中文，无需改动）。
+
+### 评测
+
+capture split=test **8/9 hard / soft 0.96**（与 v1.9.3 持平——回退链「无 config 时跟随用户输入语言」生效，中文素材用例不受默认语言变更影响）；flow split=train **2/4 hard / soft 0.88**（v1.9.3 区间为 1/4 / 0.72-0.73，本轮为近 5 版最高）。
+
+---
+
 ## v1.9.3 · 2026-08-16 · 测试12/13校准修复（source 格式统一 + 漂移防御）
 
 **摘要**：基于测试12/测试13 两份报告交叉校准——合计 4 条「确认问题」中**仅 1 条为真**（source list/object 格式冲突，且根因在仓库自身：ingest 模板与 frontmatter-schema-v1 不一致），另落地 1 项针对反复执行漂移的防御 + 3 项 P3 增强。**含 BREAKING CHANGE（source 格式，附迁移路径）**。

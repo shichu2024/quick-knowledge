@@ -178,6 +178,7 @@ quick-knowledge/
 | v1.7 | automation & integration | ✅ Done | Agent §0 contracts · polish_mode (3 levels) · near-dup/cycle detection · degradation observability |
 | v1.8 | e2e-calibration | ✅ Done | Self-contained init resources (templates + schema + fingerprint) · pre-write validation layer · unified metrics |
 | v1.8.1–v1.9.3 | test-calibration series | ✅ Done | 13 rounds of external test-report calibration: schema/vocabulary alignment · degradation threshold table · cold-start ranking · source format unified to object · structure-drift defense |
+| v1.10.0 | vault-language | ✅ Done | Vault-wide language convention: init language param upgraded (default en) · drives templates / generated content / slugs / report language · verbatim-user-input exemption |
 
 See [docs/](./docs/).
 

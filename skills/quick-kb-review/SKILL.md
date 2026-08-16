@@ -4,7 +4,7 @@ description: |
   周期复盘 + 知识库健康检查。快照采集、刷新 value.reuse、四维度（knowledge/project/goal/daily）分析、健康报告 + 待办清单。KS 排序、结构演化、deprecated 自动降级推迟 v0.3。
   触发词（中文）：复盘本周 / 复盘这个月 / 年度复盘 / 扫一下孤立笔记 / KB 体检
   Triggers (EN): weekly review / monthly review / kb health check
-version: v1.9.3
+version: v1.10.0
 phase: v0.2
 applies_to: 05_outputs/reviews/<period>/ + 各笔记 value.reuse
 source_of_truth:
@@ -266,6 +266,7 @@ quick-kb-manager-agent(
 
 ## 9. 自检清单
 
+- [ ] **输出语言（v1.10.0）**：复盘报告正文遵循 `kb.config.yaml.language`（缺失 → 默认 en；规则见 [`references/write-validation-rules.md`](../../references/write-validation-rules.md) §6）
 - [ ] 报告写入正确路径
 - [ ] **新建报告文件名含 summary 段**（除非 §步骤 4 Step 1 命中纯周期条件）
 - [ ] **未用「维度多 / 主题分散 / 数据稀疏 / 周报难归纳」等语义借口退化纯周期 token**

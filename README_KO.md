@@ -101,6 +101,7 @@ KS = confidence × log2(1 + reuse) × impact
 | v1.7 automation & integration | ✅ | agent §0 계약 · polish_mode 3단계 · 유사/순환 검출 · 저하 관측성 |
 | v1.8 e2e-calibration | ✅ | init 리소스 자족(템플릿+schema+지문) · 전 스킬 쓰기 전 검증 · 지표 통일 |
 | v1.8.1–v1.9.3 테스트 캘리브레이션 시리즈 | ✅ | 13라운드 외부 테스트 보고서 캘리브레이션: schema/어휘 정렬 · 저하 임계값표 · 콜드스타트 정렬 · source 포맷 object 통일 · 구조 드리프트 방어 |
+| v1.10.0 vault-language | ✅ | 전역 언어 규약: init 언어 파라미터 승격(기본 en) · 템플릿/생성 콘텐츠/slug/보고서 언어 구동 · 원문 소재화 면제 |
 
 ---
 

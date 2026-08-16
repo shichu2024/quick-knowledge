@@ -6,7 +6,7 @@ description: |
   可被 advisor / project / goal / ingest 通过 Skill 工具调用，也可由用户直接调用。
   触发词（中文）：我以前怎么做过… / 我的信念库 / 重复踩坑检测 / 召回相似经验
   Triggers (EN): recall similar / check beliefs / repeat mistakes / memory recall
-version: v1.9.3
+version: v1.10.0
 phase: v0.3
 applies_to: 只读 `07_principles/{experiences,patterns}/` + `05_outputs/daily/` · 不写入笔记
 source_of_truth:
@@ -424,6 +424,7 @@ score = 0.68^0.45 × 0.836^0.20 × 1.0^0.15 × 0.85^0.20
 
 ## 8. 自检清单
 
+- [ ] **输出语言（v1.10.0）**：reasoning/建议文本遵循 `kb.config.yaml.language`（缺失 → 默认 en；规则见 [`references/write-validation-rules.md`](../../references/write-validation-rules.md) §6）
 - [ ] 所有 intent 返回结构符合 MemoryResult 契约
 - [ ] recall_similar 候选集不含 concept/resource/idea/daily/moc
 - [ ] score 公式按 §4 实现（几何平均 + 类型系数 + 失败系数）

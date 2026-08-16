@@ -4,7 +4,7 @@ description: |
   Query+ 闭环 · 决策辅助。基于个人认知资产（principle/belief/pattern/experience）辅助用户决策。扫描 07_principles/ + 05_outputs/daily/ 召回历史经验 + 核对信念 + 冲突检测，输出三段：你的历史 / 你的原则 / 建议路径。
   触发词（中文）：我要做…怎么搞 / 帮我决策 / 我该怎么选 / 设计个 X / advisor
   Triggers (EN): how should I / help me decide / design a / advise on
-version: v1.9.3
+version: v1.10.0
 phase: v0.3
 applies_to: 读全库认知资产（07_principles/ + 05_outputs/daily/）；调 quick-kb-memory-agent 召回与排序
 source_of_truth:
@@ -190,6 +190,7 @@ source_of_truth:
 
 ## 10. 自检清单
 
+- [ ] **输出语言（v1.10.0）**：三段建议正文遵循 `kb.config.yaml.language`（缺失 → 用户提问语言；规则见 [`references/write-validation-rules.md`](../../references/write-validation-rules.md) §6）
 - [ ] （正常态）调用了 `quick-kb-memory-agent`（返回结构见其 §0 契约；候选集限定 07_principles/ + 05_outputs/daily/）
 - [ ] （正常态）memory-agent 按其 SKILL.md §4 score 公式排序（experience 失败案例排前）
 - [ ] （降级态 · v1.5 WP6）memory-agent 不可用时手动扫描 4 类认知资产（principles/beliefs/patterns/experiences）+ ⚠ 标注

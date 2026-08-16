@@ -185,6 +185,7 @@ quick-knowledge/
 | v1.7 | automation & integration | ✅ 已完成 | agent §0 契约 · polish_mode 三档 · 近似/循环检测 · 降级可观测性 |
 | v1.8 | e2e-calibration | ✅ 已完成 | init 资源自包含（模板+schema+指纹）· 全技能写入前校验层 · 口径统一 |
 | v1.8.1–v1.9.3 | 测试校准系列 | ✅ 已完成 | 13 轮外部测试报告校准：schema/词表对齐 · 降级阈值表 · 冷启动排序 · source 格式统一 object · 结构漂移防御 |
+| v1.10.0 | vault-language | ✅ 已完成 | 全库语言约定：init 语言参数升级（默认 en）· 驱动模板/生成内容/slug/报告语言 · 素材化豁免 |
 
 详见 [docs/](./docs/) 目录。
 
