@@ -5,7 +5,7 @@ description: |
   只读，不改笔记。
   触发词（中文）：KB 统计 / 健康度 / 仪表盘 / vault 状态
   Triggers (EN): kb stats / vault health / dashboard
-version: v1.10.1
+version: v1.10.2
 phase: v0.4
 applies_to: 只读全库 · 输出 05_outputs/reviews/adhoc/
 source_of_truth:

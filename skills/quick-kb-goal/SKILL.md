@@ -4,7 +4,7 @@ description: |
   目标管理 + 学习路径 + 进展记录 + 归档。create：调 quick-kb-research-agent 生成学习路径 + 调 quick-kb-memory-agent 召回领域 principle/belief；progress：追加 + 里程碑；complete/cancel：归档 + 状态传播。
   触发词（中文）：新建目标 / 学 X 这个目标 / 更新目标进度 / 完成目标
   Triggers (EN): new goal / learning path for / update goal progress
-version: v1.10.1
+version: v1.10.2
 phase: v0.3
 applies_to: 写 03_goals/<slug>/ · 98_archive/goals/ · 读写相关笔记 status
 source_of_truth:

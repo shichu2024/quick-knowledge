@@ -4,7 +4,7 @@ description: |
   初始化一个 quick-knowledge 知识库 vault。在当前目录（或指定 vault 根）按 PARA + 系统层模型创建完整目录骨架，铺设系统文件、配置与默认模板。
   触发词（中文）：初始化知识库 / 初始化 KB / quick-kb-init / 建知识库
   Triggers (EN): init knowledge base / setup kb / initialize kb
-version: v1.10.1
+version: v1.10.2
 phase: v0.1
 applies_to: vault 根目录
 source_of_truth:
@@ -17,6 +17,17 @@ source_of_truth:
 # quick-kb-init
 
 > 在空目录初始化一个 quick-knowledge vault。**只铺骨架，不创建任何笔记内容。**
+
+## ⚠ 执行硬约束（v1.10.2 · 无论你阅读到本文档哪一段，以下 6 条必须全部满足，缺一不得输出 ✓ 完成报告）
+
+1. **模板 28 个**：`99_system/templates/zh/` 与 `en/` 各 14（14 类清单见 §3.2），**实测清点**（ls 计数）≠ 14 时按 §3.2 输出 ⚠⚠ 阻断级告警。禁止只铺「基础 4 类」——那是 v0.1 行为
+2. **schema 落盘 + 指纹**：`99_system/config/frontmatter-schema.json` 从技能包 `references/frontmatter-schema-v1.json` 复制（① 级源在本技能目录下），`.kb-initialized` 记录规范化 SHA-256 前 8 位（剔除 `\r` 后计算）
+3. **根文件是且仅是 `_index.md`**：vault 根**禁止**写 `_readme.md`（它只属于 `00_inbox/`）
+4. **`.kb-initialized` 用 §步骤 5 的 YAML frontmatter 格式**（schema_version / skill_version=实际当前版本 / language / domains / runtime_hint / schema_sha256），禁止 plain key:value 旧格式
+5. **`kb.config.yaml` 的 `language` 行按 §3.1 当前模板写**（v1.10.0 全库语言语义注释；默认 `en`，用户消息声明语言优先）
+6. **自检清单（§7）逐项核对后才输出完成报告**；任何一项未通过 → 报告中列明未过项，不得声称「全部通过」
+
+> 背景：实测表明执行方可能只部分阅读长文档（前段命中、中段截断、尾部未达，产出 4 模板/旧标记/`_readme.md` 等 v0.1 残留）。本块置于文档最前端以保证任何阅读深度下硬约束可见。
 
 ---
 
@@ -355,7 +366,7 @@ domain: {{domain}}
 ```yaml
 ---
 schema_version: 1
-skill_version: v1.8.0
+skill_version: {{实际当前技能版本，如 v1.10.2 · 禁止照抄示例中的历史版本号}}
 initialized_at: 2026-08-13
 language: zh
 domains: general,programming/python
