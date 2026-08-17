@@ -4,7 +4,7 @@ description: |
   初始化一个 quick-knowledge 知识库 vault。在当前目录（或指定 vault 根）按 PARA + 系统层模型创建完整目录骨架，铺设系统文件、配置与默认模板。
   触发词（中文）：初始化知识库 / 初始化 KB / quick-kb-init / 建知识库
   Triggers (EN): init knowledge base / setup kb / initialize kb
-version: v1.10.0
+version: v1.10.1
 phase: v0.1
 applies_to: vault 根目录
 source_of_truth:
@@ -203,7 +203,7 @@ schema 源按优先级探测（v1.8 WP1 起，与 §3.3 模板三级回退同构
 
 - 作用：所有技能产出的笔记由 normalize `schema_check` 子动作按此 schema 校验
 - **已存在同名文件则跳过，不覆盖**（upgrade 场景由 §3.7 比对版本）
-- 复制成功后在 `.kb-initialized` 记录 schema 指纹（SHA-256 前 8 位，见步骤 5 字段表）
+- 复制成功后在 `.kb-initialized` 记录 schema 指纹（SHA-256 前 8 位，见步骤 5 字段表）。**指纹算法（v1.10.1）：先规范化换行符（剔除所有 `\r`，等效 LF）再哈希**——分发包经 git autocrlf / Windows 复制后 CRLF/LF 字节差异会导致指纹漂移，upgrade 比对误报「用户手改」
 - ①② 均不可达时，**禁止自行编写 schema 内容**，只能落盘占位声明文件并 ⚠（见 §3.3「禁止即兴生成条款」）
 
 #### 3.3 模板路径三级回退
@@ -317,9 +317,9 @@ domain: {{domain}}
 | 动作 | 细则 | 幂等保证 |
 |------|------|---------|
 | 补缺失模板 | 按 §3.3 三级回退探测，将 vault `99_system/templates/{zh,en}/` 中缺失的模板文件补齐 | 已存在同名文件则跳过，不覆盖 |
-| **模板完整性校验（v1.5 WP1）** | 对 vault 内已存在的每个模板文件计算 SHA-256，与仓库源 `templates/{zh,en}/<name>.md` 比对。**不一致**（用户手改或旧版残留）→ 在 upgrade 报告标 ⚠，**询问**用户是否覆盖（默认不覆盖，保留用户改动） | SHA-256 一致则跳过；不一致未确认则不动 |
+| **模板完整性校验（v1.5 WP1）** | 对 vault 内已存在的每个模板文件计算 SHA-256（**v1.10.1：两侧均剔除 `\r` 后计算**，换行符不敏感），与仓库源 `templates/{zh,en}/<name>.md` 比对。**不一致**（用户手改或旧版残留）→ 在 upgrade 报告标 ⚠，**询问**用户是否覆盖（默认不覆盖，保留用户改动） | SHA-256 一致则跳过；不一致未确认则不动 |
 | 补缺失 schema | 按 §3.2.1 源优先级（① 技能自带 / ② 仓库根）将 `frontmatter-schema-v1.json` 复制到 vault `99_system/config/frontmatter-schema.json`（若缺失） | 已存在则跳过 |
-| **schema 指纹校验（v1.8 WP1）** | 计算 vault 内 `frontmatter-schema.json` 的 SHA-256 前 8 位，与当前权威源（§3.2.1 命中的 ① 或 ②）指纹比对，并核对 `.kb-initialized.schema_sha256`。**不一致**（用户手改或曾即兴生成）→ upgrade 报告标 ⚠，**询问**用户是否以权威版覆盖（默认不覆盖） | 指纹一致则跳过；不一致未确认则不动 |
+| **schema 指纹校验（v1.8 WP1）** | 计算 vault 内 `frontmatter-schema.json` 的 SHA-256 前 8 位（**v1.10.1：剔除 `\r` 后计算**），与当前权威源（§3.2.1 命中的 ① 或 ②）指纹比对，并核对 `.kb-initialized.schema_sha256`（旧算法存量指纹先原样比对，未命中再按规范化指纹比对，兼容 v1.10.1 前记录）。**不一致**（用户手改或曾即兴生成）→ upgrade 报告标 ⚠，**询问**用户是否以权威版覆盖（默认不覆盖） | 指纹一致则跳过；不一致未确认则不动 |
 | 补缺失目录 | 按 §2 骨架清单检查 `00_inbox/` ~ `99_system/` 下的目录，缺失则创建并放 `.gitkeep` | 已存在目录则跳过 |
 | 合并 config 新字段 | 读取 `99_system/config/kb.config.yaml`，将当前技能版本新增的字段（如 `domain_taxonomy`）以注释默认值形式追加 | 已存在同名字段则跳过，不覆盖已有值 |
 
@@ -372,7 +372,7 @@ schema_sha256: 5e3ffca2
 | `language` | 全库语言（`zh` / `en`，v1.10.0 起驱动全部技能；此前仅控制模板） |
 | `domains` | 初始化时注册的领域列表（逗号分隔） |
 | `runtime_hint` | init 时检测到的 runtime（`claude-code` / `codex` / `cursor` / `opencode` / `kimi-code` / `unknown`），供后续诊断 |
-| `schema_sha256` | 所复制 `99_system/config/frontmatter-schema.json` 的 SHA-256 前 8 位指纹（v1.8 WP1），供 upgrade 子流程校验 schema 权威性 |
+| `schema_sha256` | 所复制 `99_system/config/frontmatter-schema.json` 的 SHA-256 前 8 位指纹（v1.8 WP1；**v1.10.1 起剔除 `\r` 后计算**，换行符不敏感），供 upgrade 子流程校验 schema 权威性 |
 
 ### 步骤 6 · 输出报告
 
@@ -446,6 +446,8 @@ schema_sha256: 5e3ffca2
 ## 7. 自检清单（执行后）
 
 - [ ] vault 根含 `.kb-initialized` 与 `_index.md`（v1.7 WP5-D · 使用指引导航页）
+- [ ] **根文件名负向断言（v1.10.1）**：vault 根**不存在** `_readme.md`——根导航文件是且仅是 `_index.md`；`_readme.md` 只属于 `00_inbox/`（E:\knowledge 实证漂移样本：执行方按旧先验写 `_readme.md` + 自称「阶段 v0.1」）。发现根 `_readme.md` → 迁移内容至 `_index.md` 后删除
+- [ ] **config 模板一致性（v1.10.1）**：`kb.config.yaml` 的 `language` 行注释与 §3.1 当前模板文本一致（v1.10.0 语义「全库语言」；实证漂移样本：执行方凭旧记忆写「模板语言」注释）
 - [ ] `99_system/config/kb.config.yaml` 存在且 `language` 字段有效（`zh` / `en`；v1.10.0 默认 `en`，与用户声明语言一致）
 - [ ] `99_system/templates/zh/` 与 `99_system/templates/en/` 各含 14 个模板文件（共 28 个）——**实测清点**（ls 计数），≠ 14 时按 §3.2 计数硬校验输出 ⚠⚠ 阻断级告警，不得静默通过
 - [ ] `99_system/config/frontmatter-schema.json` 存在（v1.5 WP3，normalize schema_check 依赖）

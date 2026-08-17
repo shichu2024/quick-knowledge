@@ -6,7 +6,7 @@ description: |
   可被 advisor / project / goal / ingest 通过 Skill 工具调用，也可由用户直接调用。
   触发词（中文）：我以前怎么做过… / 我的信念库 / 重复踩坑检测 / 召回相似经验
   Triggers (EN): recall similar / check beliefs / repeat mistakes / memory recall
-version: v1.10.0
+version: v1.10.1
 phase: v0.3
 applies_to: 只读 `07_principles/{experiences,patterns}/` + `05_outputs/daily/` · 不写入笔记
 source_of_truth:

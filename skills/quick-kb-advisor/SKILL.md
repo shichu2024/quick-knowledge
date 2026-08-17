@@ -4,7 +4,7 @@ description: |
   Query+ 闭环 · 决策辅助。基于个人认知资产（principle/belief/pattern/experience）辅助用户决策。扫描 07_principles/ + 05_outputs/daily/ 召回历史经验 + 核对信念 + 冲突检测，输出三段：你的历史 / 你的原则 / 建议路径。
   触发词（中文）：我要做…怎么搞 / 帮我决策 / 我该怎么选 / 设计个 X / advisor
   Triggers (EN): how should I / help me decide / design a / advise on
-version: v1.10.0
+version: v1.10.1
 phase: v0.3
 applies_to: 读全库认知资产（07_principles/ + 05_outputs/daily/）；调 quick-kb-memory-agent 召回与排序
 source_of_truth:
