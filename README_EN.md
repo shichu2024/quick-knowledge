@@ -79,11 +79,21 @@ Initialize my knowledge base
 
 The skill generates the full directory skeleton + system templates + `kb.config.yaml` in the current directory. The vault location is entirely your choice, decoupled from the skill install path.
 
+**Vault-wide language (v1.10.0)**: set the language at init time — English by default. All skills then use it for templates, AI-generated content, filenames, and reports:
+
+```
+Initialize my knowledge base in Chinese   # → Chinese vault (language: zh)
+Initialize my knowledge base              # → English vault (language: en, default)
+```
+
+- The language declared in your message takes priority over the default; you can also switch later by editing the `language` field in `99_system/config/kb.config.yaml`
+- Your raw input is always preserved verbatim — never translated; frontmatter field names/enums stay in English (machine-parsing layer)
+
 ---
 
 ## Usage · 5-Minute Quickstart
 
-1. **Initialize**: "Initialize my knowledge base"
+1. **Initialize**: "Initialize my knowledge base" (English vault by default; say it in Chinese for a Chinese vault)
 2. **First capture**: "Grab https://example.com/article"
 3. **First ingest**: "Ingest this inbox note"
 4. **First query**: "What do my notes say about X?"

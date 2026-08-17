@@ -48,6 +48,8 @@ Dentro de Claude Code:
 
 La inicialización del vault se realiza tras la instalación, en cualquier directorio vacío: di `初始化我的知识库` (chino) / `Initialize my knowledge base` (inglés).
 
+**Idioma global (v1.10.0)**: puedes elegir el idioma al inicializar — inglés por defecto (`用中文初始化我的知识库` para un vault en chino). A partir de entonces, todas las habilidades lo usan para plantillas, contenido generado por IA, nombres de archivo e informes. Tu entrada original se conserva literalmente, sin traducir.
+
 ---
 
 ## Inicio rápido en 5 minutos

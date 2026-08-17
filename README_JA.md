@@ -46,7 +46,9 @@ Claude Code 内で：
 | Cursor | `~/.cursor/skills/quick-knowledge/` |
 | OpenCode | `~/.opencode/skills/quick-knowledge/` |
 
-vault の初期化はインストール後、任意の空ディレクトリで `初始化我的知识 base`（中国語）/ `Initialize my knowledge base`（英語）と呼びかけるだけです。
+vault の初期化はインストール後、任意の空ディレクトリで `初始化我的知识库`（中国語）/ `Initialize my knowledge base`（英語）と呼びかけるだけです。
+
+**全庫言語（v1.10.0）**：初期化時に言語を指定でき、デフォルトは英語です（`用中文初始化我的知识库` で中国語库）。以降のすべてのスキルがテンプレート・AI 生成コンテンツ・ファイル名・レポートの言語にこれを使います。元の入力は逐字保持され翻訳されません。
 
 ---
 

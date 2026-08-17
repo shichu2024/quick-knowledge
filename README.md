@@ -85,11 +85,21 @@ npx skills add shichu2024/quick-knowledge --skill '*'
 
 技能会在当前目录生成完整目录骨架 + 系统模板 + `kb.config.yaml`。vault 位置完全由你决定，与技能安装位置解耦。
 
+**全库语言（v1.10.0）**：初始化时指定语言，默认英文；之后所有技能的模板、AI 生成内容、文件名与报告都用该语言：
+
+```
+用中文初始化我的知识库          # → 中文库（language: zh）
+Initialize my knowledge base   # → 英文库（language: en，默认）
+```
+
+- 用户消息中声明的语言优先于默认值；也可后续直接编辑 `99_system/config/kb.config.yaml` 的 `language` 字段切换
+- 你的原始输入永远逐字保留，不会被翻译；frontmatter 字段名/枚举值恒为英文（机器解析层）
+
 ---
 
 ## 使用 · 五分钟跑通
 
-1. **初始化**：「初始化我的知识库」
+1. **初始化**：「初始化我的知识库」（默认英文库；「用中文初始化」建中文库）
 2. **第一条 capture**：「抓 https://example.com/article」
 3. **第一次 ingest**：「入库 inbox 这条」
 4. **第一次 query**：「我笔记里关于 X 怎么说？」

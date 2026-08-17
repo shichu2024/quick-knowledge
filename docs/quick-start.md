@@ -23,6 +23,8 @@
 初始化我的知识库
 ```
 
+**全库语言（v1.10.0）**：默认英文库；初始化时在消息里声明语言即可切换（如「**用中文**初始化我的知识库」→ 中文库），或后续编辑 `kb.config.yaml` 的 `language` 字段。库语言驱动所有技能的模板选择、AI 生成内容、文件名 slug 与报告输出；你的原始输入永远逐字保留，不会被翻译。
+
 技能会生成如下结构：
 
 ```
@@ -122,7 +124,7 @@ RAG 的核心是检索后生成 [[RAG 架构设计]]。
 - 设置目标：`新建目标：学 Rust`
 - 开项目：`开个项目：插件系统`
 - 看健康度：`KB 统计一下`（v0.4+）
-- 多语言切换：编辑 `kb.config.yaml` 的 `language` 字段
+- 多语言切换：编辑 `kb.config.yaml` 的 `language` 字段（v1.10.0 起新库默认 `en`；详见 [write-validation-rules §6](../references/write-validation-rules.md)）
 
 完整文档：[DESIGN.md](./DESIGN.md) · [SKILLS_SPEC.md](./SKILLS_SPEC.md) · [AGENTS_SPEC.md](./AGENTS_SPEC.md)
 
@@ -226,6 +228,6 @@ The skill reports orphan notes, low-reuse high-occupancy notes, high-value low-c
 - Set a goal: `New goal: learn Rust`
 - Start a project: `New project: plugin system`
 - Health check: `KB stats` (v0.4+)
-- Switch language: edit `language` in `kb.config.yaml`
+- Switch language: edit `language` in `kb.config.yaml` (default `en` for new vaults since v1.10.0; see [write-validation-rules §6](../references/write-validation-rules.md))
 
 Full docs: [DESIGN.md](./DESIGN.md) · [SKILLS_SPEC.md](./SKILLS_SPEC.md) · [AGENTS_SPEC.md](./AGENTS_SPEC.md)
