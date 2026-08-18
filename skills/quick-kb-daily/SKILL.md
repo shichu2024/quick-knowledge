@@ -4,7 +4,7 @@ description: |
   每日日志：把用户口述的一句话变成结构化日志（做了什么/学到什么/想法/卡点）。描述不足时反问补充（最多 2 轮），自动生成 wikilinks，发现待入库项时建议调用 capture。v1.2 新增「AI 润色提议」——对 4 段中识别出的短句主动扩写，用户三选一确认。
   触发词（中文）：今天的日志 / 记日志 / daily / 今天做了什么
   Triggers (EN): daily log / today's notes / log today
-version: v1.10.2
+version: v1.10.3
 phase: v1.2
 applies_to: 05_outputs/daily/YYYY/MM/
 source_of_truth:
@@ -18,6 +18,8 @@ source_of_truth:
 # quick-kb-daily
 
 > 每日日志入口。**反问是增强不是阻塞** —— 用户只说一句话也能记录。
+
+> ⚠ **写入硬约束（v1.10.3 · 无论读到本文档哪一段）**：自动生成的 wikilinks（`[[X]]`）目标 X 必须已存在于 vault 文件名索引——不存在 → 降级为普通文本，**禁止写入死链**（用户口述原文中的 `[[]]` 逐字保留，属豁免）。规则全文见 [`references/write-validation-rules.md`](../../references/write-validation-rules.md) §2。
 
 ---
 

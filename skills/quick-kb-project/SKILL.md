@@ -4,7 +4,7 @@ description: |
   项目全生命周期管理。init：建目录 + README + 主动召回相似项目经验；update：追加进展；archive：补 Decision Ledger + lesson 派生 experience + 迁移归档。
   触发词（中文）：开个项目 / 项目 X / 归档项目
   Triggers (EN): new project / archive project
-version: v1.10.2
+version: v1.10.3
 phase: v0.3
 applies_to: 写 04_projects/<slug>/ · 98_archive/projects/ · 07_principles/experiences/（派生）
 source_of_truth:
@@ -18,6 +18,8 @@ source_of_truth:
 # quick-kb-project（v0.3）
 
 > **项目全生命周期**：init → update → archive。核心是 archive 时的「Decision Ledger → experience 派生闭环」，让项目经验沉淀为长期记忆。
+
+> ⚠ **写入硬约束（v1.10.3 · 无论读到本文档哪一段）**：写入的任何 `[[X]]`（README / ADR / progress / 派生 experience 内）目标 X 必须已存在于 vault 文件名索引——不存在 → 降级为 `**X**` 加粗，**禁止写入死链**（ADR/Decision Ledger 深路径对象按 wikilink-conventions §5 用全路径）。规则全文见 [`references/write-validation-rules.md`](../../references/write-validation-rules.md) §2。
 
 ---
 

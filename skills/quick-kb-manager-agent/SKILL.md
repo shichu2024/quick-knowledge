@@ -6,7 +6,7 @@ description: |
   可被其他技能（connect / review / ingest / normalize）通过 Skill 工具显式调用，也可由用户直接调用执行单项能力。
   触发词（中文）：建 MOC / 推荐关系 / 找孤立笔记 / 修死链 / 刷新价值 / 结构漂移
   Triggers (EN): build moc / recommend relations / find orphans / repair deadlinks / refresh value / structure drift
-version: v1.10.2
+version: v1.10.3
 phase: v0.3
 applies_to: 读写 frontmatter（value.reuse / value.ks）· 写入 06_wiki/mocs/ · 只读全库快照
 source_of_truth:

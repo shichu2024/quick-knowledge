@@ -6,7 +6,7 @@ description: |
   重复检测基于 (title + domain) 或 source.url。
   触发词（中文）：导入 / import / 从 Obsidian / 从 Notion / 从 Logseq
   Triggers (EN): import from / migrate from / ingest external
-version: v1.10.2
+version: v1.10.3
 phase: v0.4
 applies_to: 读外部源 · 写 00_inbox/ · 不删原库
 source_of_truth:
@@ -19,6 +19,8 @@ source_of_truth:
 # quick-kb-import（v0.4）
 
 > **外部库导入**：把 Obsidian / Notion / Logseq 笔记导入 quick-knowledge 的 00_inbox/。**不直接入库**，走正常 Ingest 流程。
+
+> ⚠ **写入硬约束（v1.10.3）**：**import 豁免** wikilink 存在性拦截——源库原文 wikilink 逐字保留（目标可能尚未导入本库），由 connect / repair_deadlinks 后续处理；但 import **自身生成**的报告/索引链接必须指向真实存在的文件。规则见 [`references/write-validation-rules.md`](../../references/write-validation-rules.md) §2 例外条款。
 
 ---
 

@@ -4,7 +4,7 @@ description: |
   低摩擦采集：把用户的想法、网页 URL、PDF、会议转写、AI 对话、阅读笔记快速写入 inbox。v0.2 接入 defuddle 抓取干净正文；新增 PDF/会议/AI 对话/阅读四类源；主动提醒（memory 事件）推迟 v0.3。v1.2 新增「AI 润色提议」步骤——对用户手敲输入主动生成扩写版，三选一确认。
   触发词（中文）：记一下 / 快记 / 收藏这个 / 抓这个网页 / 保存这段 / 记个想法 / 抓 PDF / 保存对话
   Triggers (EN): capture this / save this / clip this page / quick note / capture pdf
-version: v1.10.2
+version: v1.10.3
 phase: v1.2
 applies_to: 00_inbox/
 source_of_truth:
@@ -19,6 +19,8 @@ source_of_truth:
 > 把现在脑子里的东西 / 看到的页面 / 拿到的素材快速落进 inbox。**采集即廉价**：只写最小 frontmatter，分类与提炼留给 ingest。
 >
 > **v0.2 升级**：接 defuddle 抓干净正文；新增 PDF/会议/AI 对话/阅读四类源；capture 路径不再用基础 HTML→MD（缺失时降级）。
+
+> ⚠ **写入硬约束（v1.10.3 · 无论读到本文档哪一段）**：写入的任何 `[[X]]` 目标 X 必须已存在于 vault 文件名索引——不存在 → 降级为 `**X**` 加粗，**禁止写入死链**（用户原文中的 `[[]]` 按素材化原则逐字保留，属豁免）。规则全文见 [`references/write-validation-rules.md`](../../references/write-validation-rules.md) §2。
 
 ---
 

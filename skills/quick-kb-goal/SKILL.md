@@ -4,7 +4,7 @@ description: |
   目标管理 + 学习路径 + 进展记录 + 归档。create：调 quick-kb-research-agent 生成学习路径 + 调 quick-kb-memory-agent 召回领域 principle/belief；progress：追加 + 里程碑；complete/cancel：归档 + 状态传播。
   触发词（中文）：新建目标 / 学 X 这个目标 / 更新目标进度 / 完成目标
   Triggers (EN): new goal / learning path for / update goal progress
-version: v1.10.2
+version: v1.10.3
 phase: v0.3
 applies_to: 写 03_goals/<slug>/ · 98_archive/goals/ · 读写相关笔记 status
 source_of_truth:
@@ -18,6 +18,8 @@ source_of_truth:
 # quick-kb-goal（v0.3）
 
 > **目标全生命周期**：create → progress → complete/cancel。核心是 create 时调 `quick-kb-research-agent`（intent=`process_resource`/`summarize`）生成学习路径 + 调 `quick-kb-memory-agent`（intent=`recall_similar`）召回领域认知资产。
+
+> ⚠ **写入硬约束（v1.10.3 · 无论读到本文档哪一段）**：写入的任何 `[[X]]`（goal.md / progress / 学习路径内）目标 X 必须已存在于 vault 文件名索引——不存在 → 降级为 `**X**` 加粗，**禁止写入死链**。规则全文见 [`references/write-validation-rules.md`](../../references/write-validation-rules.md) §2。
 
 ---
 

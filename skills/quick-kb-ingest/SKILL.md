@@ -4,7 +4,7 @@ description: |
   把 inbox 素材正式入库为 01_resources/<category>/（resource）或 02_areas/<domain>/（concept）笔记：调 quick-kb-research-agent 抽取原子观点、补全 v0.2 完整 frontmatter（含 relations/context/value.reuse）、链接原始素材、给置信度初值、调 quick-kb-manager-agent + quick-kb-memory-agent 做冲突检测。
   触发词（中文）：处理 inbox / 入库 / 把这条归档 / 消化这条 / 这条入库
   Triggers (EN): process inbox / ingest this / promote this note
-version: v1.10.2
+version: v1.10.3
 phase: v0.2
 applies_to: 00_inbox/ → 02_areas/ / 01_resources/
 source_of_truth:
@@ -18,6 +18,8 @@ source_of_truth:
 # quick-kb-ingest（v0.2）
 
 > 把 inbox 一条素材变成 N 条原子笔记。**原始素材永不删除**；入库笔记通过 `source.note` 链回。
+
+> ⚠ **写入硬约束（v1.10.3 · 无论读到本文档哪一段）**：落盘前每个 `[[X]]`（正文或 relations 内）的目标 X 必须已存在于 vault 文件名索引——不存在 → 降级为 `**X**` 加粗，**禁止写入死链**。规则全文见 [`references/write-validation-rules.md`](../../references/write-validation-rules.md) §2。
 >
 > **v0.2 升级**：调 `quick-kb-research-agent`（intent=`extract_atoms`）抽取原子观点；产出完整 frontmatter（含 relations/context/value.reuse）；加入冲突检测（调 `quick-kb-manager-agent.recommend_relations` 发现候选 + `quick-kb-memory-agent.present_conflicts` 呈现冲突）。
 

@@ -5,7 +5,7 @@ description: |
   幂等（多次运行结果一致）+ 可解释（每条改动带 why）+ 可回滚（写 diff 到 _normalize_log/）+ dry-run 预览。
   触发词（中文）：规整笔记 / normalize / 批量修复 / 迁移 related / 重组领域
   Triggers (EN): normalize notes / batch fix frontmatter / migrate related field / regroup domains
-version: v1.10.2
+version: v1.10.3
 phase: v1.4
 applies_to: 读写 frontmatter（不改正文）· 跨 inbox / areas / principles
 source_of_truth:

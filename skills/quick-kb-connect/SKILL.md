@@ -4,7 +4,7 @@ description: |
   建立双链、生成 MOC、绘制知识地图（canvas）。调 quick-kb-manager-agent 推荐关系与构建 MOC；写入类型化 relations（不再写扁平 related）；生成 06_wiki/mocs/<domain>-moc.md；接 json-canvas 生成 .canvas（Obsidian 缺失跳过）。
   触发词（中文）：连一下 / 建个 MOC / 给这领域建索引 / 画个知识地图 / 连接笔记
   Triggers (EN): connect these / build moc / map this domain / link notes
-version: v1.10.2
+version: v1.10.3
 phase: v0.2
 applies_to: 06_wiki/ + 各笔记 frontmatter.relations
 source_of_truth:
@@ -20,6 +20,8 @@ source_of_truth:
 # quick-kb-connect（v0.2）
 
 > Connect 闭环：建立双链、生成 MOC、绘制知识地图。被 ingest 之后的「整理」步骤。
+
+> ⚠ **写入硬约束（v1.10.3 · 无论读到本文档哪一段）**：写入的任何 `[[X]]`（relations / MOC / 反向键内）目标 X 必须已存在于 vault 文件名索引——不存在 → 降级为普通文本或加粗，**禁止写入死链**。规则全文见 [`references/write-validation-rules.md`](../../references/write-validation-rules.md) §2。
 
 ---
 
