@@ -49,7 +49,7 @@ value:
 
 ## 进度记录
 
-> 进展写入 progress/YYYY-MM-DD.md（每次 quick-kb-goal progress 追加一条）
+> 进展写入 progress/YYYY-MM-DD-<summary>.md（内容过薄命中强制纯日期清单时落 progress/YYYY-MM-DD.md；每次 quick-kb-goal progress 追加一条，同日已有则编辑既有文件不改名）
 
 - [[progress/2026-XX-XX]]
 - [[progress/2026-XX-XX]]

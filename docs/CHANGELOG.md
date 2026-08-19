@@ -4,6 +4,30 @@
 
 ---
 
+## v1.11.1 · 2026-08-19 · goal 进度文件名口径对齐（模板 ↔ SKILL §5）
+
+**摘要**：用户报告 goal.md 模板「进度记录」段写死 `progress/YYYY-MM-DD.md`（纯日期），与 quick-kb-goal SKILL §5 的双轨规则（默认 `progress/<YYYY-MM-DD>-<summary>.md`，命中强制纯日期清单才落纯日期）矛盾——模板把降级路径写成了唯一规则，当日实际产出的带 summary 后缀文件名与模板声明不一致。全库扫出同类漂移共 3 处落点（模板双副本 + SKILLS_SPEC）。
+
+### 修复清单
+
+| # | 内容 | 影响 |
+|---|------|------|
+| 1 | goal.md 模板「进度记录」说明行改为双轨口径：默认 `progress/YYYY-MM-DD-<summary>.md`，内容过薄命中强制纯日期清单时落纯日期，同日已有则编辑既有文件不改名 | templates/{zh,en}/goal.md + skills/quick-kb-init/templates/{zh,en}/goal.md（4 副本，root↔init 已 diff 确认字节级一致） |
+| 2 | SKILLS_SPEC §9 工作流（progress）第 1 步同步双轨口径（原文同样写死纯日期） | docs/SKILLS_SPEC.md |
+| 3 | 17 SKILL version → v1.11.1 | 全部 SKILL.md |
+
+### 设计说明
+
+- 真相源是 quick-kb-goal SKILL §5（L133-141，含强制纯日期清单三项与同日去重规则）+ `references/filename-summary-rules.md`（v1.4.2 引入 summary 提炼防绕过）——模板与 SPEC 均为陈述方，向 SKILL 对齐。
+- project.md 模板无进展命名行（grep 确认），quick-kb-project SKILL §5 口径本就与 goal 一致，无需改。
+- docs/archive/V1/SKILLS_SPEC.md 同款纯日期描述为历史归档，不动。
+
+### 评测
+
+无需跑 bench：纯模板说明行与文档口径修正，无行为变更（SKILL 行为即目标行为，且 capture/flow 评测不触及 goal 模板）。
+
+---
+
 ## v1.11.0 · 2026-08-19 · 主动化链路（ingest 写入后复验 + AI 产出文章自动识别入库）
 
 **摘要**：修复两个「被动→主动」链路断点。① ingest 只有写入前校验（§2.8），写入后无人核对——v1.9.3 的 source list 格式漂移正属此类执行漂移；本版加「步骤 4.4 写入后复验」：每条笔记落盘后立即重读，按 core 检查集（定义于 write-validation-rules §5）核对，不一致当场改，报告显式输出修正计数（0 也写）。② 对话中 AI 产出的结构化知识文章无人识别，入库靠用户手动提醒且格式漂移；本版新增 **ai-article 源类型**：识别（标题+章节+≥300 字）→ 一句话提示入库 → 确认后直写 01_resources/02_areas（v0.2 完整集 + 全量校验 + 死链 + 语言链），未确认落 inbox 待 ingest。

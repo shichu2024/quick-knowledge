@@ -565,7 +565,7 @@ tags:
 
 ### 工作流（progress）
 
-1. **追加进展**：写入 `03_goals/<slug>/progress/YYYY-MM-DD.md`。
+1. **追加进展**：写入 `03_goals/<slug>/progress/YYYY-MM-DD-<summary>.md`（内容过薄命中强制纯日期清单时落纯日期文件名；同日已有 progress 文件则编辑既有文件不改名）。
 2. **更新里程碑**：勾选 goal.md 里完成的里程碑。
 3. **路径动态调整**：基于进展推荐新节点或跳过冗余节点。
 

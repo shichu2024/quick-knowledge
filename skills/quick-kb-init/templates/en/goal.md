@@ -49,7 +49,7 @@ value:
 
 ## Progress log
 
-> Progress entries are written to progress/YYYY-MM-DD.md (appended by quick-kb-goal progress)
+> Progress entries are written to progress/YYYY-MM-DD-<summary>.md (pure-date progress/YYYY-MM-DD.md only when the content is too thin; appended by quick-kb-goal progress — same-day updates edit the existing file)
 
 - [[progress/2026-XX-XX]]
 - [[progress/2026-XX-XX]]
