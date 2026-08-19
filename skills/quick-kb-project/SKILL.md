@@ -4,7 +4,7 @@ description: |
   项目全生命周期管理。init：建目录 + README + 主动召回相似项目经验；update：追加进展；archive：补 Decision Ledger + lesson 派生 experience + 迁移归档。
   触发词（中文）：开个项目 / 项目 X / 归档项目
   Triggers (EN): new project / archive project
-version: v1.11.1
+version: v1.12.0
 phase: v0.3
 applies_to: 写 04_projects/<slug>/ · 98_archive/projects/ · 07_principles/experiences/（派生）
 source_of_truth:
@@ -134,7 +134,7 @@ source_of_truth:
    - progress/<YYYY-MM-DD>-<summary>.md（用 daily 模板简化版）
      - **summary 提炼**严格按 [`filename-summary-rules.md`](../../references/filename-summary-rules.md) §2 机械判定：
        - **Step 1 强制纯日期清单**（命中任一即 `progress/<YYYY-MM-DD>.md`）：① 进展字段全空 ② 实质字符 < 5 ③ 仅元描述无事件词
-       - **Step 2 未命中 → 必须提炼** 2-5 词 ASCII kebab-case（如 `auth-impl` / `demo-dry-run` / `vector-db-blocker` / `m2-done`）
+       - **Step 2 未命中 → 必须提炼** 2-5 词 summary（语言跟随 vault 语言，zh 库保留中文如 `登录流程实现`；en 库 ASCII kebab-case 如 `auth-impl` / `m2-done`，见 filename-summary-rules §5.3）
      - **禁止语义绕过**：严禁用「进展太短」「卡点描述笼统」「里程碑完成不是主题」等借口退化为纯日期
      - 错误反例：输入「今天实现了登录流程」→ ❌ `progress/2026-08-13.md`（借口「实现太简单」）→ ✅ `progress/2026-08-13-auth-impl.md`
      - 错误反例：输入「卡在向量库选型上」→ ❌ 纯日期（借口「卡点太短」）→ ✅ `progress/2026-08-13-vector-db-blocker.md`

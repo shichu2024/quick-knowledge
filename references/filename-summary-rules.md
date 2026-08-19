@@ -1,7 +1,7 @@
 ---
-version: v1.4.2
-updated: 2026-08-13
-phase: v1.4
+version: v1.12.0
+updated: 2026-08-19
+phase: v1.12（语言跟随；v1.4 机械判定框架不变）
 applies_to: quick-kb-daily §1 / quick-kb-project §5 (progress) / quick-kb-goal §5 (progress) / quick-kb-review §4（以及任何生成 `<date-token>-<summary>.md` 文件名的技能）
 source_of_truth:
   - skills/quick-kb-daily/SKILL.md §步骤 1
@@ -47,9 +47,9 @@ source_of_truth:
 
 ### Step 2 · 未命中 → **必须**提炼 summary
 
-Step 1 全部未命中 → **强制**从 content 提炼 2-5 词 kebab-case 作为 summary：
+Step 1 全部未命中 → **强制**从 content 提炼 2-5 词 summary 作为文件名段（**语言跟随 vault 语言**，判定见 §5.3）：
 
-- 限 30 字符内
+- 限 30 字符内（中文按 1 字符计）
 - 从最有实质内容的段落 / 字段抽取核心名词 + 动作
 - 多个候选 → 取第一个出现的实质内容
 - 内容跨领域 / 主题分散 → **取首个主题**（不允许多主题作为退化为纯日期的借口）
@@ -121,11 +121,14 @@ Step 1-2 是**机械字符判定**。**严禁**用以下语义理由退化为纯
 - 多主题并重 → 用最宽泛的概括词（如「日常」→ `routine-dev`，**不要**退化纯日期）
 - 在 diff log / 报告中可标 `needs_review: true` 提示用户人工调整（仅 review 技能）
 
-### 5.3 字符约束
+### 5.3 字符与语言约束
 
-- 2-5 个词（kebab-case 连接）
-- 总长度 ≤ 30 字符
-- 仅 ASCII（中文输入也要提炼为英文 summary，便于 wikilink 与跨工具兼容）
+- 2-5 个词（词间用 `-` 连接）
+- 总长度 ≤ 30 字符（中文按 1 字符计）
+- **语言跟随 vault 语言**（判定链同 [`write-validation-rules.md`](./write-validation-rules.md) §6.1：`kb.config.yaml.language` > 用户输入语言 > `en`）：
+  - `en`（或缺省兜底）→ ASCII kebab-case 英文 summary（如 `rag-tuning` / `login-bugfix`）
+  - `zh` → **保留中文**（对齐 [`slug-rules.md`](./slug-rules.md) §2，如「RAG 调参」→ `rag调参`、「登录 bug 修复」→ `登录bug修复`；中英混合词间用 `-` 连接）
+  - 其他语言 → 按 slug-rules.md 同则处理（保留原文 + `-` 分词，不转拼音）
 
 ---
 
@@ -144,7 +147,7 @@ Step 1-2 是**机械字符判定**。**严禁**用以下语义理由退化为纯
 | 场景 | 降级行为 |
 |------|---------|
 | LLM 不可用（无法提炼） | 用 fallback 启发式：取 content 首个实词 + 核心动词（如「RAG 调参」→ `rag-tuning`） |
-| content 仅含中文 | 翻译为 ASCII kebab-case（「RAG 调参」→ `rag-tuning`，「登录 bug 修复」→ `login-bugfix`） |
+| content 仅含中文 | 语言跟随 vault（zh 库保留中文：「RAG 调参」→ `rag调参`；en 库翻译为 ASCII kebab-case：「RAG 调参」→ `rag-tuning`） |
 | 实在抽不出关键词（罕见） | 用日期相关的最低信息（如 `daily-log` / `progress-note`），**不退化为纯日期** |
 | summary 候选超 30 字符 | 截断到 30 字符内（保前 2 个词） |
 
@@ -157,7 +160,7 @@ Step 1-2 是**机械字符判定**。**严禁**用以下语义理由退化为纯
 - **机械字符判定优先**：Step 1 是硬性条件检查，**不参**入语义判断
 - **summary 提炼不可跳过**：只要 content 非空（Step 1 未命中），文件名**必须**含 summary 段
 - **文件名稳定性**：同日/同周期已有任何形式的旧文件 → 编辑不改名（详见各技能 §加载/创建逻辑）
-- **summary 永远 ASCII kebab-case**：即使 content 是中文，summary 也是 ASCII
+- **summary 语言跟随 vault 语言**：en 库 ASCII kebab-case；zh 库保留中文（slug-rules.md §2）；无 config 时按用户输入语言回退（判定链 write-validation-rules §6.1）——机械字符判定与「不许语义绕过」不因语言放宽
 - **长度上限 30 字符**：超出截断，不报错
 
 ---
@@ -169,14 +172,14 @@ Step 1-2 是**机械字符判定**。**严禁**用以下语义理由退化为纯
 | `kb.config.filename_summary.enabled` | `true` | 全局开关；关闭时所有日期文件退为纯日期（仅用于排查） |
 | `kb.config.filename_summary.min_chars` | 5 | Step 1 条件 3 的阈值 |
 | `kb.config.filename_summary.max_length` | 30 | summary 字符上限 |
-| `kb.config.filename_summary.lang` | `ascii` | summary 语言（v1.4 仅支持 ascii） |
+| `kb.config.filename_summary.lang` | `auto` | summary 语言：`auto`（默认，跟随 `kb.config.yaml.language`）/ `ascii`（强制英文，v1.4 旧行为）/ `zh` |
 
 ---
 
 ## 10. 自检清单（执行后）
 
 - [ ] 新建文件路径含 summary 段（除非 Step 1 命中纯日期）
-- [ ] summary 是 2-5 词 ASCII kebab-case，≤ 30 字符
+- [ ] summary 是 2-5 词、≤ 30 字符，且语言形态与库语言一致（en → ASCII kebab-case / zh → 保留中文）
 - [ ] 未用「内容笼统 / 主题分散 / 信息不足」等语义借口退化为纯日期
 - [ ] 同日/同周期已有旧文件时，编辑不改名
 - [ ] summary 反映 content 首个实质主题（多主题时取首个）
@@ -189,3 +192,4 @@ Step 1-2 是**机械字符判定**。**严禁**用以下语义理由退化为纯
 | 版本 | 日期 | 变更 |
 |------|------|------|
 | v1.4.2 | 2026-08-13 | 初始版本，从 daily §步骤 1 + project/goal progress + review §步骤 4 抽取统一决策表；引入机械判定杜绝语义绕过 |
+| v1.12.0 | 2026-08-19 | 「仅 ASCII」硬约束改为「跟随 vault 语言」（对齐 slug-rules §2 与 write-validation-rules §6.1 语言判定链；zh 库保留中文 summary）；`filename_summary.lang` 默认 `auto`，`ascii` 保留为强制旧行为选项；机械判定与反语义绕过框架不变 |

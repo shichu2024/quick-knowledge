@@ -4,7 +4,7 @@ description: |
   每日日志：把用户口述的一句话变成结构化日志（做了什么/学到什么/想法/卡点）。描述不足时反问补充（最多 2 轮），自动生成 wikilinks，发现待入库项时建议调用 capture。v1.2 新增「AI 润色提议」——对 4 段中识别出的短句主动扩写，用户三选一确认。
   触发词（中文）：今天的日志 / 记日志 / daily / 今天做了什么
   Triggers (EN): daily log / today's notes / log today
-version: v1.11.1
+version: v1.12.0
 phase: v1.2
 applies_to: 05_outputs/daily/YYYY/MM/
 source_of_truth:
@@ -86,7 +86,7 @@ source_of_truth:
 | 3 | 实质字符数 < 5 | 去掉元描述后剩 < 5 字符（「ok」/「没事」/「休息」/「-」） |
 | 4 | 仅含纯元描述且无事件关键词 | 字面是「今天没什么」/「就这些」/「完毕」/「没特别要记」/「日常」之一且无具体名词 |
 
-**Step 2 · 未命中 → 必须提炼 summary**：从最有实质内容的段落抽 2-5 词 ASCII kebab-case（限 30 字符）。
+**Step 2 · 未命中 → 必须提炼 summary**：从最有实质内容的段落抽 2-5 词 summary（限 30 字符；**语言跟随 vault 语言**——en → ASCII kebab-case，zh → 保留中文，判定见 filename-summary-rules §5.3）。
 
 > **禁止语义绕过（硬约束）**：上述是机械字符判定。即使输入字面是「开了一天的会」「学了很多」「没什么特别的」「日常开发」等笼统表达，**仍按 Step 2 提炼 summary**（如 `meeting-day` / `mcp-learning` / `routine-dev` / `daily-grind`）。**严禁**用「内容笼统 / 主题分散 / 会议型日志不可提炼」等语义理由退化纯日期。
 
@@ -418,7 +418,7 @@ frontmatter 加 `ai_polished_entries: [1, 2]`（被润色条目的编号列表�
 
 - [ ] 文件路径正确（含年月子目录）
 - [ ] **新建文件名含 summary 段**（除非 §步骤 1 Step 1 命中纯日期条件 1-4）
-- [ ] summary 是 2-5 词 ASCII kebab-case，≤ 30 字符
+- [ ] summary 是 2-5 词、≤ 30 字符，语言形态与库语言一致（en kebab-case / zh 保留中文）
 - [ ] **未用「内容笼统 / 主题分散 / 会议型日志」等语义借口退化纯日期**
 - [ ] 同日已有旧文件时，编辑不改名（文件名稳定性）
 - [ ] frontmatter 含必填字段，无 v0.2+ 字段

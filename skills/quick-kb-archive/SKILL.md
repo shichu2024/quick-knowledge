@@ -6,7 +6,7 @@ description: |
   通用归档不派生 experience；仅当归档对象 type=project 时，执行 lesson → experience 草稿半自动化（status: draft，需用户确认后激活）。
   触发词（中文）：归档 / archive / 把 X 收起来
   Triggers (EN): archive / put away / move to archive
-version: v1.11.1
+version: v1.12.0
 phase: v0.4
 applies_to: 写 98_archive/ · 更新 wikilinks · 不删笔记
 source_of_truth:

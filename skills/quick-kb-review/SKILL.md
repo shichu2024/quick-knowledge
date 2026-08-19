@@ -4,7 +4,7 @@ description: |
   周期复盘 + 知识库健康检查。快照采集、刷新 value.reuse、四维度（knowledge/project/goal/daily）分析、健康报告 + 待办清单。KS 排序、结构演化、deprecated 自动降级推迟 v0.3。
   触发词（中文）：复盘本周 / 复盘这个月 / 年度复盘 / 扫一下孤立笔记 / KB 体检
   Triggers (EN): weekly review / monthly review / kb health check
-version: v1.11.1
+version: v1.12.0
 phase: v0.2
 applies_to: 05_outputs/reviews/<period>/ + 各笔记 value.reuse
 source_of_truth:
@@ -144,7 +144,7 @@ quick-kb-manager-agent(
 - **旧文件优先**：同周期若已存在任何形式的报告（纯日期 / 已带 summary）→ **编辑既有文件，不重新提炼 summary，不改名**（与 daily §步骤 1 同样的稳定性约束）
 - **summary 提炼机械判定**（按 [`filename-summary-rules.md`](../../references/filename-summary-rules.md) §2）：
   - **Step 1 强制纯周期 token**（命中任一即 `<date-token>.md`）：① 报告四维度全空 ② 实质字符 < 5 ③ 仅元描述无事件词
-  - **Step 2 未命中 → 必须提炼** 2-5 词 ASCII kebab-case（如 `rag-eval` / `stabilization` / `auth-incident` / `m2-review`）
+  - **Step 2 未命中 → 必须提炼** 2-5 词 summary（语言跟随 vault 语言，zh 库保留中文如 `rag调优周报`；en 库 ASCII kebab-case 如 `rag-eval` / `m2-review`，见 filename-summary-rules §5.3）
 - **禁止语义绕过**：严禁用「维度多 / 主题分散 / 数据稀疏 / 周报难归纳」等借口退化为纯周期 token
   - 错误反例：主线是 RAG 评估调试 → ❌ `2026-W32.md`（借口「周报维度多」）→ ✅ `2026-W32-rag-eval.md`
   - 错误反例：季度稳定化为主 → ❌ `2026-Q3.md`（借口「季度主题分散」）→ ✅ `2026-Q3-stabilization.md`
@@ -227,7 +227,7 @@ quick-kb-manager-agent(
 - yearly：`05_outputs/reviews/yearly/YYYY-<summary>.md`
 - adhoc：`05_outputs/reviews/adhoc/YYYY-MM-DD-<summary>.md`
 
-> `<summary>` **必须**按 [`filename-summary-rules.md`](../../references/filename-summary-rules.md) §2 机械判定提炼 2-5 词 ASCII kebab-case；同周期已存在旧文件 → 编辑不改名（详见 §步骤 4）。**禁止**用「维度多 / 主题分散」等语义借口退化为纯周期 token。
+> `<summary>` **必须**按 [`filename-summary-rules.md`](../../references/filename-summary-rules.md) §2 机械判定提炼 2-5 词 summary（**语言跟随 vault 语言**，en → ASCII kebab-case / zh → 保留中文，判定 §5.3）；同周期已存在旧文件 → 编辑不改名（详见 §步骤 4）。**禁止**用「维度多 / 主题分散」等语义借口退化为纯周期 token。
 
 ### 5.2 报告结构
 

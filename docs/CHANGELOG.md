@@ -4,6 +4,32 @@
 
 ---
 
+## v1.12.0 · 2026-08-19 · summary 语言跟随 vault（filename-summary-rules 去 ASCII 硬约束）
+
+**摘要**：filename-summary-rules.md 自 v1.4.2 起「summary 永远 ASCII kebab-case（中文输入也提炼为英文）」，与 v1.10.0 语言体系的 slug 规则（slug-rules §2 zh 保留中文）和 write-validation-rules §6.2（zh → 按 slug-rules 保留中文）不一致——zh 库的 daily/progress/review 文件名被强制英文，是语言判定链的最后一处例外。本版改为**语言跟随 vault 语言**。
+
+### 修复清单
+
+| # | 内容 | 影响 |
+|---|------|------|
+| 1 | filename-summary-rules §5.3 字符约束重写为「字符与语言约束」：语言判定链同 write-validation-rules §6.1（`kb.config.language` > 用户输入语言 > `en`）；en → ASCII kebab-case，zh → 保留中文（`rag调参` / `登录bug修复`，对齐 slug-rules §2），其他语言保留原文 + `-` 分词；长度上限 30 字符（中文按 1 字符计） | references/filename-summary-rules.md |
+| 2 | 同文件 §2 Step 2 / §7 降级路径（「content 仅含中文」行）/ §8 不变量 / §9 `filename_summary.lang` 默认 `ascii`→`auto`（`ascii` 保留为强制旧行为选项）/ §10 自检 / §11 版本历史 | references/filename-summary-rules.md |
+| 3 | 4 个消费方 SKILL 的 Step 2 措辞同步（daily §步骤 1 + 自检、goal/project §5 progress、review §步骤 4 + §230 硬约束段），各加 zh 示例（`rag基线评估` / `登录流程实现` / `rag调优周报`） | daily / goal / project / review SKILL.md |
+| 4 | 17 SKILL version → v1.12.0 | 全部 SKILL.md |
+
+### 设计说明
+
+- **机械判定与反语义绕过框架零改动**：Step 1 强制纯日期清单、Step 2 必须提炼、「禁止语义借口」不变——只放开语言形态，不放松「不许退化纯日期」。
+- `filename_summary.lang: ascii` 保留为逃生门（v1.4 旧行为强制英文）；默认 `auto` 跟随 `kb.config.language`。
+- capture 的 inbox 文件名（`YYYYMMDD-HHMM-<slug>`）不受影响——它走 slug-rules（本就语言跟随）。
+- 中文文件名与 wikilink 兼容：Python `re` 的 `\w` 默认匹配 CJK（bench 路径抽取无影响）；wikilink-conventions §7 仅禁空格/扩展名/全角括号后缀，中文 basename 合法。
+
+### 评测
+
+capture split=test：**8/9 / soft 0.96**（A5.2 失败=执行方将 `<timestamp>` 字面占位写入文件名，v1.8.2 已记录的 F1 类已知漂移；capture 本版仅动 version 行，无因果）；flow split=train **1/4 / soft 0.59**（J 类振荡区间 0.57-0.83：J1 置信度边界判定（路径已正确）、J3 decision 路径浅引用、J4 执行方反问未落文件；J6 通过且 summary 提炼正常）。
+
+---
+
 ## v1.11.1 · 2026-08-19 · goal 进度文件名口径对齐（模板 ↔ SKILL §5）
 
 **摘要**：用户报告 goal.md 模板「进度记录」段写死 `progress/YYYY-MM-DD.md`（纯日期），与 quick-kb-goal SKILL §5 的双轨规则（默认 `progress/<YYYY-MM-DD>-<summary>.md`，命中强制纯日期清单才落纯日期）矛盾——模板把降级路径写成了唯一规则，当日实际产出的带 summary 后缀文件名与模板声明不一致。全库扫出同类漂移共 3 处落点（模板双副本 + SKILLS_SPEC）。

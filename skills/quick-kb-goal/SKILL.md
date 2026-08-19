@@ -4,7 +4,7 @@ description: |
   目标管理 + 学习路径 + 进展记录 + 归档。create：调 quick-kb-research-agent 生成学习路径 + 调 quick-kb-memory-agent 召回领域 principle/belief；progress：追加 + 里程碑；complete/cancel：归档 + 状态传播。
   触发词（中文）：新建目标 / 学 X 这个目标 / 更新目标进度 / 完成目标
   Triggers (EN): new goal / learning path for / update goal progress
-version: v1.11.1
+version: v1.12.0
 phase: v0.3
 applies_to: 写 03_goals/<slug>/ · 98_archive/goals/ · 读写相关笔记 status
 source_of_truth:
@@ -133,7 +133,7 @@ source_of_truth:
    - progress/<YYYY-MM-DD>-<summary>.md（结构：完成 / 学到 / 想法 / 卡点）
      - **summary 提炼**严格按 [`filename-summary-rules.md`](../../references/filename-summary-rules.md) §2 机械判定：
        - **Step 1 强制纯日期清单**（命中任一即 `progress/<YYYY-MM-DD>.md`）：① 进展字段全空 ② 实质字符 < 5 ③ 仅元描述无事件词
-       - **Step 2 未命中 → 必须提炼** 2-5 词 ASCII kebab-case（如 `chunk-eval-baseline` / `api-stabilization` / `m2-done` / `vector-db-research`）
+       - **Step 2 未命中 → 必须提炼** 2-5 词 summary（语言跟随 vault 语言，zh 库保留中文如 `rag基线评估`；en 库 ASCII kebab-case 如 `chunk-eval-baseline` / `m2-done`，见 filename-summary-rules §5.3）
      - **禁止语义绕过**：严禁用「进展太短」「学习笼统」「里程碑完成不是主题」等借口退化为纯日期
      - 错误反例：输入「完成 milestone 2」→ ❌ `progress/2026-08-13.md`（借口「里程碑不是主题」）→ ✅ `progress/2026-08-13-m2-done.md`
      - 同日已有 `progress/<YYYY-MM-DD>*.md` → 编辑既有文件，不重新提炼 summary，不改名
