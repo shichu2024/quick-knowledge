@@ -8,7 +8,7 @@
 ---
 title: {{简短标题}}                    # required
 captured_at: {{YYYY-MM-DDTHH:MM}}      # required · ISO 8601 含时间
-capture_type: idea                     # idea | web-clip | pdf | meeting | ai-dialog | reading
+capture_type: idea                     # idea | web-clip | pdf | meeting | ai-dialog | reading | ai-article
 source:                                # optional · 若来自对话/他人/链接
   # - url: https://...
   # - person: "{{谁说的}}"

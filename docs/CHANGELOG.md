@@ -4,6 +4,37 @@
 
 ---
 
+## v1.11.0 · 2026-08-19 · 主动化链路（ingest 写入后复验 + AI 产出文章自动识别入库）
+
+**摘要**：修复两个「被动→主动」链路断点。① ingest 只有写入前校验（§2.8），写入后无人核对——v1.9.3 的 source list 格式漂移正属此类执行漂移；本版加「步骤 4.4 写入后复验」：每条笔记落盘后立即重读，按 core 检查集（定义于 write-validation-rules §5）核对，不一致当场改，报告显式输出修正计数（0 也写）。② 对话中 AI 产出的结构化知识文章无人识别，入库靠用户手动提醒且格式漂移；本版新增 **ai-article 源类型**：识别（标题+章节+≥300 字）→ 一句话提示入库 → 确认后直写 01_resources/02_areas（v0.2 完整集 + 全量校验 + 死链 + 语言链），未确认落 inbox 待 ingest。
+
+### 修复清单
+
+| # | 内容 | 影响 |
+|---|------|------|
+| 1 | ingest 新增步骤 4.4「写入后复验」：4 项 core 复验表（行内注释 / source object / tags inline array+词表 / v0.2 必填字段）+ 硬约束「当场改再进下一条」+ 报告「⚠ 复验修正：N 处」（N=0 也写，显式 0 计数 > 正向勾选） | ingest SKILL.md |
+| 2 | write-validation-rules 新增 **§5 写入后复验（core 检查集）**：写入前（§1/§2）+ 写入后（§5）双层防线定位；core 集为单一真相源，声明与 normalize run / schema_check 同源；§7 版本历史同步 | write-validation-rules.md |
+| 3 | normalize 加一句同源声明：core 检查集定义于 write-validation-rules §5，被 ingest §4.4 复用（不新增章节） | normalize SKILL.md |
+| 4 | capture 新增 **ai-article 源类型**（capture_type 第 8 值）：description 常驻提示 + 步骤 1 判定表（AI 自身产出 + 成篇结构）+ 新增步骤 6.5 快速入库（📖 一句话 [Y]/[N] 提示；[Y] 走 v0.2 完整集直写，[N] 落 00_inbox/ai-dialogs/）+ 素材化边界说明（AI 产出可合规修正，织入的用户原话保留） | capture SKILL.md |
+| 5 | schema `source.type` enum 加 `ai_generated`（根 + init 技能包双副本字节级同步）；**顺带修复预存漂移**：根副本缺 v1.9.3 的 capture_type/author/published 三字段（init 副本有），已补齐至两副本一致 | frontmatter-schema-v1.json ×2 |
+| 6 | frontmatter-v0.2 §6 source.type 枚举 / §7 capture_type 词表补值；ingest §2.1 源类型映射表加 ai-article 行；SKILLS_SPEC 源类型表 + 4 份 note-idea 模板 capture_type 注释同步 | frontmatter-v0.2.md / ingest SKILL.md / SKILLS_SPEC.md / templates ×4 |
+| 7 | kb.config 新增 `capture_ai.emit`（suggest 默认提示后确认 / always 自动入库 / off 不识别），init config 模板 + demo-vault 孪生副本同步 | init SKILL.md / demo-vault kb.config.yaml |
+| 8 | 17 SKILL version → v1.11.0 | 全部 SKILL.md |
+
+### 设计说明
+
+- **core 集单一真相源放 write-validation-rules §5**：引用方是 ingest 等写入技能，与其既有引用习惯一致；normalize 只做同源声明，避免三处各写一套漂移。
+- **ai-article 不扩「结构性待记录内容」触发**：现有触发只针对用户输入；AI 产出走独立判定路径，且默认只提示不自动落盘（suggest）——「采集即落盘零对话」不变量的适用边界不被破坏。
+- **复验不放 §2.8**：写入发生在步骤 4.3，复验必须紧跟其后、先于 4.5 inbox 归档（归档与报告统计基于修正后的最终态）。
+- **inbox 不加新子目录**：ai-article 拒绝时落 `00_inbox/ai-dialogs/`（字段级区分足够），目录树是 init 负向断言管的对象，少一目录少一漂移面。
+- **schema 指纹无需改常量**：init 的 schema_sha256 为运行时计算；但 ① 级源副本须与仓库根源字节级一致（本版 #5 已 diff 确认）。
+
+### 评测
+
+capture split=test 两轮：**7/9 / 0.93**（A2.3=执行方对话式回复未落文件 + A3.1=已记录 flaky）→ 复跑 **9/9 / soft 1.00**（满分恢复，方差确认——ai-article 判定无误触发，三段契约无回归）；flow split=train **1/4 / soft 0.68**（J 类振荡区间 0/4~2/4；三例失败均为已知模式：J1 置信度边界判定（步骤 4.4 已正确执行，报告含「复验修正： 0 处」）、J3 relations 旧扁平键、J4 执行方反问未落文件，与本次改动无因果）。
+
+---
+
 ## v1.10.3 · 2026-08-18 · 死链防线前置（wikilink 存在性硬约束铺开）
 
 **摘要**：wikilink 存在性校验自 v1.8 WP2 起已存在于 `write-validation-rules.md` §2（写入前拦截 + 降级为加粗/普通文本），但其「校验存在而执行方不跑」的弱点与 v1.10.2 修的 init 部分阅读问题同构。本版把 v1.10.2 的硬约束前置模式从 init 铺开到全部链接写入方——**规则一条、置顶可见、任何阅读深度命中**。

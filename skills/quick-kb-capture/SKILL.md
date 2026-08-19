@@ -1,10 +1,10 @@
 ---
 name: quick-kb-capture
 description: |
-  低摩擦采集：把用户的想法、网页 URL、PDF、会议转写、AI 对话、阅读笔记快速写入 inbox。v0.2 接入 defuddle 抓取干净正文；新增 PDF/会议/AI 对话/阅读四类源；主动提醒（memory 事件）推迟 v0.3。v1.2 新增「AI 润色提议」步骤——对用户手敲输入主动生成扩写版，三选一确认。
+  低摩擦采集：把用户的想法、网页 URL、PDF、会议转写、AI 对话、阅读笔记快速写入 inbox。v0.2 接入 defuddle 抓取干净正文；新增 PDF/会议/AI 对话/阅读四类源；主动提醒（memory 事件）推迟 v0.3。v1.2 新增「AI 润色提议」步骤——对用户手敲输入主动生成扩写版，三选一确认。v1.11 新增 ai-article 源类型：AI 在对话中产出结构化知识文章（教程/深度分析/技术总结，标题+章节+成篇）时主动提示入库，确认后直写 01_resources/02_areas，未确认落 inbox。
   触发词（中文）：记一下 / 快记 / 收藏这个 / 抓这个网页 / 保存这段 / 记个想法 / 抓 PDF / 保存对话
   Triggers (EN): capture this / save this / clip this page / quick note / capture pdf
-version: v1.10.3
+version: v1.11.0
 phase: v1.2
 applies_to: 00_inbox/
 source_of_truth:
@@ -68,7 +68,7 @@ source_of_truth:
 | `url` | 二选一 | string | 网页链接 |
 | `file_path` | 二选一 | string | PDF/文件路径 |
 | `source_type` | 否 | enum | 强制指定源类型；未给则自动判定。合法值见 `capture_type` 词表（§步骤 1） |
-| `capture_type` | — | — | **frontmatter 字段**（非入参），取值 ∈ `{idea, web-clip, pdf, meeting, ai-dialog, reading}`。等于源类型字面值；PDF 写 `pdf`（即使落入 `reading/` 目录）。详见 [`references/polish-rules.md`](../../references/polish-rules.md) §1.1 |
+| `capture_type` | — | — | **frontmatter 字段**（非入参），取值 ∈ `{idea, web-clip, pdf, meeting, ai-dialog, reading, ai-article}`。等于源类型字面值；PDF 写 `pdf`（即使落入 `reading/` 目录）。详见 [`references/polish-rules.md`](../../references/polish-rules.md) §1.1 |
 | `source_hint` | 否 | string | 用户标注来源（「同事 X 说的」「某书第 3 章」） |
 | `suggested_tags` | 否 | string[] | 用户主动给的候选标签；未给则 AI 推断 |
 | `polish_mode` | 否 | enum | 润色模式：`confirm`（三选一，默认）/ `auto`（采纳扩写版）/ `skip`（不润色）。覆盖 `kb.config.yaml` 中 `polish.default_mode` 配置 |
@@ -81,9 +81,9 @@ source_of_truth:
 
 ### 步骤 1 · 识别源类型（含 capture_type 校验）
 
-**capture_type 合法词表**：`idea` | `web-clip` | `pdf` | `meeting` | `ai-dialog` | `reading`
+**capture_type 合法词表**：`idea` | `web-clip` | `pdf` | `meeting` | `ai-dialog` | `reading` | `ai-article`（v1.11.0）
 
-> 若用户通过 `source_type` 显式指定的值不在词表内 → **警告并提示合法值**：「⚠ `source_type=<值>` 不在合法词表内，合法值为 `idea / web-clip / pdf / meeting / ai-dialog / reading`。已按自动判定处理。」然后走自动判定流程。
+> 若用户通过 `source_type` 显式指定的值不在词表内 → **警告并提示合法值**：「⚠ `source_type=<值>` 不在合法词表内，合法值为 `idea / web-clip / pdf / meeting / ai-dialog / reading / ai-article`。已按自动判定处理。」然后走自动判定流程。
 
 | 判定 | 流向 | capture_type |
 |------|------|-------------|
@@ -92,6 +92,9 @@ source_of_truth:
 | 含「会议」「参会」「主持人」等会议关键词 | → meeting（若 source_type=meeting 强制） | `meeting` |
 | 含「AI 说」「Claude 答」「GPT」等对话关键词 | → ai-dialog（若 source_type=ai-dialog 强制） | `ai-dialog` |
 | 其他（文本） | → idea 或 reading（用户选） | `idea` / `reading` |
+| AI 自身在本对话产出的成篇结构化内容（标题+章节+≥300 字） | → ai-article（走步骤 6.5 快速入库流程） | `ai-article` |
+
+> 边界：§1「结构性待记录内容」触发条件（针对**用户输入**）不因 ai-article 扩展——AI 产出只走 ai-article 独立判定路径，两者互不放宽。
 
 ### 步骤 2 · 抓取与清洗（按源类型）
 
@@ -254,6 +257,7 @@ polish 触发判定**严格**按下面的**决策表**逐步走（不许用单�
 | pdf / reading | `00_inbox/reading/` |
 | meeting | `00_inbox/meetings/` |
 | ai-dialog | `00_inbox/ai-dialogs/` |
+| ai-article（未确认/落 inbox 时） | `00_inbox/ai-dialogs/`（复用，不加新子目录） |
 
 > **目录名 ≠ `capture_type`** —— `pdf` 与 `reading` 共用 `00_inbox/reading/` 目录，但 frontmatter `capture_type` 字段**写源类型字面值**：PDF 输入 → 目录 `00_inbox/reading/`、`capture_type: pdf`；阅读笔记输入 → 目录 `00_inbox/reading/`、`capture_type: reading`。**严禁**因目录名是 `reading/` 就把 PDF 的 `capture_type` 也写成 `reading`。
 
@@ -263,7 +267,7 @@ polish 触发判定**严格**按下面的**决策表**逐步走（不许用单�
 
 落盘前按 [`references/write-validation-rules.md`](../../references/write-validation-rules.md) 校验 inbox 简化集：
 
-1. frontmatter：`title` / `captured_at` / `capture_type` 按词表（`idea` / `web-clip` / `pdf` / `meeting` / `ai-dialog` / `reading`）；严禁提前写入正式字段（type/status/maturity/relations/context/value/confidence）
+1. frontmatter：`title` / `captured_at` / `capture_type` 按词表（`idea` / `web-clip` / `pdf` / `meeting` / `ai-dialog` / `reading` / `ai-article`）；严禁提前写入正式字段（type/status/maturity/relations/context/value/confidence）
 2. wikilink 目标检查：正文中生成的 `[[X]]` 目标必须已存在于 vault 文件名索引；不存在 → 降级为普通文本或加粗，不写死链
 3. 校验失败 → 按规则修正后直接写入（**不阻塞、不对话追问**，与 §0 零对话不变量一致）；无法校验（无文件索引）时在反馈输出中 ⚠ 标注
 
@@ -275,7 +279,7 @@ polish 触发判定**严格**按下面的**决策表**逐步走（不许用单�
 ---
 title: {{自动生成的简短标题}}
 captured_at: {{YYYY-MM-DDTHH:MM}}
-capture_type: {{idea | web-clip | pdf | meeting | ai-dialog | reading}}  # = 源类型字面值，**不**按目录名取名；PDF → `pdf`（即使写入 `reading/` 目录）
+capture_type: {{idea | web-clip | pdf | meeting | ai-dialog | reading | ai-article}}  # = 源类型字面值，**不**按目录名取名；PDF → `pdf`（即使写入 `reading/` 目录）
 source:                    # 嵌套字典；仅写用得上的字段，缺失字段不写
   url: {{原始 URL，若有；http(s):// 或 01_resources/ 相对路径}}
   raw: {{原始资料路径，若有；vault 相对路径，禁绝对路径}}
@@ -319,6 +323,31 @@ partial: {{true|false}}
 ```
 
 > 💡 **下一步**：运行 `quick-kb-ingest` 将此素材正式入库（抽取原子观点、补全 frontmatter、检测冲突）。
+
+### 步骤 6.5 · ai-article 快速入库（v1.11.0）
+
+**触发对象**：AI 自身在本对话产出的成篇结构化内容（教程 / 深度分析 / 技术总结，标题 + 章节 + ≥300 字，步骤 1 判定 `ai-article`）。先读 `kb.config.capture_ai.emit`：`off` → 不识别，走普通 capture；`always` → 跳过提示直接执行 [Y] 分支；缺省 / `suggest` → 一句话提示（含推断 domain，不打断对话）：
+
+```
+📖 这篇内容较完整，建议直接入库到 02_areas/<domain>/（或 01_resources/<category>/）。直接入库？[Y] 入库 / [N] 存 inbox 待处理
+```
+
+（单轮 eval 场景带 `[simulated-user-choice]` 时同轮跑完，复用步骤 2.5 polish 的 token 契约。）
+
+**[Y] 快速入库分支**：
+
+1. 去向判定：教程 / 深度分析 / 方法论 → `concept` → `02_areas/<domain>/`；技术总结 / 参考资料 / 工具清单 → `resource` → `01_resources/<category>/`（推断失败 → concept 路径）
+2. frontmatter 按 v0.2 完整集生成（复用 ingest §2.5 模板）；`source` 写 `{type: ai_generated, capture_type: ai-article}`；不写 `source.note`（无 inbox 源）
+3. 写入前校验引用 [`write-validation-rules.md`](../../references/write-validation-rules.md) 全集（与 ingest §2.8 同源）
+4. 死链约束照常（顶部硬约束）：正文中 `[[X]]` 目标必须已存在，否则降级 `**X**` 加粗
+5. 语言判定链照常（write-validation-rules §6；AI 生成内容属其适用对象）
+6. 跳过：原子化拆分（AI 文章天然结构完整）、inbox 中转；近似重复降为轻量标题比对（命中 → 三选一提示，同 ingest §2.4b）
+7. 反馈：✓ 路径行 + yaml 块 + 「下一步 → quick-kb-connect」
+8. 不回链对话（对话非 vault 实体，`[[对话]]` 即死链）；溯源靠 `source.type: ai_generated`
+
+**[N] 落 inbox**：走现有 capture 流程不变，落 `00_inbox/ai-dialogs/`（复用既有子目录，不加新目录——目录树是 init 负向断言管的对象，少一个子目录少一处漂移面），`capture_type: ai-article`，步骤 6 三段契约完整。
+
+> **素材化边界**：ai-article 非「用户素材」——AI 产出文章可按库语言（write-validation-rules §6 判定链）书写、可校验修正；但文中织入的用户原话按原文保留。
 
 ---
 
@@ -393,6 +422,8 @@ partial: {{true|false}}
 - [ ] 若 `ai_polished: true`，必含 `source.original_text`
 - [ ] 反馈输出含「下一步 → ingest」提示
 - [ ] **v1.8 新增**（WP2）：写入前校验已执行（§步骤 4.5），未引入对话式追问
+- [ ] **v1.11 新增**：识别到 ai-article 时，`capture_ai.emit ≠ off` 则一句话入库提示已出现（§步骤 6.5）
+- [ ] **v1.11 新增**：ai-article 未确认（[N]）时正常落 `00_inbox/ai-dialogs/` 且 `capture_type: ai-article`
 - [ ] 无 v0.2 正式字段被提前写入（maturity/relations/context/value 等）
 
 ---

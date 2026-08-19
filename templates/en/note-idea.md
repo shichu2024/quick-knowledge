@@ -8,7 +8,7 @@ Source of truth: references/frontmatter-v0.2.md §7 · docs/DESIGN.md §6.9
 ---
 title: {{short title}}                  # required
 captured_at: {{YYYY-MM-DDTHH:MM}}      # required · ISO 8601 with time
-capture_type: idea                     # idea | web-clip | pdf | meeting | ai-dialog | reading
+capture_type: idea                     # idea | web-clip | pdf | meeting | ai-dialog | reading | ai-article
 source:                                # optional · if from a conversation/person/link
   # - url: https://...
   # - person: "{{who said it}}"

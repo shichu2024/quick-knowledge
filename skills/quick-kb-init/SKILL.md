@@ -4,7 +4,7 @@ description: |
   初始化一个 quick-knowledge 知识库 vault。在当前目录（或指定 vault 根）按 PARA + 系统层模型创建完整目录骨架，铺设系统文件、配置与默认模板。
   触发词（中文）：初始化知识库 / 初始化 KB / quick-kb-init / 建知识库
   Triggers (EN): init knowledge base / setup kb / initialize kb
-version: v1.10.3
+version: v1.11.0
 phase: v0.1
 applies_to: vault 根目录
 source_of_truth:
@@ -155,6 +155,9 @@ language: en                       # zh | en · 全库语言（v1.10.0）：驱�
 default_domain: general            # 默认领域
 domains:                           # 已注册领域（与 02_areas/ 子目录对应）
   - general
+# capture_ai（v1.11.0 · AI 产出文章识别）
+capture_ai:
+  emit: suggest                    # suggest（提示后等确认）/ always（自动入库不问）/ off（不识别，全走普通 capture）
 # tags_vocabulary:                 # v0.4 启用（受控标签词表）
 # review:                          # v0.2 启用
 #   inbox_max_age_days: 7

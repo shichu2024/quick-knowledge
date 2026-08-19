@@ -1,8 +1,8 @@
 ---
-version: v1.10.0
-updated: 2026-08-16
-phase: v1.8 写入校验层 + v1.10.0 语言一致性
-applies_to: 所有写入型技能（ingest / capture / connect / daily / goal / project / import）落盘前的 frontmatter 与 wikilink 校验；§6 语言一致性适用于全部技能的生成内容与报告输出
+version: v1.11.0
+updated: 2026-08-19
+phase: v1.8 写入校验层 + v1.10.0 语言一致性 + v1.11.0 写入后复验
+applies_to: 所有写入型技能（ingest / capture / connect / daily / goal / project / import）落盘前的 frontmatter 与 wikilink 校验；§5 写入后复验（ingest）；§6 语言一致性适用于全部技能的生成内容与报告输出
 source_of_truth:
   - references/frontmatter-schema-v1.json
   - references/wikilink-conventions.md
@@ -69,6 +69,21 @@ source_of_truth:
 
 ---
 
+## 5. 写入后复验（core 检查集）（v1.11.0）
+
+> §1 / §2 是**写入前**防线；本节是**写入后**第二层——写入方（ingest §4.4）在落盘后重读文件，按下表 core 检查集核对，兜住写入前校验未拦住的 schema/格式类执行漂移（v1.9.3 source list 漂移的根因即写入后无人核对）。修正须当场执行并记入处理报告；无修正也显式记「复验通过 0 修正」。
+
+| # | 检查项 | 违规形态 → 修正 |
+|---|--------|------|
+| 1 | frontmatter 无行内注释 | `confidence: 80 # verified` → 剥离注释 |
+| 2 | `source` 为 object 格式 | list 格式 → 合并为 object（v1.9.3 口径） |
+| 3 | `tags` inline array + 对照 tags_vocabulary | block list / 词表外变体 → 转换/修正 |
+| 4 | v0.2 必填字段齐全 | 缺失 → 按规则补；不可推断 → `status: draft` |
+
+> **单一真相源声明**：本 core 集 4 项与 normalize `run` 检查项（步骤 2.1 行内注释剥离 / source list→object 迁移）及 `schema_check` 检查项 #1/#6/#7/#10 同源——定义以本文件为准，ingest §4.4 与 normalize 均复用，不另行维护副本。死链不在本集（§2 写入前已拦截）。
+
+---
+
 ## 6. 语言一致性（v1.10.0）
 
 > 全库语言由 init 写入 `kb.config.yaml.language`（新库默认 `en`），全部技能读写内容时遵循本节。
@@ -115,3 +130,4 @@ kb.config.yaml.language（显式库语言，最高）
 |------|------|------|
 | v1.8.0 | 2026-08-14 | 初始版本：frontmatter 最小校验集 / wikilink 目标存在性 / 失败处理三段式 |
 | v1.10.0 | 2026-08-16 | 新增 §6 语言一致性：库语言判定优先级 / 适用与豁免对象 / slug 语言形态 |
+| v1.11.0 | 2026-08-19 | 新增 §5 写入后复验（core 检查集）：行内注释 / source list→object / tags 词表与格式 / 必填字段；与 normalize 检查项及 schema_check 同源 |

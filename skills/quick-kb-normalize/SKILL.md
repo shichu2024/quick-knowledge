@@ -5,7 +5,7 @@ description: |
   幂等（多次运行结果一致）+ 可解释（每条改动带 why）+ 可回滚（写 diff 到 _normalize_log/）+ dry-run 预览。
   触发词（中文）：规整笔记 / normalize / 批量修复 / 迁移 related / 重组领域
   Triggers (EN): normalize notes / batch fix frontmatter / migrate related field / regroup domains
-version: v1.10.3
+version: v1.11.0
 phase: v1.4
 applies_to: 读写 frontmatter（不改正文）· 跨 inbox / areas / principles
 source_of_truth:
@@ -142,6 +142,8 @@ quick-kb-normalize action=schema_check [scope=<domain|all|legacy>] [items=<paths
 | 8 | `outcome` 非 success/failure/mixed（Decision Ledger / experience 专用） | `outcome: 成功` |
 | 9 | `derived_from` / `derived_to` 非 list（v1.5 WP4） | `derived_from: "[[X]]"`（应为 list） |
 | 10 | frontmatter 值携带行内注释（v1.8.1 · 模板指引照抄污染） | `confidence: 80 # verified`（修复走 `action=run` 步骤 2.1 剥离） |
+
+> **同源声明（v1.11.0）**：上表 #1/#6/#7/#10 与 `run` 步骤 2.1 的行内注释剥离 / source list→object 迁移共同构成 core 检查集，定义于 [`references/write-validation-rules.md`](../../references/write-validation-rules.md) §5，被 ingest §4.4 写入后复验复用为同源定义。
 
 #### 输出格式
 

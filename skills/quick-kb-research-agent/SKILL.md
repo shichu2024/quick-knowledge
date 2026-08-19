@@ -6,7 +6,7 @@ description: |
   可被 capture / ingest / goal 通过 Skill 工具调用，也可由用户直接调用。
   触发词（中文）：处理资料 / 抽原子观点 / 摘要 / 交叉验证 / 研究这个
   Triggers (EN): process resource / extract atoms / cross verify / summarize / research this
-version: v1.10.3
+version: v1.11.0
 phase: v0.2
 applies_to: 只读外部资料（URL / PDF / 长文）· 不读库内已有笔记
 source_of_truth:

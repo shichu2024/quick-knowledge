@@ -19,6 +19,10 @@ polish:
   default_mode: confirm  # confirm（三选一确认）/ auto（自动采纳扩写版）/ skip（不润色）
   threshold_chars: 50     # 字符数阈值（低于此值可能触发润色判定）
 
+# capture_ai（v1.11.0 · AI 产出文章识别）
+capture_ai:
+  emit: suggest   # suggest（提示后等确认）/ always（自动入库不问）/ off（不识别，全走普通 capture）
+
 # archive_reasons（v1.7 WP5-F · 归档原因受控词表）
 # archive 技能的 reason 参数应从此词表中选择
 archive_reasons:

@@ -122,6 +122,7 @@ daily 日志 / review 报告 / goal·project progress 文件名采用 `<date-tok
 | PDF/文件 | 文件路径 | 提取文本摘要 → 00_inbox/reading/ |
 | 会议转写 | 长文本 | 结构化为 00_inbox/meetings/ |
 | AI 对话 | 对话文本 | 提取关键观点 → 00_inbox/ai-dialogs/ |
+| AI 产出文章（v1.11.0） | 成篇结构化内容（标题+章节+≥300 字） | 提示快速入库：确认后直写 01_resources/02_areas，未确认落 00_inbox/ai-dialogs/ |
 | 阅读笔记 | 文本 | 存 00_inbox/reading/ |
 
 ### 工作流
@@ -147,7 +148,7 @@ source:                              # 嵌套字典（object），禁 list 格�
 suggested_tags:    # 候选标签，Ingest 时确认
   - ai/agent
   - eng/architecture
-capture_type: web-clip   # idea | web-clip | pdf | meeting | ai-dialog | reading
+capture_type: web-clip   # idea | web-clip | pdf | meeting | ai-dialog | reading | ai-article
 ---
 {{干净正文 / 用户原文}}
 ```

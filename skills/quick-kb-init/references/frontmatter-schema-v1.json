@@ -42,7 +42,7 @@
       "properties": {
         "type": {
           "type": "string",
-          "enum": ["web", "pdf", "book", "meeting", "ai_dialog", "reading", "import"]
+          "enum": ["web", "pdf", "book", "meeting", "ai_dialog", "ai_generated", "reading", "import"]
         },
         "from": {
           "type": "string",

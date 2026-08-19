@@ -4,7 +4,7 @@ description: |
   把 inbox 素材正式入库为 01_resources/<category>/（resource）或 02_areas/<domain>/（concept）笔记：调 quick-kb-research-agent 抽取原子观点、补全 v0.2 完整 frontmatter（含 relations/context/value.reuse）、链接原始素材、给置信度初值、调 quick-kb-manager-agent + quick-kb-memory-agent 做冲突检测。
   触发词（中文）：处理 inbox / 入库 / 把这条归档 / 消化这条 / 这条入库
   Triggers (EN): process inbox / ingest this / promote this note
-version: v1.10.3
+version: v1.11.0
 phase: v0.2
 applies_to: 00_inbox/ → 02_areas/ / 01_resources/
 source_of_truth:
@@ -78,6 +78,7 @@ source_of_truth:
 | `meeting` | `concept` | 会议决议提炼为 concept |
 | `ai-dialog` | `concept` | AI 对话中的观点提炼为 concept |
 | `reading` | `resource` | 书籍/课程归 resource |
+| `ai-article` | `resource` | 成篇归 resource；方法论性内容 concept |
 
 > research-agent `extract_atoms` 返回的 `note_type` 优先于本默认映射（按内容实质判定）。映射冲突时以 research-agent 输出为准 + 在 ingest 报告标 ⚠。
 
@@ -266,6 +267,20 @@ source:                               # v1.9.3 · object 格式（对齐 frontma
   value.reuse: 0
 ```
 
+#### 4.4 写入后复验（v1.11.0）
+
+> ⚠ **硬约束**：每条笔记写入（§4.3）后必须立即重读刚落盘的文件，按下表核对——发现不一致**当场改掉再进入下一条**。复验范围仅限本次 ingest 产出的笔记。
+
+| # | 复验项（core 检查集，见 [`write-validation-rules.md`](../../references/write-validation-rules.md) §5） | 违规形态 → 修正 |
+|---|------|------|
+| 1 | frontmatter 无行内注释 | `confidence: 80 # verified` → 剥离注释 |
+| 2 | `source` 为 object 格式 | list 格式 → 合并为 object（v1.9.3 口径） |
+| 3 | `tags` inline array + 对照 tags_vocabulary | block list / 词表外变体 → 转换/修正 |
+| 4 | v0.2 必填字段齐全 | 缺失 → 按规则补；不可推断 → `status: draft` |
+
+- 修正项逐条记入步骤 6 报告「复验修正」段；**无修正也必须写「复验通过 0 修正」**（显式 0 计数 > 正向勾选，v1.10.1「清单存在但不跑」教训）
+- 死链不在此表——顶部写入硬约束已在落盘前拦截，复验只兜 schema/格式类漂移
+
 ### 步骤 4.5 · inbox 素材归档（v1.7 WP2-B）
 
 入库成功后，对源 inbox 笔记：
@@ -288,6 +303,7 @@ source:                               # v1.9.3 · object 格式（对齐 frontma
   ⚠ 草稿：Y 条（字段不全，已标 status: draft）
   ⚠ 冲突候选：Z 条（已建立 contradicts，请补充 context）
   ⏭ 跳过：W 条（重复或类型不支持）
+  ⚠ 复验修正：N 处
 
   下一步建议：
     → quick-kb-connect scope={{domain}}（生成 MOC + 双链）
@@ -375,6 +391,7 @@ source:                               # v1.9.3 · object 格式（对齐 frontma
 - [ ] **v1.7 新增**（WP3-B）：
       · [ ] supports/contradicts 冲突消歧检测已执行
 - [ ] **v1.8 新增**（WP2）：写入前校验已执行（§2.8），修正项记入报告
+- [ ] 写入后复验已逐条执行（§4.4），修正项/0 修正已记入报告
 
 ---
 
