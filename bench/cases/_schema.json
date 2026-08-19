@@ -28,16 +28,17 @@
     },
     "source_type": {
       "type": "string",
-      "enum": ["idea", "meeting", "ai-dialog", "reading", "web-clip", "pdf", "flow", "idea"]
+      "enum": ["idea", "meeting", "ai-dialog", "ai-article", "reading", "web-clip", "pdf", "flow"]
     },
     "input": {
       "type": "string",
       "description": "User-natural-language input. MUST NOT contain SKILL.md jargon or template words."
     },
     "user_choice": {
-      "description": "Polish menu selection: 1=accept polished, 2=keep original, 3=retry. null = not applicable.",
+      "description": "Polish menu selection: 1=accept polished, 2=keep original, 3=retry. ai-article (v1.11) fast-track choice: 'Y'=直写 01_resources/02_areas, 'N'=存 inbox. null = not applicable.",
       "oneOf": [
         {"type": "integer", "enum": [1, 2, 3]},
+        {"type": "string", "enum": ["Y", "N"]},
         {"type": "null"}
       ]
     },

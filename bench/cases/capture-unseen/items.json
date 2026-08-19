@@ -198,5 +198,49 @@
     "category": "frontmatter",
     "references": ["SKILL.md §5 步骤 5 + §8 自检"],
     "notes": "unseen：长 + 含标点 → 不触发 polish；测必填字段 title/captured_at/capture_type"
+  },
+  {
+    "id": "U11-ai-article-confirm-fasttrack",
+    "dimension": "auto-detect",
+    "source_type": "ai-article",
+    "input": "刚才你帮我写的这篇教程处理一下：\n\n# RAG Chunking 实战指南\n\n## 为什么分块策略决定检索质量\n召回块与查询的相关度直接受 chunk 粒度影响：块太小，语义被切断，召回零碎；块太大，单块语义稀释，排序被噪声拖累。中等规模语料（数万到数十万文档）通常在 512-1024 token 之间取得平衡。\n\n## 参数怎么选\n固定分块先用 512 或 1024 token 加 10%-20% overlap 做基线；语义分块按段落边界切，成本高但边界更准；递归分块在结构与语义之间折中。POC 阶段建议从固定中等块起步，验证基线后再评估语义分块。\n\n## 常见坑\noverlap 不是越大越好，超过 30% 会显著放大存储与索引成本；表格与代码块要保护边界，禁止从中间切断；中文语料按字符切分时注意 token 与字符比例约为 1:1.5。",
+    "user_choice": "Y",
+    "expected": {
+      "should_trigger_capture": true,
+      "path_glob": "02_areas/*/*.md",
+      "frontmatter": {
+        "type": "^concept$",
+        "source.capture_type": "^ai-article$",
+        "source.type": "^ai_generated$"
+      },
+      "frontmatter_forbidden": [],
+      "content_contains": ["Chunking"],
+      "content_excludes": [],
+      "should_trigger_polish": false,
+      "feedback_contains": []
+    },
+    "category": "auto-detect",
+    "references": ["SKILL.md §2 步骤 1 判定表 + 步骤 6.5 [Y] 快速入库"],
+    "notes": "unseen v1.11：AI 产出教程（标题+章节+≥300 字）→ [Y] 直写 02_areas（教程→concept），source {type: ai_generated, capture_type: ai-article}"
+  },
+  {
+    "id": "U12-ai-article-reject-inbox",
+    "dimension": "auto-detect",
+    "source_type": "ai-article",
+    "input": "你刚整理的这篇先存起来待处理：\n\n# 向量数据库选型深度分析\n\n## 选型维度\n查询延迟、过滤能力、混合检索支持、运维成本四条主线决定选型：pgvector 胜在事务一致性与现有 postgres 生态复用，milvus 胜在大规模 ANN 索引性能，qdrant 胜在过滤场景的延迟稳定性。\n\n## 规模分界\n千万级向量以下 pgvector + HNSW 索引足够，配合 IVFFlat 做冷数据降级；亿级以上需要分片与副本时 milvus 的分布式架构更成熟；中等规模且过滤条件复杂时 qdrant 的 payload 索引收益明显。\n\n## 迁移成本\n从零接入按 SDK 与运维熟悉度排序即可；已有 postgres 技术栈的团队优先 pgvector，避免引入第二套存储带来的备份与监控成本。",
+    "user_choice": "N",
+    "expected": {
+      "should_trigger_capture": true,
+      "path_glob": "00_inbox/ai-dialogs/*.md",
+      "frontmatter": {"capture_type": "^ai-article$"},
+      "frontmatter_forbidden": [],
+      "content_contains": ["pgvector"],
+      "content_excludes": [],
+      "should_trigger_polish": false,
+      "feedback_contains": []
+    },
+    "category": "auto-detect",
+    "references": ["SKILL.md §2 步骤 6.5 [N] 落 inbox（复用 ai-dialogs/ 子目录）"],
+    "notes": "unseen v1.11：AI 产出深度分析（≥300 字）→ [N] 落 00_inbox/ai-dialogs/，capture_type: ai-article，素材正文保留"
   }
 ]

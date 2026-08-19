@@ -247,9 +247,13 @@ def _format_user_message(item: dict) -> str:
 
     parts.append(item.get("input", ""))
 
-    # Polish choice simulation
+    # Polish choice simulation; ai-article (v1.11) [Y]/[N] fast-track choice
     choice = item.get("user_choice")
-    if choice in (1, 2, 3):
+    if isinstance(choice, str) and choice.upper() in ("Y", "N"):
+        # ai-article 步骤 6.5: [Y] 入库 / [N] 存 inbox (same token contract as polish)
+        parts.append("")
+        parts.append(f"[simulated-user-choice] {choice.upper()}")
+    elif choice in (1, 2, 3):
         parts.append("")
         parts.append(f"[simulated-user-choice] {choice}")
     elif expected.get("should_trigger_polish"):
