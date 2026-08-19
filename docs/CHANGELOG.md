@@ -26,7 +26,7 @@
 
 ### 评测
 
-capture split=test：**8/9 / soft 0.96**（A5.2 失败=执行方将 `<timestamp>` 字面占位写入文件名，v1.8.2 已记录的 F1 类已知漂移；capture 本版仅动 version 行，无因果）；flow split=train **1/4 / soft 0.59**（J 类振荡区间 0.57-0.83：J1 置信度边界判定（路径已正确）、J3 decision 路径浅引用、J4 执行方反问未落文件；J6 通过且 summary 提炼正常）。
+capture split=test 三轮：**8/9 / 0.96 → 6/9 / 0.85 → 7/9 / 0.89**（全部失败均出自已知 flaky 池：A3.1 输入形状边界 / A5.2+F1 类 `<timestamp>` 字面占位 / A5.3 付费墙网络类——capture 本版仅动 version 行，无因果；三轮均无中文 slug 失配等语言改动相关的新失败模式）；flow split=train **1/4 / soft 0.59**（J 类振荡区间 0.57-0.83：J1 置信度边界判定（路径已正确）、J3 decision 路径浅引用、J4 执行方反问未落文件；J6 通过且 summary 提炼正常）。
 
 ---
 
