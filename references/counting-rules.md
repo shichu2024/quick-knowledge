@@ -1,7 +1,7 @@
 ---
-version: v1.4
-updated: 2026-08-13
-phase: v1.4
+version: v1.13.0
+updated: 2026-08-21
+phase: v1.13
 applies_to: quick-kb-stats / quick-kb-review（以及任何需要统计「正式笔记数」的技能）
 source_of_truth:
   - docs/DESIGN.md §4（目录结构）
@@ -46,7 +46,7 @@ source_of_truth:
 
 | 模式 | 排除原因 |
 |------|---------|
-| `_moc.md` / `_index.md` | 索引文件，非独立知识笔记 |
+| `*-moc.md`（`<basename>-moc.md`，如 `general-moc.md`；v1.13.0 起领域 MOC 命名）/ `_index.md` | 索引文件，非独立知识笔记 |
 | `.canvas` / `.json` / `.html` 等非 `.md` | 非笔记格式 |
 | 含 `template: true` frontmatter 的文件 | 模板标记 |
 
@@ -88,3 +88,4 @@ source_of_truth:
 | 版本 | 日期 | 变更 |
 |------|------|------|
 | v1.4 | 2026-08-13 | 初始版本，统一 stats 与 review 的计数口径 |
+| v1.13.0 | 2026-08-21 | MOC 索引排除模式 `_moc.md` → `*-moc.md`（领域 MOC 命名统一，见 wikilink-conventions.md §2a） |

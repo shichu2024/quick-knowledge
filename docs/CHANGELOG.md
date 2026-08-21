@@ -4,6 +4,36 @@
 
 ---
 
+## v1.13.0 · 2026-08-21 · MOC 命名统一 `<basename>-moc.md` + 位置收敛（goal/project 去索引化）
+
+**摘要**：领域 MOC 全库统一命名 `_moc.md` 导致 Obsidian 图谱/快速切换/标签页全部显示同名 `_moc` 不可区分；排查发现规格内冲突——goal/project SKILL 各自规定在 03_goals/04_projects 建「目标/项目内索引 `_moc.md`」（真相源 SKILLS_SPEC §10），与 init「MOC 仅在 02_areas」口径并存，MOC 概念泛滥。本版：① 领域 MOC 改名 `<basename>-moc.md`（与主题 MOC `06_wiki/mocs/<domain>-moc.md` 命名统一）；② 嵌套 domain 层级规则澄清（显式输入才建、中间层 hub 合法）；③ goal/project 去索引化（goal.md/_readme.md 是唯一入口，删除 `_moc.md` 产物规定）；④ normalize 新增 MOC 越界检查 + `migrate_moc` 幂等迁移。
+
+### 修复清单
+
+| # | 内容 | 影响 |
+|---|------|------|
+| 1 | 领域 MOC 命名 `02_areas/<domain>/_moc.md` → `<basename>-moc.md`（basename=目录名，zh 库保留中文如 `编程-moc.md`，语言链同 write-validation §6.1）；init 骨架图/§3.4 内嵌 _index 链接/§3.6/兜底澄清/报告示例/自检全量同步 | init / ingest / manager-agent / DESIGN §4 |
+| 2 | 嵌套 domain 层级规则：init 对每个**用户显式输入的** domain 建 MOC（嵌套展开的中间目录不自动建）；ingest 新建嵌套 domain 只建目标层；既有中间层 hub 合法（MOC 合法位置=02_areas/ 任意层级 + 06_wiki/mocs/） | init / ingest |
+| 3 | goal SKILL 去索引化：删除 `_moc.md` 产物（create 步骤 3/7、progress 步骤 6、complete 步骤 5、自检）；「不做」段新增「不创建 MOC/索引占位——goal.md 是唯一索引入口」 | goal / SKILLS_SPEC §10 / DESIGN §4 |
+| 4 | project SKILL 同口径：删除 `_moc.md` 产物（目录树/init 步骤 8/update 步骤 4/archive 步骤 7/输出示例/偏差表改记 v1.13.0 决策）；「不做」段新增「_readme.md 是唯一索引入口」 | project / SKILLS_SPEC §10 |
+| 5 | normalize：schema_check 新增检查 #11「MOC 位置与命名」（`type: moc`/`*-moc.md`/`_moc.md` 出现在 02_areas 与 06_wiki/mocs 之外 → ⚠「MOC 越界」结构漂移报告）；新增 `action=migrate_moc` 幂等迁移（重命名 + 全库 wikilink 同步改写 + alias 保留 + 冲突三态 + diff log） | normalize |
+| 6 | wikilink-conventions 新增 §2a「MOC 文件命名与引用」（v1.6.0→v1.13.0）；counting-rules 排除模式 `_moc.md`→`*-moc.md`（v1.4→v1.13.0）；§5.5 示例路径纠错（`06_wiki/mocs/programming/_moc.md` → `programming-moc.md`）；demo-vault git mv 2 文件 + _index 链接 | references / demo-vault |
+| 7 | 17 SKILL version → v1.13.0 | 全部 SKILL.md |
+
+### 设计说明
+
+- **改名本质是统一两套 MOC 命名**：域内 `_moc.md` 与 mocs 目录 `<domain>-moc.md` 本就是同一概念的两种写法，统一后全库 basename 唯一性大幅改善；不同父目录同名子域仍可能撞名 → path-qualified 消歧机制保留（新独立理由）。
+- **goal/project 去索引化的依据**：goal.md（学习路径+进度记录段）与 _readme.md（说明+进度索引）已各自承担索引入口职责，第二索引是冗余；且 MOC 越界会持续触发 normalize 检查 #11。
+- **初判校准**：`03_goals/daily-learning/_moc.md` 起初判为「执行漂移」，实为 goal SKILL 规格本身（同 v1.11.1 模式：先查谁是真相源再定方向）。
+- 存量 vault 升级路径：`normalize action=migrate_moc` + 手动删除 03_goals/04_goals 下越界 MOC。
+- bench 用例与评分代码 0 处 `_moc` 引用，理论零影响。
+
+### 评测
+
+capture split=test：**8/9 / 0.96**（基线持平；唯一失败出自已知 flaky 池）；flow split=train (6:1:1 seed 1)：**1/4 / soft 0.66**（J 类已知振荡区间 0.57-0.83；J6 通过，失败项为边界判定/执行方未落文件类，与 MOC 命名改动无因果——bench 用例与评分代码 0 处 `_moc` 引用）。
+
+---
+
 ## v1.12.0 · 2026-08-19 · summary 语言跟随 vault（filename-summary-rules 去 ASCII 硬约束）
 
 **摘要**：filename-summary-rules.md 自 v1.4.2 起「summary 永远 ASCII kebab-case（中文输入也提炼为英文）」，与 v1.10.0 语言体系的 slug 规则（slug-rules §2 zh 保留中文）和 write-validation-rules §6.2（zh → 按 slug-rules 保留中文）不一致——zh 库的 daily/progress/review 文件名被强制英文，是语言判定链的最后一处例外。本版改为**语言跟随 vault 语言**。

@@ -129,15 +129,14 @@ vault 根目录采用 **PARA + 系统层** 混合模型，并加两位数字前�
 │
 ├── 02_areas/                       # 领域知识 · 核心沉淀
 │   ├── <domain-slug>/              #   如 front-end、ai-engineering
-│   │   ├── _moc.md                 #     领域 MOC
+│   │   ├── <basename>-moc.md       #     领域 MOC（basename=目录名，如 general/general-moc.md）
 │   │   └── <sub-area>/             #     子领域
 │   └── general/                    #   通用认知
 │
 ├── 03_goals/                       # 目标管理 · 方向牵引
 │   └── <goal-slug>/
-│       ├── goal.md                 #   目标定义 + 学习路径
-│       ├── progress/               #   日期进展记录
-│       └── _moc.md                 #   目标相关笔记索引
+│       ├── goal.md                 #   目标定义 + 学习路径 · 唯一索引入口
+│       └── progress/               #   日期进展记录
 │
 ├── 04_projects/                    # 项目实践 · 执行落地
 │   ├── <project-slug>/             #   进行中项目

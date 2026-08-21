@@ -4,7 +4,7 @@ description: |
   初始化一个 quick-knowledge 知识库 vault。在当前目录（或指定 vault 根）按 PARA + 系统层模型创建完整目录骨架，铺设系统文件、配置与默认模板。
   触发词（中文）：初始化知识库 / 初始化 KB / quick-kb-init / 建知识库
   Triggers (EN): init knowledge base / setup kb / initialize kb
-version: v1.12.0
+version: v1.13.0
 phase: v0.1
 applies_to: vault 根目录
 source_of_truth:
@@ -98,7 +98,7 @@ source_of_truth:
 02_areas/
 └── <domain>/              # 对每个用户输入 domain 创建；至少 general
                           # v1.4+ · domain 可含 "/"（如 programming/python）→ 建多层目录
-    └── _moc.md            # 领域 MOC 占位（含模板头；仅建在最深层）
+    └── <basename>-moc.md  # 领域 MOC 占位（含模板头）；对每个用户显式输入的 domain 建；嵌套展开的中间目录不自动建（S2）
 
 07_principles/
 ├── principles/
@@ -237,7 +237,7 @@ schema 源按优先级探测（v1.8 WP1 起，与 §3.3 模板三级回退同构
 3. 若某文件在所有级别均不可用，写入占位模板（仅 frontmatter + 标题），并在报告中标 ⚠。
 4. **幂等**：目标已存在同名文件则跳过，不覆盖。
 
-> **兜底范围澄清（v1.8 WP1）**：本 SKILL.md 仅内嵌 **4 个系统文件**的文本（§3.4 `06_wiki/_index.md`、§3.5 `00_inbox/_readme.md`、§3.6 `02_areas/<domain>/_moc.md`、步骤 5 `.kb-initialized`），**14 个笔记模板不内嵌**。①② 均未命中时：4 个系统文件仍以内嵌文本写入，笔记模板按探测逻辑第 3 条写占位模板并 ⚠ 高亮。
+> **兜底范围澄清（v1.8 WP1）**：本 SKILL.md 仅内嵌 **4 个系统文件**的文本（§3.4 `06_wiki/_index.md`、§3.5 `00_inbox/_readme.md`、§3.6 `02_areas/<domain>/<basename>-moc.md`、步骤 5 `.kb-initialized`），**14 个笔记模板不内嵌**。①② 均未命中时：4 个系统文件仍以内嵌文本写入，笔记模板按探测逻辑第 3 条写占位模板并 ⚠ 高亮。
 
 **禁止即兴生成条款（v1.8 WP1）**：若模板 / schema 的 ①② 级源均不可达，**禁止自行编写 schema 或模板内容**——即兴生成的第三套 schema / 模板会污染下游所有技能。此时只能落盘占位声明文件（仅 frontmatter + 标题 + 一行「模板/schema 源不可达」说明），并在报告中 ⚠ 高亮提示用户：设置 `QUICK_KB_REPO_ROOT` 环境变量，或重装自带 `templates/` 与 `references/` 的技能包。
 
@@ -258,7 +258,7 @@ tags:
 > quick-knowledge vault 索引页。MOC 生成（v0.2）后将自动填充。
 
 ## 领域
-- [[02_areas/general/_moc|General]]
+- [[02_areas/general/general-moc|General]]
 
 ## 主题 MOC
 - _（待 quick-kb-connect 生成）_
@@ -291,7 +291,7 @@ tags:
 3. inbox 原始素材**永不删除**，由 review 闭环统一清理
 ```
 
-#### 3.6 `02_areas/<domain>/_moc.md`（每个领域一份）
+#### 3.6 `02_areas/<domain>/<basename>-moc.md`（每个领域一份；basename=目录名，如 `02_areas/general/general-moc.md`；zh 库语言判定链同 write-validation-rules §6.1）
 
 ```markdown
 ---
@@ -406,7 +406,7 @@ schema_sha256: 5e3ffca2
     - 99_system/templates/{zh,en}/ × 14 each（共 28 个）
     - 06_wiki/_index.md
     - 00_inbox/_readme.md
-    - 02_areas/{{domain}}/_moc.md × N
+    - 02_areas/{{domain}}/{{basename}}-moc.md × N
     - _index.md（vault 根 · v1.7 WP5-D，与步骤 4 一致）
     - .kb-initialized
 
@@ -434,7 +434,7 @@ schema_sha256: 5e3ffca2
 | `98_archive/` | 创建但不写 | v0.3+ project / v0.4 archive |
 | `99_system/templates/en/` | ✓ 铺设 14 个模板 | init（v1.4 起，与 zh 同步） |
 
-> **理由**：完整骨架让用户从 day 1 看到最终形态，避免后续升级时频繁迁移目录结构。v0.1 不使用的目录靠 `_moc.md` 占位或 `.gitkeep` 标注用途。
+> **理由**：完整骨架让用户从 day 1 看到最终形态，避免后续升级时频繁迁移目录结构。v0.1 不使用的目录靠 `<basename>-moc.md` 占位或 `.gitkeep` 标注用途。
 
 ---
 
@@ -470,7 +470,7 @@ schema_sha256: 5e3ffca2
 - [ ] `00_inbox/`、`02_areas/`、`01_resources/`、`07_principles/`、`06_wiki/`、`05_outputs/`、`03_goals/`、`04_projects/`、`98_archive/`、`99_system/` 顶层目录齐全
 - [ ] **顶层目录负向断言（v1.9.3）**：vault 根下目录集合与骨架**精确匹配**——除上述 10 个顶层目录 + `_normalize_log/` + 用户文件外，不得出现自创目录（如 `08_beliefs/`、`09_patterns/`、`10_experiences/`——认知资产**只**写入 `07_principles/{principles,beliefs,patterns,experiences}/` 子目录）。发现多余顶层目录 → ⚠⚠ 报告「结构漂移：非骨架目录 <名单>」并建议删除或迁移，**不得静默保留**
 - [ ] 每个空叶子目录含 `.gitkeep`
-- [ ] 每个领域至少一个 `_moc.md`
+- [ ] 每个领域至少一个 `<basename>-moc.md`
 - [ ] 二次执行：提示已初始化，不覆盖
 - [ ] upgrade 场景：版本不一致时补缺模板/目录/config 字段，不覆盖已有文件
 

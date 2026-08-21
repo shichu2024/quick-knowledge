@@ -5,7 +5,7 @@ description: |
   幂等（多次运行结果一致）+ 可解释（每条改动带 why）+ 可回滚（写 diff 到 _normalize_log/）+ dry-run 预览。
   触发词（中文）：规整笔记 / normalize / 批量修复 / 迁移 related / 重组领域
   Triggers (EN): normalize notes / batch fix frontmatter / migrate related field / regroup domains
-version: v1.12.0
+version: v1.13.0
 phase: v1.4
 applies_to: 读写 frontmatter（不改正文）· 跨 inbox / areas / principles
 source_of_truth:
@@ -58,7 +58,7 @@ source_of_truth:
 | 参数 | 必填 | 默认 | 说明 |
 |------|------|------|------|
 | 范围 `scope` | 否 | `all` | `all` / `<domain>` / `legacy`（仅 v0.1 旧笔记） |
-| 操作 `action` | 否 | `run` | `run` / `dry-run`（仅预览不写入） / `rollback`（按 log 回滚） / `regroup`（v1.4+ · 按 domain_taxonomy 重组嵌套路径） / `schema_check`（v1.5 WP3 · 只校验不修改） |
+| 操作 `action` | 否 | `run` | `run` / `dry-run`（仅预览不写入） / `rollback`（按 log 回滚） / `regroup`（v1.4+ · 按 domain_taxonomy 重组嵌套路径） / `schema_check`（v1.5 WP3 · 只校验不修改） / `migrate_moc`（v1.13.0 · `02_areas/**/_moc.md` → `<basename>-moc.md` 重命名 + 全库 wikilink 同步） |
 | 项 `items` | 否 | — | 指定具体笔记路径（逗号分隔），覆盖 scope |
 | 跳过 `skip` | 否 | — | 跳过的检查项：`tags / relations / fields / filename` |
 
@@ -142,6 +142,7 @@ quick-kb-normalize action=schema_check [scope=<domain|all|legacy>] [items=<paths
 | 8 | `outcome` 非 success/failure/mixed（Decision Ledger / experience 专用） | `outcome: 成功` |
 | 9 | `derived_from` / `derived_to` 非 list（v1.5 WP4） | `derived_from: "[[X]]"`（应为 list） |
 | 10 | frontmatter 值携带行内注释（v1.8.1 · 模板指引照抄污染） | `confidence: 80 # verified`（修复走 `action=run` 步骤 2.1 剥离） |
+| 11 | MOC 位置与命名（v1.13.0）：MOC 类文件（frontmatter `type: moc` 或文件名匹配 `*-moc.md` / `_moc.md`）出现在 `02_areas/` 任意层级与 `06_wiki/mocs/` 之外 | `03_goals/<slug>/_moc.md` → ⚠ 结构漂移：「MOC 越界：<路径>（goal/project 有各自入口文件，建议删除或迁至 02_areas）」（修复走 `action=migrate_moc`） |
 
 > **同源声明（v1.11.0）**：上表 #1/#6/#7/#10 与 `run` 步骤 2.1 的行内注释剥离 / source list→object 迁移共同构成 core 检查集，定义于 [`references/write-validation-rules.md`](../../references/write-validation-rules.md) §5，被 ingest §4.4 写入后复验复用为同源定义。
 
@@ -208,7 +209,7 @@ quick-kb-normalize scope=<domain|all> action=regroup [dry-run=true]
    - `mv` 文件到新路径
    - 更新 frontmatter：`domain: <key>` → `domain: <key>/<sub>`
    - Grep 全库 path-qualified wikilink `[[02_areas/<key>/<slug>]]` → Edit 重写为 `[[02_areas/<key>/<sub>/<slug>]]`（slug-based `[[<slug>]]` wikilink 无需改动）
-   - 若所在 domain 的 `_moc.md` 含该笔记路径引用 → 同步更新
+   - 若所在 domain 的 `<basename>-moc.md` 含该笔记路径引用 → 同步更新
 7. **写 diff log**：`_normalize_log/<date>-regroup.diff.md`，含每条的旧/新路径 + 推断依据
    - ⚠ **diff log 内严禁出现 `[[...]]` 字面量**：`check-links.mjs` 会把方括号语法当真 wikilink 扫描。需要示例 wikilink 形态时用行内代码 `` `[[slug]]` `` 或描述性措辞（如「slug-based wikilink」），**不要**写裸 `[[xxx]]`
 8. **post-check**：调 `scripts/check-links.mjs`（若存在）扫死链；若失败 → 输出回滚命令并标记 `status: needs_rollback`
@@ -220,7 +221,7 @@ quick-kb-normalize scope=<domain|all> action=regroup [dry-run=true]
 | Path-qualified wikilink 漏改 | Grep 全库 `[[02_areas/` 前缀；post-check 跑 check-links.mjs |
 | taxonomy 冲突（一条笔记可属于多子域） | 取 tags 第一个匹配 + `needs_review: true`，不阻塞 |
 | 用户中途反悔 | dry-run 先看 diff；rollback 沿用现有 normalize rollback（diff log 驱动） |
-| _moc.md 引用过期 | 步骤 6 显式更新；connect action=moc 可重建兜底 |
+| `<basename>-moc.md` 引用过期 | 步骤 6 显式更新；connect action=moc 可重建兜底 |
 
 ### 输出示例
 
@@ -239,6 +240,36 @@ quick-kb-normalize scope=<domain|all> action=regroup [dry-run=true]
 ⚠ 待人工确认：
    - [[async-patterns]] tags 同时含 python/async + rust/async → 取 python（待 review）
 ```
+
+---
+
+## 4.6. migrate_moc action（v1.13.0 · `_moc.md` → `<basename>-moc.md` 重命名）
+
+> 领域 MOC 命名统一（v1.13.0）：`02_areas/` 任意层级的 `_moc.md` 重命名为同目录 `<basename>-moc.md`（basename = 所在目录名，如 `02_areas/general/_moc.md` → `02_areas/general/general-moc.md`；命名语言跟随 vault）。幂等：二次运行 0 改动。
+
+### 契约
+
+```
+quick-kb-normalize action=migrate_moc [dry-run=true]
+```
+
+### 步骤
+
+1. **扫描候选**：Glob `02_areas/**/_moc.md`（仅 02_areas；03_goals/ 等越界 MOC 归 schema_check 检查 #11 报告，不在本 action 处理）
+2. **对每个 `_moc.md` 计算目标名**：`<dir>/<dir>-moc.md`（basename=目录名，语言跟随 vault）
+3. **冲突处理**：
+   - 目标 `<basename>-moc.md` 已存在且 `_moc.md` 为纯占位（仅 frontmatter + 标题）→ 删除占位 + 记录到 diff log
+   - 两者均有正文 → ⚠ 手动合并，不自动处理（写入 diff log 待人工清单）
+4. **重命名**：`mv` 到目标路径
+5. **全库 wikilink 同步改写**：Grep 全库 `[[02_areas/<x>/_moc` 前缀 → Edit 重写为新路径（alias 保留：`` `[[02_areas/x/_moc|alias]]` `` → `` `[[02_areas/x/x-moc|alias]]` ``；无 alias 的 path-qualified / 相对形式同样改写）
+6. **写 diff log**：`_normalize_log/<date>-migrate-moc.diff.md`（沿用 §6 格式；⚠ diff log 内严禁出现裸 `[[...]]` 字面量，同 §4.5 步骤 7 约束）
+7. **post-check**：调 `scripts/check-links.mjs`（若存在）扫死链
+8. **幂等**：无 `_moc.md` 残留时输出「0 改动」直接结束
+
+### 边界
+
+- 仅处理 `02_areas/` 下的 `_moc.md`；`06_wiki/mocs/` 主题 MOC 命名（`<domain>-moc.md`）本就正确，不涉及
+- 不合并/不改写 MOC 正文内容（除冲突占位删除外）
 
 ---
 
@@ -306,7 +337,7 @@ quick-kb-normalize scope=<domain|all> action=regroup [dry-run=true]
    - 迁移：笔记 slug
    - 改名：旧文件名 + 新 slug
    - regroup：旧 path-qualified wikilink target + 新 target
-2. 扫描 `06_wiki/mocs/*.md`（含各 domain 的 `_moc.md`），对正文每一处 wikilink：
+2. 扫描 `06_wiki/mocs/*.md`（含 `02_areas/` 各层级的 `<basename>-moc.md`），对正文每一处 wikilink：
    - target 命中 `affected` 任一标识 → 记入 `stale_moc_refs`
 3. 输出 `stale_moc_refs` 到 §5 报告末尾的「过期引用」段（见下）
 
@@ -320,8 +351,8 @@ quick-kb-normalize scope=<domain|all> action=regroup [dry-run=true]
 📝 diff 已备份：_normalize_log/2026-08-09-all.diff.md
 
 ⚠ 以下 MOC 文件引用了被迁移的笔记，可能过期：
-   - 06_wiki/mocs/programming/_moc.md → [[async-patterns]]、[[rust-ownership]]
-   - 06_wiki/mocs/ai-engineering/_moc.md → [[vector-db-old]]
+   - 06_wiki/mocs/programming-moc.md → [[async-patterns]]、[[rust-ownership]]
+   - 06_wiki/mocs/ai-engineering-moc.md → [[vector-db-old]]
    建议运行 `quick-kb-connect mode=refresh`。
 
 ⚠ 待确认：
@@ -346,7 +377,7 @@ quick-kb-normalize scope=<domain|all> action=regroup [dry-run=true]
 
 ### 边界
 
-- 仅扫 `06_wiki/mocs/` 下的 `.md`，不扫散落笔记正文中的 wikilink（归 connect/repair_deadlinks）
+- 仅扫 `06_wiki/mocs/` 与 `02_areas/` 各层级 MOC（`<basename>-moc.md`）的 `.md`，不扫散落笔记正文中的 wikilink（归 connect/repair_deadlinks）
 - 检测只输出提示，**不修改 MOC 文件**；修复由用户显式调用 `quick-kb-connect mode=refresh` 完成
 - 若 `06_wiki/mocs/` 目录不存在 → 跳过检测，不报错
 
@@ -431,6 +462,8 @@ quick-kb-normalize scope=<domain|all> action=regroup [dry-run=true]
 - [ ] **schema_check**：confidence 0-1 量纲误写能识别（v1.5 WP2）
 - [ ] **run**：confidence 存在且 0 < x ≤ 1 时 × 100 取整 + 写 diff log（v1.5 WP2 量纲迁移）
 - [ ] **run**：source 为 list 格式时合并为 object + 写 diff log（v1.9.3 迁移）；已为 object → 幂等不动
+- [ ] **schema_check**：MOC 位置检查已执行（`type: moc` / `*-moc.md` / `_moc.md` 出现在 02_areas 与 06_wiki/mocs 之外 → ⚠ 越界报告）（v1.13.0）
+- [ ] **migrate_moc**：`_moc.md` 迁移幂等（二次运行 0 改动）；wikilink alias 保留；冲突双正文 → ⚠ 手动合并不自动处理（v1.13.0）
 
 ---
 

@@ -4,7 +4,7 @@ description: |
   把 inbox 素材正式入库为 01_resources/<category>/（resource）或 02_areas/<domain>/（concept）笔记：调 quick-kb-research-agent 抽取原子观点、补全 v0.2 完整 frontmatter（含 relations/context/value.reuse）、链接原始素材、给置信度初值、调 quick-kb-manager-agent + quick-kb-memory-agent 做冲突检测。
   触发词（中文）：处理 inbox / 入库 / 把这条归档 / 消化这条 / 这条入库
   Triggers (EN): process inbox / ingest this / promote this note
-version: v1.12.0
+version: v1.13.0
 phase: v0.2
 applies_to: 00_inbox/ → 02_areas/ / 01_resources/
 source_of_truth:
@@ -353,7 +353,7 @@ source:                               # v1.9.3 · object 格式（对齐 frontma
 | 无 embedding 服务 | similarity 降为「标签 Jaccard × 0.6 + 标题关键词重叠 × 0.4」（统一公式见 [`references/scoring.md`](../../references/scoring.md) §5）；关系推荐仍可工作但精度下降 |
 | 候选素材为空/格式损坏 | 跳过，报告 |
 | 无候选（target 无文件） | 输出「inbox 已清空」 |
-| 目标 domain 不存在 | 自动创建 `02_areas/<domain>/_moc.md` |
+| 目标 domain 不存在 | 自动创建 `02_areas/<domain>/<basename>-moc.md`（嵌套 domain 只建目标层，中间层不自动建） |
 | 文件名冲突 | `-2`/`-3` |
 
 ---

@@ -1,7 +1,7 @@
 ---
-version: v1.6.0
-updated: 2026-08-13
-phase: v1.6 规范化
+version: v1.13.0
+updated: 2026-08-21
+phase: v1.13 规范化
 applies_to: 全部技能写入 wikilink 时 · quick-kb-stats 死链统计 · quick-kb-archive 归档标注 · quick-kb-connect MOC 写入
 source_of_truth:
   - references/frontmatter-v0.2.md §3（relations 字段 wikilink）
@@ -42,6 +42,28 @@ source_of_truth:
 - 路径前缀取**最短唯一**子路径（不一定从 vault 根开始）
 - 路径段不含扩展名
 - normalize `schema_check` 子动作能识别 basename 歧义并列出冲突清单，提示用户改用 path-qualified 形式
+
+---
+
+## 2a. MOC 文件命名与引用（v1.13.0）
+
+MOC 的**合法位置**仅两处：
+
+| 位置 | 命名 | 示例 |
+|------|------|------|
+| `02_areas/` 任意层级（领域 MOC） | `<basename>-moc.md`，basename = 所在目录名 | `02_areas/general/general-moc.md`；zh 库 `02_areas/编程/编程-moc.md` |
+| `06_wiki/mocs/`（主题 MOC） | `<domain>-moc.md` | `06_wiki/mocs/rag-moc.md` |
+
+两处命名形式统一（`<basename>-moc.md`），与 v1.12.0 之前的 `02_areas/<domain>/_moc.md` 旧命名不兼容——旧名文件按 normalize 迁移。
+
+**引用规则**：MOC 引用与普通笔记一致——默认 basename 形式：
+
+```markdown
+[[general-moc]]
+[[编程-moc]]
+```
+
+**basename 仍可能重复**：新命名下，不同父目录下的同名子域会产生同名 MOC（如 `02_areas/programming/python/python-moc.md` 与 `02_areas/ml/python/python-moc.md`）→ 此时按 §2 用 path-qualified 形式（`[[programming/python/python-moc]]` / `[[ml/python/python-moc]]`）。这是保留 path-qualified 消歧机制的独立理由，即使无 `_moc.md` 时代「全库所有 MOC 同名」的极端情况已消除。
 
 ---
 
@@ -158,3 +180,4 @@ quick-kb-stats 死链统计按本约定判定：
 | 版本 | 日期 | 变更 |
 |------|------|------|
 | v1.6.0 | 2026-08-13 | 初始版本：定义 basename 默认 / path-qualified 消歧 / 别名 / 归档后缀 / canvas 区别 |
+| v1.13.0 | 2026-08-21 | §2a 新增：领域 MOC 命名 `_moc.md` → `<basename>-moc.md`，与主题 MOC 对齐；MOC 合法位置 = `02_areas/` 任意层级 + `06_wiki/mocs/` |

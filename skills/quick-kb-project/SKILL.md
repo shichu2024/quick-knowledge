@@ -4,7 +4,7 @@ description: |
   项目全生命周期管理。init：建目录 + README + 主动召回相似项目经验；update：追加进展；archive：补 Decision Ledger + lesson 派生 experience + 迁移归档。
   触发词（中文）：开个项目 / 项目 X / 归档项目
   Triggers (EN): new project / archive project
-version: v1.12.0
+version: v1.13.0
 phase: v0.3
 applies_to: 写 04_projects/<slug>/ · 98_archive/projects/ · 07_principles/experiences/（派生）
 source_of_truth:
@@ -38,7 +38,7 @@ source_of_truth:
 ### 做
 
 - init：建目录 + README + Decision Ledger 骨架 + 调 `quick-kb-memory-agent` 召回相似项目经验
-- update：追加进展到 `progress/`，更新 _moc.md
+- update：追加进展到 `progress/`，更新 _readme.md 进度索引
 - **archive 闭环（核心）**：
   1. 扫 `decisions/`，补全每条 Decision Ledger 的 `actual` 与 `lesson`
   2. 每条 lesson 自动派生为独立 `experience` 笔记
@@ -50,6 +50,7 @@ source_of_truth:
 
 - 不做项目立项调研（外部资料由 capture/ingest 先入库）
 - 不写 review 周报（归 review 技能）
+- 不创建 MOC / 索引占位文件（`*-moc.md`、`_moc.md`）——_readme.md 是项目唯一索引入口（说明 + 进度索引）；MOC 仅属于 02_areas/ 与 06_wiki/mocs/（v1.13.0）
 
 ---
 
@@ -73,8 +74,7 @@ source_of_truth:
 
 2. 创建结构：
    04_projects/<slug>/
-   ├── _readme.md         # 用 99_system/templates/{lang}/project.md（v1.5 WP1）
-   ├── _moc.md            # 项目内索引
+   ├── _readme.md         # 用 99_system/templates/{lang}/project.md（v1.5 WP1）· 唯一索引入口
    ├── notes/             # 项目笔记
    ├── decisions/         # Decision Ledger
    ├── progress/          # 进展日志
@@ -111,8 +111,6 @@ source_of_truth:
 7. 询问关联 goal（若 goal 提供）：
    - 在 _readme.md 的 relations.supports 引用
    - 在 03_goals/<goal-slug>/goal.md 的「关联项目」段引用本项目
-
-8. 更新顶层 _moc.md（若有）加入项目入口
 ```
 
 ### 4.1 写入前校验（v1.8 WP2 · 适用于 init / update / archive 所有写入）
@@ -145,10 +143,9 @@ source_of_truth:
    - updated: <date>
    - 里程碑勾选（若用户提供）
    - 关键决策若变化 → 在 decisions/ 新增 Decision Ledger
+   - 新增笔记的索引入口（若有新 notes/ 笔记）
 
-4. 更新 _moc.md：纳入新笔记的索引
-
-5. Decision Ledger 回填提醒（输出报告段）：
+4. Decision Ledger 回填提醒（输出报告段）：
    扫描 decisions/*.md，对 frontmatter 中 actual: "" 或 lesson: "" 的条目：
    - N 天 = today - decision.created_at（created_at 取文件名日期或 frontmatter date 字段）
    - 在 update 输出报告中列出：
@@ -163,7 +160,7 @@ source_of_truth:
 ```
 1. 状态检查：
    - 扫描 decisions/，列出 actual / lesson 仍为空的 Decision Ledger
-   - 列出 notes/ 未关联 _moc 的笔记
+   - 列出 notes/ 未被 _readme.md 索引引用的笔记
    - 提示用户：「以下决策尚未补 actual/lesson，是否在归档前补齐？」
 
 1.5 归档前置门控（未回填 Decision Ledger 拦截）：
@@ -256,7 +253,6 @@ source_of_truth:
    | [[decisions/001]] | ... | ... | ±X% | [[experience/...]] |
 
 7. 引用清理（可选 · 调 `quick-kb-manager-agent` intent=`repair_deadlinks`；返回结构见其 §0）：
-   - 顶层 _moc.md 移除项目入口或迁到 archive 区
    - goal 的「关联项目」段标注「已归档」
 ```
 
@@ -268,8 +264,7 @@ source_of_truth:
 
 ```
 ✅ 项目已创建：04_projects/<slug>/
-   - _readme.md（已填充基础字段）
-   - _moc.md（索引骨架）
+   - _readme.md（已填充基础字段 · 唯一索引入口）
    - notes/ decisions/ progress/ refs/（空目录）
 
 🧠 经验召回（new_project_init 事件 · 由 quick-kb-memory-agent 执行；规则见其 SKILL.md §3.4）：
@@ -381,5 +376,5 @@ source_of_truth:
 |--------|------|-------|
 | 新增 `update` 工作流的 progress/ 子目录 | SKILLS_SPEC §10 工作流只列 init/archive；但 DESIGN §8.4 提及项目应有进展记录 | docs/DESIGN.md §8.4 |
 | 派生 experience 自动计算 outcome | SKILLS_SPEC §10 工作流第 2 步只说「派生 experience」，未指定 outcome；但召回排序依赖 outcome（失败加权） | docs/AGENTS_SPEC.md §3.5 类型加权 |
-| `_moc.md` 项目内索引页 | SKILLS_SPEC §10 工作流第 4 步明确要求 | docs/SKILLS_SPEC.md §10 |
+| v1.13.0 起不再创建 `_moc.md` 项目内索引页（原 SKILLS_SPEC §10 工作流第 4 步要求，v1.13.0 已同步删除） | MOC 合法位置收敛为 02_areas/ + 06_wiki/mocs/；_readme.md 已含进度索引，职责唯一 | references/wikilink-conventions.md §2a（v1.13.0） |
 | 不做项目立项调研 | 项目立项的外部资料应先 capture/ingest 入库；advisor 阶段也不调外部 | docs/DESIGN.md §7 边界 |

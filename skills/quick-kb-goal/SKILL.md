@@ -4,7 +4,7 @@ description: |
   目标管理 + 学习路径 + 进展记录 + 归档。create：调 quick-kb-research-agent 生成学习路径 + 调 quick-kb-memory-agent 召回领域 principle/belief；progress：追加 + 里程碑；complete/cancel：归档 + 状态传播。
   触发词（中文）：新建目标 / 学 X 这个目标 / 更新目标进度 / 完成目标
   Triggers (EN): new goal / learning path for / update goal progress
-version: v1.12.0
+version: v1.13.0
 phase: v0.3
 applies_to: 写 03_goals/<slug>/ · 98_archive/goals/ · 读写相关笔记 status
 source_of_truth:
@@ -47,6 +47,7 @@ source_of_truth:
 
 - 不调外部课程平台 API（学习路径基于库内 + 公开知识摘要）
 - 不自动标完成（必须用户确认）
+- 不创建 MOC / 索引占位文件（`*-moc.md`、`_moc.md`）——goal.md 是目标唯一索引入口（学习路径 + 进度记录段已覆盖）；MOC 仅属于 02_areas/ 与 06_wiki/mocs/（v1.13.0）
 
 ---
 
@@ -85,7 +86,6 @@ source_of_truth:
 3. 建立子目录：
    03_goals/<slug>/
    ├── goal.md
-   ├── _moc.md            # 目标内索引
    └── progress/          # 进展日志
 
 4. 学习路径推荐（path_source=recommend）：
@@ -110,8 +110,6 @@ source_of_truth:
 6. 询问关联项目（可选）：
    - 若用户已有相关 project，建立双向 wikilink
    - goal.md「关联项目」段 + project _readme「relations.supports」
-
-7. 更新顶层 _moc.md：纳入新目标入口
 ```
 
 ### 4.1 写入前校验（v1.8 WP2 · 适用于 create / progress / complete / path 所有写入）
@@ -153,8 +151,6 @@ source_of_truth:
 5. 学习成果入库：
    - 若用户描述了学到的新概念 → 询问是否 quick-kb-ingest 为 concept 笔记
    - 若用户描述了踩坑 → 询问是否记录为 experience（独立于 project 也可）
-
-6. 更新 _moc.md
 ```
 
 ---
@@ -192,7 +188,6 @@ source_of_truth:
    - 是否要立进阶目标？
 
 5. 引用清理（可选 · 调 `quick-kb-manager-agent` intent=`repair_deadlinks`；返回结构见其 §0）：
-   - 顶层 _moc.md 移除目标入口或迁到 archive 区
    - 关联 project 的 relations.supports 标注「已达成/已取消」
 ```
 
@@ -290,7 +285,7 @@ source_of_truth:
 - [ ] 学习路径每节点关联库内笔记 OR 标 [Capture 缺口]
 - [ ] 写入前校验（§4.1）已执行（引用实际文件名 / decision 引用无双前缀 / wikilink 目标存在）
 - [ ] 里程碑 3-5 个，每个带目标日期
-- [ ] _moc.md 创建
+- [ ] 未创建任何 MOC/索引占位文件（goal.md 为唯一入口）
 
 ### progress
 

@@ -12,8 +12,8 @@ tags:
 > quick-knowledge vault 索引页。MOC 生成（v0.2）后将自动填充。
 
 ## 领域
-- [[02_areas/ai-engineering/_moc|AI Engineering]]
-- [[02_areas/general/_moc|General]]
+- [[02_areas/ai-engineering/ai-engineering-moc|AI Engineering]]
+- [[02_areas/general/general-moc|General]]
 
 ## 主题 MOC
 - _（待 quick-kb-connect 生成，v0.2 启用）_

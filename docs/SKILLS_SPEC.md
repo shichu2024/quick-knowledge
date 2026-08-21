@@ -561,7 +561,7 @@ tags:
    - 调用 quick-kb-research-agent，基于已入库笔记 + 公开资料生成路径。
    - 路径分层：基础概念 → 进阶 → 实战项目。
    - 每个节点关联库内已有笔记或建议 Capture 的资料。
-4. **建立 _moc.md**：路径 `03_goals/<slug>/_moc.md`，索引该目标的所有相关笔记。
+4. **不建立任何 MOC/索引占位**（v1.13.0）：goal.md 是目标唯一索引入口（学习路径 + 进度记录段）；MOC 仅属于 02_areas/ 与 06_wiki/mocs/。
 
 ### 工作流（progress）
 
@@ -639,7 +639,7 @@ related:
 1. **创建目录**：`04_projects/<slug>/`。
 2. **生成 README**：项目说明、目标、关键决策、进度索引。
 3. **拉起子目录**：`notes/`（项目笔记）、`decisions/`（Decision Ledger，见 DESIGN §8.4）、`refs/`（参考资料 wikilink）。
-4. **建立 _moc.md**：项目内索引页。
+4. **不建立任何 MOC/索引占位**（v1.13.0）：README（_readme.md）是项目唯一索引入口（说明 + 进度索引）；MOC 仅属于 02_areas/ 与 06_wiki/mocs/。
 5. **关联目标**：询问是否关联 goal，建立 wikilink。
 6. **主动相似项目召回**（V2 关键 · 见 DESIGN §7.6）：调用 quick-kb-memory-agent，基于项目主题召回历史相似项目/相关 experience/pattern/失败教训，在 README 顶部生成「经验复用建议」段：
    ```
