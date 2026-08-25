@@ -4,7 +4,7 @@ description: |
   初始化一个 quick-knowledge 知识库 vault。在当前目录（或指定 vault 根）按 PARA + 系统层模型创建完整目录骨架，铺设系统文件、配置与默认模板。
   触发词（中文）：初始化知识库 / 初始化 KB / quick-kb-init / 建知识库
   Triggers (EN): init knowledge base / setup kb / initialize kb
-version: v1.13.0
+version: v1.14.0
 phase: v0.1
 applies_to: vault 根目录
 source_of_truth:
@@ -152,7 +152,7 @@ source_of_truth:
 # 完整 schema 见 docs/DESIGN.md §4.2；v0.1 仅启用基础字段。
 
 language: en                       # zh | en · 全库语言（v1.10.0）：驱动模板选择 / AI 生成内容 / 文件名 slug / 报告输出（规则见 references/write-validation-rules.md §6）
-default_domain: general            # 默认领域
+default_domain: general            # 低置信兜底领域（v1.14.0）：判定链见 references/write-validation-rules.md §7——仅当 taxonomy/已有目录/tags 推导皆不中才落此域，落此域强制 status: draft + 待分流报告
 domains:                           # 已注册领域（与 02_areas/ 子目录对应）
   - general
 # capture_ai（v1.11.0 · AI 产出文章识别）
@@ -168,6 +168,8 @@ capture_ai:
 # domain_taxonomy:                 # v1.4 启用（嵌套领域分类树，选填）
 #   programming: [python, go, rust]
 #   ai-engineering: [rag, agent, eval]
+# triage:                          # v1.14.0 启用（兜底域治理，选填）
+#   general_alert_threshold: 0.3   # stats/review 的兜底域占比告警阈值
 ```
 
 #### 3.2 `99_system/templates/{zh,en}/` 下铺设全部 14 个模板
@@ -292,6 +294,8 @@ tags:
 ```
 
 #### 3.6 `02_areas/<domain>/<basename>-moc.md`（每个领域一份；basename=目录名，如 `02_areas/general/general-moc.md`；zh 库语言判定链同 write-validation-rules §6.1）
+
+> 兜底域 MOC 语义（v1.14.0）：`general-moc.md` 描述可含「待分流暂存区」——低置信笔记暂存于此（status: draft），定期运行 `quick-kb-normalize action=triage_general` 分流（判定链见 write-validation-rules §7）。
 
 ```markdown
 ---

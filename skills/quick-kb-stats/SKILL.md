@@ -5,7 +5,7 @@ description: |
   只读，不改笔记。
   触发词（中文）：KB 统计 / 健康度 / 仪表盘 / vault 状态
   Triggers (EN): kb stats / vault health / dashboard
-version: v1.13.0
+version: v1.14.0
 phase: v0.4
 applies_to: 只读全库 · 输出 05_outputs/reviews/adhoc/
 source_of_truth:
@@ -75,6 +75,7 @@ source_of_truth:
 | MOC 数 | 06_wiki/mocs/ 下文件数 | 文件路径 |
 | 孤立 MOC | 无入链的 MOC | wikilink 图谱 |
 | domain 分布 | 按 domain 计数 + 占比 | frontmatter.domain |
+| 兜底域占比（v1.14.0） | `02_areas/<default_domain>/`（缺省 general）笔记数 ÷ `02_areas/` 总数；> 阈值（默认 0.3，config `triage.general_alert_threshold` 覆盖）→ ⚠ 告警 + 建议行「quick-kb-normalize action=triage_general」 | 文件路径 / frontmatter.domain |
 | 近 30/90 天活跃度 | 近 N 天 updated 的笔记数 | frontmatter.updated |
 
 ### 4.1 frontmatter 必填字段（v0.4 视角）
@@ -274,6 +275,7 @@ view: table
 - [ ] 高价值低置信阈值正确（KS ≥ 中位数 AND confidence < 60）
 - [ ] 低复用高占用阈值正确（confidence ≥ 70 AND reuse = 0）
 - [ ] inbox 周转时长含平均 / 中位数 / P90
+- [ ] 兜底域占比已输出（分母 = 02_areas 总数；超阈值 ⚠ 告警 + triage_general 建议行）（v1.14.0）
 - [ ] 对比段引用上次 stats（若存在）
 - [ ] 报告路径正确：05_outputs/reviews/adhoc/stats-YYYY-MM-DD.md
 - [ ] Obsidian Bases 段仅 Obsidian vault 启用时输出

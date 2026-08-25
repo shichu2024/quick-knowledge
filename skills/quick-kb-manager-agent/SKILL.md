@@ -2,11 +2,11 @@
 name: quick-kb-manager-agent
 description: |
   知识库管家 + 知识架构师（技能化封装）。维护索引、关系、价值、结构。
-  能力：tidy_inbox / build_moc / recommend_relations / detect_orphans / repair_deadlinks / refresh_value（含 KS 排序）/ proactive_remind / detect_structure_drift / promote_maturity（v1.8.2）。
+  能力：tidy_inbox / build_moc / recommend_relations / detect_orphans / repair_deadlinks / refresh_value（含 KS 排序）/ proactive_remind / detect_structure_drift / promote_maturity（v1.8.2）/ triage_general（v1.14.0 兜底域分流推荐）。
   可被其他技能（connect / review / ingest / normalize）通过 Skill 工具显式调用，也可由用户直接调用执行单项能力。
-  触发词（中文）：建 MOC / 推荐关系 / 找孤立笔记 / 修死链 / 刷新价值 / 结构漂移
-  Triggers (EN): build moc / recommend relations / find orphans / repair deadlinks / refresh value / structure drift
-version: v1.13.0
+  触发词（中文）：建 MOC / 推荐关系 / 找孤立笔记 / 修死链 / 刷新价值 / 结构漂移 / 分流 general
+  Triggers (EN): build moc / recommend relations / find orphans / repair deadlinks / refresh value / structure drift / triage general
+version: v1.14.0
 phase: v0.3
 applies_to: 读写 frontmatter（value.reuse / value.ks）· 写入 06_wiki/mocs/ · 只读全库快照
 source_of_truth:
@@ -33,13 +33,13 @@ manager_agent(
   intent: "tidy_inbox" | "build_moc" | "recommend_relations"
         | "detect_orphans" | "repair_deadlinks" | "refresh_value"
         | "proactive_remind" | "detect_structure_drift"
-        | "promote_maturity",
+        | "promote_maturity" | "triage_general",
   payload: {
     inbox_notes?: Note[],             // tidy_inbox 用
     scope?: string,                    // build_moc 用（domain/tag/note-path）
     note?: Note,                       // recommend_relations 用
     candidate_pool?: Note[],           // recommend_relations 用
-    snapshot?: Note[],                 // detect_orphans / repair_deadlinks / refresh_value / detect_structure_drift / promote_maturity 用
+    snapshot?: Note[],                 // detect_orphans / repair_deadlinks / refresh_value / detect_structure_drift / promote_maturity / triage_general 用
     query_log?: QueryLogEntry[],       // refresh_value 用
     event?: "ingest_new" | "review_done" | "stale_applied_notes",  // proactive_remind 用
     context?: Record<string, unknown> // proactive_remind 用
@@ -68,7 +68,10 @@ interface ManagerAgentResult {
     type?: string,                     // recommend_relations 用（supports/evolves/contradicts/supersedes）
     similarity?: number,               // recommend_relations 用
     reason?: string,                   // recommend_relations / repair_deadlinks 用
-    suggested_action?: string          // repair_deadlinks / detect_structure_drift 用
+    suggested_action?: string,         // repair_deadlinks / detect_structure_drift 用
+    note?: string,                     // triage_general 用（待分流笔记 wikilink）
+    target_domain?: string,            // triage_general 用（推荐目标域，如 programming/python）
+    confidence_basis?: string          // triage_general 用（taxonomy 命中 | 目录命中 | tags 推导）
   }>,
   conflicts?: Array<{                  // recommend_relations 产出 contradicts 候选
     a: Note,
@@ -111,6 +114,7 @@ interface ManagerAgentResult {
 | `proactive_remind` | ✓（3 manager 事件） | **✓（manager 事件基于 maturity）** | 事件 + 上下文 | 主动建议列表 |
 | `detect_structure_drift` | ✗ | **✓ 新增** | 全库快照 | 子领域升格/拆分建议 |
 | `promote_maturity` | ✗ | **✓（v1.8.2）** | 全库快照 | maturity 停滞评估 + 晋升/降级建议清单 |
+| `triage_general` | ✗ | **✓（v1.14.0）** | 兜底域（default_domain）笔记快照 | 推荐目标 domain 清单（只读，不迁移；执行归 normalize `action=triage_general`） |
 
 ---
 
@@ -385,6 +389,37 @@ KS = confidence × log2(1 + reuse) × impact
 - 不删除笔记、不改 confidence（晋升建议只动 maturity）
 - `stalled` 建议不自动降级 maturity，仅提醒用户处理（归档走 quick-kb-archive）
 
+### 3.10 `triage_general`（v1.14.0 新增 · 只读推荐）
+
+**输入**：`{ snapshot: Note[] }`（调用方可只传 `02_areas/<default_domain>/` 下笔记，缺省 general）
+
+**处理**：对每条兜底域笔记，按 [`references/write-validation-rules.md`](../../references/write-validation-rules.md) §7.1 前三级重新判定：
+1. `domain_taxonomy` 命中 → `target_domain` + reason（如「tags 命中 taxonomy key: programming」）
+2. `02_areas/`（或 `01_resources/`）已有目录名命中 → `target_domain` + reason
+3. tags/title 强推导 → `target_domain` + reason + ⚠ 标记「需新建目录」
+4. 三级皆不中 → 留守清单（`keep: true`），**不强行编造 domain**
+
+**输出**：
+
+```typescript
+{
+  found: [
+    { note: "[[threading-model]]", target_domain: "programming/python",
+      confidence_basis: "taxonomy 命中", reason: "tags 命中 taxonomy key: programming，title 推断子域 python" },
+    { note: "[[misc-thought]]", keep: true, reason: "三级皆不中，留守待人工判定" }
+  ],
+  suggestions: [
+    { type: "triage_to_domain", reason: "general 下 9 条可分流（taxonomy 5 / 目录 2 / 推导 2），3 条留守",
+      recommended_action: "quick-kb-normalize action=triage_general" }
+  ],
+  reasoning: "扫描兜底域 12 条：9 条可分流，3 条留守"
+}
+```
+
+**不做**（manager 边界，对齐 §3.8 detect_structure_drift）：
+- 不迁移文件、不改 frontmatter（执行归 normalize `action=triage_general`）
+- 留守笔记不编造 domain
+
 ---
 
 ## 4. 排序与阈值
@@ -439,6 +474,7 @@ KS = confidence × log2(1 + reuse) × impact
 - [ ] detect_structure_drift 不实际改 domain 字典
 - [ ] promote_maturity 默认 auto_write=false 仅输出建议；写回时每条含 reason（confidence / inlink_count / stalled_days）
 - [ ] promote_maturity 的 stalled 建议不自动降级 maturity（仅提醒）
+- [ ] triage_general 只读推荐，不迁移不改 frontmatter；按 write-validation-rules §7.1 前三级判定；三级皆不中 → 留守不编造
 
 ---
 

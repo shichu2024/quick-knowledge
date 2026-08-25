@@ -33,6 +33,18 @@ updated: 2026-08-09
 
 > `domain_taxonomy` 缺省时全部退为 v1.3 行为，零破坏。Obsidian 默认 wikilink 是 slug-based（`[[threading]]`），文件移动只要 slug 不变就不断链；path-qualified wikilink（`[[02_areas/programming/threading]]`）由 regroup 全库扫描重写。
 
+### domain 低置信兜底（v1.14.0）
+
+入库技能推断落位目录时按**判定链**（真相源 [`references/write-validation-rules.md`](../references/write-validation-rules.md) §7.1）穷尽：`domain_taxonomy 命中 → 已有目录命中 → tags/title 强推导（允许新建）→ 低置信才落 default_domain（缺省 general）`。落兜底域的笔记强制 `status: draft` + 报告「⚠ 待分流」。相关 skill 统一处理：
+
+| Skill | 行为 |
+|-------|------|
+| `quick-kb-ingest` | §2.2 引用判定链；§2.8 写入校验第 5 条 + §4.4 复验第 5 项（core 集同源 write-validation-rules §5） |
+| `quick-kb-capture` | ai-article 快速入库 [Y] 分支同判定链；低置信落 general → draft + ⚠ 待分流 |
+| `quick-kb-manager-agent` | 新增 intent `triage_general`：只读推荐目标 domain（三级皆不中 → 留守不编造） |
+| `quick-kb-normalize` | 新增 `action=triage_general`：执行迁移（slug 不变 / status draft→active / diff log 可回滚 / 幂等）；`schema_check` 新增 #12 兜底域 draft 约束 + 报告尾注兜底域占比告警（阈值 config `triage.general_alert_threshold`，默认 0.3） |
+| `quick-kb-stats` / `quick-kb-review` | 新增兜底域占比指标（超阈值 ⚠ 告警 + triage_general 建议行） |
+
 ### 日期类文件命名（v1.4+）
 
 daily 日志 / review 报告 / goal·project progress 文件名采用 `<date-token>-<summary>.md` 形态，summary 由各 skill 的 LLM 从内容提炼 2-5 词 kebab-case（限 30 字符）。

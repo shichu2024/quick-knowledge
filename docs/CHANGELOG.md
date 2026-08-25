@@ -4,6 +4,38 @@
 
 ---
 
+## v1.14.0 · 2026-08-25 · domain 低置信收紧 + general 兜底域治理
+
+**摘要**：用户反馈入库时 `02_areas/general/` 成垃圾桶目录。根因：spec 从未规定 domain 推断低置信时的处理，执行方静默读 `kb.config.yaml` 的 `default_domain: general` 落兜底域。本版四层防线：① 判定链穷尽前三级才许落兜底域；② 落兜底域强制 `status: draft` + 报告 ⚠ 待分流；③ schema_check #12 巡检；④ normalize `triage_general` 迁移存量。general 从「默认兜底」改语义为「显式跨领域暂存区」。
+
+### 修复清单
+
+| # | 内容 | 影响 |
+|---|------|------|
+| 1 | write-validation-rules 新增 **§7 domain/category 判定链**（四级优先级：taxonomy 命中 → 已有目录命中 → tags/title 强推导允许新建 → 低置信兜底 default_domain + 强制 draft + ⚠ 待分流报告）；§5 core 集扩第 5 项（domain 兜底落位），同源声明补 schema_check #12；原 §7 版本历史顺延 §8 | write-validation-rules / 全部写入型技能经引用继承 |
+| 2 | ingest §2.2 引用判定链 + §2.8 写入校验第 5 条 + §4.4 复验表第 5 行；capture 步骤 6.5 ai-article [Y] 分支内嵌一行硬约束（低置信落 general → draft + ⚠ 待分流） | ingest / capture |
+| 3 | manager-agent 新增 intent `triage_general`（§3.10）：只读推荐目标 domain（按 §7.1 前三级重判；三级皆不中 → 留守不编造；不迁移不改 frontmatter，对齐 detect_structure_drift 边界） | manager-agent |
+| 4 | normalize 新增 `action=triage_general`（§4.7，regroup 范式）：迁移兜底域笔记（slug 不变 / path-qualified wikilink 全库改写 / status draft→active 归一 / diff log 可回滚 / 幂等）；schema_check 新增 **#12 兜底域 draft 约束** + 报告尾注兜底域占比告警（阈值默认 0.3，config `triage.general_alert_threshold` 覆盖）；§5.5 MOC 过期检测触发条件补 triage_general | normalize |
+| 5 | stats §4 新增「兜底域占比」指标（超阈值 ⚠ 告警 + triage_general 建议行）；review §3.1 knowledge 维度新增兜底域占比与待分流存量（超 30% 列风险项） | stats / review |
+| 6 | init config 模板：`default_domain` 注释改语义（低置信兜底 + 判定链引用）；新增注释键示例 `triage.general_alert_threshold`；§3.6 兜底域 MOC 加「待分流暂存区」语义说明 | init |
+| 7 | SKILLS_SPEC 通用约定新增「domain 低置信兜底（v1.14.0）」段（5 skill 统一处理表）；17 SKILL version → v1.14.0 | SKILLS_SPEC / 全部 SKILL.md |
+
+### 设计说明
+
+- **判定链放 write-validation-rules §7**（§6 语言链先例）：单一真相源，写入技能经既有校验步骤引用自动继承；domain（02_areas）与 category（01_resources）共用同一条链。
+- **显式条款 + 继承双落点**：除 §7 自动继承外，ingest §2.8/§4.4 与 capture 6.5 各有显式条款——「清单存在但不跑」是 v1.10.1 教训，显式条目比纯继承硬。
+- **推荐与执行切分**：manager-agent 只读推荐（留守不编造 domain），normalize 执行迁移（幂等 + diff log 回滚）——对齐既有 agent 边界与 normalize 基建。
+- **迁移不改 slug**：basename wikilink 天然不断，仅改写 path-qualified 引用（regroup §4.5 步骤 6 范式复用）；迁移成功 status draft→active（draft 是待分流产物，domain 确定后保留是语义残留）。
+- **config 不加激活键**：阈值由 SKILL 内置默认 0.3，config 注释键仅示例——防 v1.10.2 类升级漂移面。
+- 存量 vault 治理路径：`normalize action=schema_check`（看 #12 违规面与占比）→ `action=triage_general dry-run=true` → 实跑。
+- bench 用例与评分 0 处 general 引用，理论零影响。
+
+### 评测
+
+capture split=test：**8/9 / 0.96**（基线持平；唯一失败出自已知 flaky 池）；flow split=train (6:1:1 seed 1)：**2/4 / soft 0.83**（J 类已知振荡区间上沿；失败项 J3 边界 0.75 + J1 执行方未落文件类，均出自已知方差池，与判定链改动无因果——bench 用例与评分代码 0 处 general 引用）。
+
+---
+
 ## v1.13.0 · 2026-08-21 · MOC 命名统一 `<basename>-moc.md` + 位置收敛（goal/project 去索引化）
 
 **摘要**：领域 MOC 全库统一命名 `_moc.md` 导致 Obsidian 图谱/快速切换/标签页全部显示同名 `_moc` 不可区分；排查发现规格内冲突——goal/project SKILL 各自规定在 03_goals/04_projects 建「目标/项目内索引 `_moc.md`」（真相源 SKILLS_SPEC §10），与 init「MOC 仅在 02_areas」口径并存，MOC 概念泛滥。本版：① 领域 MOC 改名 `<basename>-moc.md`（与主题 MOC `06_wiki/mocs/<domain>-moc.md` 命名统一）；② 嵌套 domain 层级规则澄清（显式输入才建、中间层 hub 合法）；③ goal/project 去索引化（goal.md/_readme.md 是唯一入口，删除 `_moc.md` 产物规定）；④ normalize 新增 MOC 越界检查 + `migrate_moc` 幂等迁移。

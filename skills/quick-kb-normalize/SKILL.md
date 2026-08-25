@@ -1,11 +1,11 @@
 ---
 name: quick-kb-normalize
 description: |
-  批量规整历史笔记。补全 frontmatter、归一标签（对照受控词表）、related→relations 迁移、标题规范化（kebab-case 文件名）、嵌套 domain 重组（v1.4+ regroup）。
+  批量规整历史笔记。补全 frontmatter、归一标签（对照受控词表）、related→relations 迁移、标题规范化（kebab-case 文件名）、嵌套 domain 重组（v1.4+ regroup）、兜底域分流迁移（v1.14.0 triage_general）。
   幂等（多次运行结果一致）+ 可解释（每条改动带 why）+ 可回滚（写 diff 到 _normalize_log/）+ dry-run 预览。
-  触发词（中文）：规整笔记 / normalize / 批量修复 / 迁移 related / 重组领域
-  Triggers (EN): normalize notes / batch fix frontmatter / migrate related field / regroup domains
-version: v1.13.0
+  触发词（中文）：规整笔记 / normalize / 批量修复 / 迁移 related / 重组领域 / 分流 general
+  Triggers (EN): normalize notes / batch fix frontmatter / migrate related field / regroup domains / triage general
+version: v1.14.0
 phase: v1.4
 applies_to: 读写 frontmatter（不改正文）· 跨 inbox / areas / principles
 source_of_truth:
@@ -58,7 +58,7 @@ source_of_truth:
 | 参数 | 必填 | 默认 | 说明 |
 |------|------|------|------|
 | 范围 `scope` | 否 | `all` | `all` / `<domain>` / `legacy`（仅 v0.1 旧笔记） |
-| 操作 `action` | 否 | `run` | `run` / `dry-run`（仅预览不写入） / `rollback`（按 log 回滚） / `regroup`（v1.4+ · 按 domain_taxonomy 重组嵌套路径） / `schema_check`（v1.5 WP3 · 只校验不修改） / `migrate_moc`（v1.13.0 · `02_areas/**/_moc.md` → `<basename>-moc.md` 重命名 + 全库 wikilink 同步） |
+| 操作 `action` | 否 | `run` | `run` / `dry-run`（仅预览不写入） / `rollback`（按 log 回滚） / `regroup`（v1.4+ · 按 domain_taxonomy 重组嵌套路径） / `schema_check`（v1.5 WP3 · 只校验不修改） / `migrate_moc`（v1.13.0 · `02_areas/**/_moc.md` → `<basename>-moc.md` 重命名 + 全库 wikilink 同步） / `triage_general`（v1.14.0 · 按 write-validation-rules §7.1 判定链迁移兜底域笔记，调 manager-agent 推荐） |
 | 项 `items` | 否 | — | 指定具体笔记路径（逗号分隔），覆盖 scope |
 | 跳过 `skip` | 否 | — | 跳过的检查项：`tags / relations / fields / filename` |
 
@@ -143,8 +143,11 @@ quick-kb-normalize action=schema_check [scope=<domain|all|legacy>] [items=<paths
 | 9 | `derived_from` / `derived_to` 非 list（v1.5 WP4） | `derived_from: "[[X]]"`（应为 list） |
 | 10 | frontmatter 值携带行内注释（v1.8.1 · 模板指引照抄污染） | `confidence: 80 # verified`（修复走 `action=run` 步骤 2.1 剥离） |
 | 11 | MOC 位置与命名（v1.13.0）：MOC 类文件（frontmatter `type: moc` 或文件名匹配 `*-moc.md` / `_moc.md`）出现在 `02_areas/` 任意层级与 `06_wiki/mocs/` 之外 | `03_goals/<slug>/_moc.md` → ⚠ 结构漂移：「MOC 越界：<路径>（goal/project 有各自入口文件，建议删除或迁至 02_areas）」（修复走 `action=migrate_moc`） |
+| 12 | 兜底域 draft 约束（v1.14.0）：`02_areas/<default_domain>/`（缺省 general）下笔记 `status ≠ draft` | general 下 `status: active` → ⚠「兜底域笔记应为 draft 待分流」（修复走 `action=triage_general` 或人工确认改 domain；规则同源 write-validation-rules §7） |
 
-> **同源声明（v1.11.0）**：上表 #1/#6/#7/#10 与 `run` 步骤 2.1 的行内注释剥离 / source list→object 迁移共同构成 core 检查集，定义于 [`references/write-validation-rules.md`](../../references/write-validation-rules.md) §5，被 ingest §4.4 写入后复验复用为同源定义。
+> **同源声明（v1.11.0）**：上表 #1/#6/#7/#10 与 `run` 步骤 2.1 的行内注释剥离 / source list→object 迁移共同构成 core 检查集，定义于 [`references/write-validation-rules.md`](../../references/write-validation-rules.md) §5，被 ingest §4.4 写入后复验复用为同源定义；#12（v1.14.0）与 write-validation-rules §7 domain 判定链及 §5 core 集第 5 项同源。
+>
+> **报告尾注（v1.14.0）**：schema_check 报告末尾输出兜底域占比——`02_areas/<default_domain>/` 笔记数 ÷ `02_areas/` 总数，超过阈值（默认 0.3，config `triage.general_alert_threshold` 可覆盖）→ ⚠ 告警行 + 建议运行 `action=triage_general`。
 
 #### 输出格式
 
@@ -273,6 +276,49 @@ quick-kb-normalize action=migrate_moc [dry-run=true]
 
 ---
 
+## 4.7. triage_general action（v1.14.0 · 兜底域分流迁移）
+
+> 把 `02_areas/<default_domain>/`（缺省 general）下「待分流」笔记迁移到按判定链推出的目标 domain。判定链真相源：[`references/write-validation-rules.md`](../../references/write-validation-rules.md) §7.1。幂等：无兜底域笔记或全部留守 → 0 改动。
+
+### 契约
+
+```
+quick-kb-normalize action=triage_general [source_domain=general] [dry-run=true] [items=<paths>]
+```
+
+### 步骤
+
+1. **扫描候选**：`02_areas/<default_domain>/` 顶层笔记（子目录笔记跳过——嵌套 domain 是有意组织，不是兜底堆积）；`items` 指定路径时仅处理指定笔记
+2. **获取推荐**：调 `quick-kb-manager-agent` intent=`triage_general`（返回结构见其 §3.10），按判定链前三级（taxonomy 命中 / 已有目录命中 / tags 推导）得出 target_domain
+3. **留守处理**：推荐结果 `keep: true` / 无推荐 → 保留原位，记 diff log「unclassified: 三级皆不中，留守待人工」（不编造 domain）
+4. **目标目录准备**：目标 domain 目录不存在 → `mkdir -p` + 铺 `<basename>-moc.md` 占位（同 ingest §6 降级表先例；嵌套 domain 只建目标层）
+5. **迁移**：`mv` 文件到 `02_areas/<target_domain>/<slug>.md`。**slug 保持不变**（关键约束：slug-based wikilink 不断，同 §4.5 步骤 4）
+6. **全库 wikilink 同步**：Grep 全库 path-qualified `` `[[02_areas/<default_domain>/<slug>]]` `` → Edit 重写为新路径；源域 `<basename>-moc.md` 的引用同步移除/更新
+7. **frontmatter 更新**：`domain: <default_domain>` → `domain: <target_domain>`；`status: draft → active`（why「triage 迁移，domain 已确定」——draft 本就是待分流的产物，domain 确定后保留 draft 是语义残留；status 非 draft 的存量笔记迁移时同样归一为 active）
+8. **写 diff log**：`_normalize_log/<date>-triage.diff.md`，每条含旧/新路径 + 推荐依据（confidence_basis + reason）；⚠ diff log 内严禁出现裸 `[[...]]` 字面量（同 §4.5 步骤 7 约束）
+9. **post-check**：调 `scripts/check-links.mjs`（若存在）扫死链；失败 → 输出回滚命令并标记 `status: needs_rollback`
+10. **幂等**：兜底域无笔记或全部留守 → 输出「0 改动」直接结束
+
+### 回滚
+
+沿用 §8 rollback（diff log 驱动）；rollback 后路径、domain、status 一并还原。
+
+### 输出示例
+
+```
+✅ triage_general 完成（source_domain=general）
+
+📊 统计：
+   - 扫描兜底域笔记：12 条
+   - 迁移成功：9 条（programming/python 5 / systems 2 / tools 2）
+   - 留守：3 条（三级皆不中，待人工判定）
+
+📝 diff：_normalize_log/2026-08-25-triage.diff.md
+🔗 post-check：check-links.mjs → 0 死链
+```
+
+---
+
 ## 5. 输出示例
 
 ### run 模式
@@ -330,6 +376,7 @@ quick-kb-normalize action=migrate_moc [dry-run=true]
 - 执行了 `related → relations` 迁移（relations 字段被写入）
 - 执行了文件名 kebab-case 改名
 - 执行了 regroup（笔记文件路径变更）
+- 执行了 triage_general（笔记文件路径变更 · v1.14.0）
 
 ### 检测逻辑
 
@@ -464,6 +511,8 @@ quick-kb-normalize action=migrate_moc [dry-run=true]
 - [ ] **run**：source 为 list 格式时合并为 object + 写 diff log（v1.9.3 迁移）；已为 object → 幂等不动
 - [ ] **schema_check**：MOC 位置检查已执行（`type: moc` / `*-moc.md` / `_moc.md` 出现在 02_areas 与 06_wiki/mocs 之外 → ⚠ 越界报告）（v1.13.0）
 - [ ] **migrate_moc**：`_moc.md` 迁移幂等（二次运行 0 改动）；wikilink alias 保留；冲突双正文 → ⚠ 手动合并不自动处理（v1.13.0）
+- [ ] **schema_check**：兜底域 draft 约束 #12 已执行 + 报告尾注含兜底域占比（超阈值 ⚠ 告警）（v1.14.0）
+- [ ] **triage_general**：slug 不变；path-qualified wikilink 全库改写；迁移后 status 归一 active；留守不编造 domain；幂等（二次运行 0 改动）（v1.14.0）
 
 ---
 

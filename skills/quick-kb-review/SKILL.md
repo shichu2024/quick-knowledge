@@ -4,7 +4,7 @@ description: |
   周期复盘 + 知识库健康检查。快照采集、刷新 value.reuse、四维度（knowledge/project/goal/daily）分析、健康报告 + 待办清单。KS 排序、结构演化、deprecated 自动降级推迟 v0.3。
   触发词（中文）：复盘本周 / 复盘这个月 / 年度复盘 / 扫一下孤立笔记 / KB 体检
   Triggers (EN): weekly review / monthly review / kb health check
-version: v1.13.0
+version: v1.14.0
 phase: v0.2
 applies_to: 05_outputs/reviews/<period>/ + 各笔记 value.reuse
 source_of_truth:
@@ -104,6 +104,7 @@ quick-kb-manager-agent(
 - **死链**：调 `quick-kb-manager-agent`（intent=`repair_deadlinks`）
 - **frontmatter 缺失率**：与 `quick-kb-stats` §4.1 同口径——必填字段集为 `title` / `type` / `created` / `updated` / `status` / `confidence`（`maturity` / `value` / `relations` / `context` 为 v0.2+ 字段，对 v0.1 旧笔记不视为缺失）；扫描范围跳过 `98_archive/` 与 `99_system/`（除非显式 scope）；**分母排除含 `capture_type` 的 inbox 采集素材**（v1.9.0，设计上无 type/status）。健康指标表中该指标注明「口径：quick-kb-stats §4.1」，与 stats 计算结果必然相等
 - **inbox 周转**：从 query-log 与 inbox 时间戳估算 captured_at → ingest 间隔
+- **兜底域（default_domain，缺省 general）占比与待分流存量**（v1.14.0）：兜底域笔记数 ÷ `02_areas/` 总数 + 其中 `status: draft` 的待分流条数；占比超 30% 列为知识维度风险项（阈值 config `triage.general_alert_threshold` 可覆盖）→ 建议运行 `quick-kb-normalize action=triage_general`
 
 #### 3.2 value 维度（v0.2 简化版）
 
@@ -272,6 +273,7 @@ quick-kb-manager-agent(
 - [ ] **未用「维度多 / 主题分散 / 数据稀疏 / 周报难归纳」等语义借口退化纯周期 token**
 - [ ] 同周期已有报告文件时，编辑不改名
 - [ ] 健康指标表含全部指标（含阈值对照）
+- [ ] knowledge 维度含兜底域占比与待分流存量（超 30% 列风险项 + triage_general 建议）（v1.14.0）
 - [ ] value.reuse 刷新（二选一 · v1.5 WP8）：
       · 正常态：调 quick-kb-manager-agent（intent=refresh_value）
       · 降级态：手动统计每条笔记的入链数作为 reuse 近似值 + ⚠ 标注「未含查询命中数 + Connect 推荐频次」

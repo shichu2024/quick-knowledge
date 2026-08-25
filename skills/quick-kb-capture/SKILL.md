@@ -4,7 +4,7 @@ description: |
   低摩擦采集：把用户的想法、网页 URL、PDF、会议转写、AI 对话、阅读笔记快速写入 inbox。v0.2 接入 defuddle 抓取干净正文；新增 PDF/会议/AI 对话/阅读四类源；主动提醒（memory 事件）推迟 v0.3。v1.2 新增「AI 润色提议」步骤——对用户手敲输入主动生成扩写版，三选一确认。v1.11 新增 ai-article 源类型：AI 在对话中产出结构化知识文章（教程/深度分析/技术总结，标题+章节+成篇）时主动提示入库，确认后直写 01_resources/02_areas，未确认落 inbox。
   触发词（中文）：记一下 / 快记 / 收藏这个 / 抓这个网页 / 保存这段 / 记个想法 / 抓 PDF / 保存对话
   Triggers (EN): capture this / save this / clip this page / quick note / capture pdf
-version: v1.13.0
+version: v1.14.0
 phase: v1.2
 applies_to: 00_inbox/
 source_of_truth:
@@ -337,6 +337,7 @@ partial: {{true|false}}
 **[Y] 快速入库分支**：
 
 1. 去向判定：教程 / 深度分析 / 方法论 → `concept` → `02_areas/<domain>/`；技术总结 / 参考资料 / 工具清单 → `resource` → `01_resources/<category>/`（推断失败 → concept 路径）
+   - **domain/category 推断按 write-validation-rules §7.1 判定链穷尽（taxonomy → 已有目录 → tags/title 强推导）**；低置信落 default_domain（如 general）→ 该笔记强制 `status: draft` + 反馈行加「⚠ 待分流」（v1.14.0 硬约束）
 2. frontmatter 按 v0.2 完整集生成（复用 ingest §2.5 模板）；`source` 写 `{type: ai_generated, capture_type: ai-article}`；不写 `source.note`（无 inbox 源）
 3. 写入前校验引用 [`write-validation-rules.md`](../../references/write-validation-rules.md) 全集（与 ingest §2.8 同源）
 4. 死链约束照常（顶部硬约束）：正文中 `[[X]]` 目标必须已存在，否则降级 `**X**` 加粗

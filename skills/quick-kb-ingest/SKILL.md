@@ -4,7 +4,7 @@ description: |
   把 inbox 素材正式入库为 01_resources/<category>/（resource）或 02_areas/<domain>/（concept）笔记：调 quick-kb-research-agent 抽取原子观点、补全 v0.2 完整 frontmatter（含 relations/context/value.reuse）、链接原始素材、给置信度初值、调 quick-kb-manager-agent + quick-kb-memory-agent 做冲突检测。
   触发词（中文）：处理 inbox / 入库 / 把这条归档 / 消化这条 / 这条入库
   Triggers (EN): process inbox / ingest this / promote this note
-version: v1.13.0
+version: v1.14.0
 phase: v0.2
 applies_to: 00_inbox/ → 02_areas/ / 01_resources/
 source_of_truth:
@@ -98,6 +98,8 @@ source_of_truth:
 
 > **嵌套 domain 决策（v1.4+）**：当 `kb.config.yaml.domain_taxonomy` 命中顶层 key 且能从 tags/title 推断子域 → 推断嵌套 domain（`key/sub`）；未配置 taxonomy 或未命中 → 单层（向后兼容）。
 
+> **domain/category 判定链（v1.14.0）**：目录推断按 [`write-validation-rules.md`](../../references/write-validation-rules.md) §7.1 顺序穷尽（taxonomy → 已有目录 → tags/title 强推导）后才允许落 `default_domain`；落兜底域的笔记**强制 `status: draft`** + 报告「⚠ 待分流」——严禁跳过推导直接读 default_domain。
+
 #### 2.3 原子化拆分
 
 - 抽取得到 N 条原子笔记 → 拆为 N 条
@@ -181,6 +183,7 @@ source:                               # v1.9.3 · object 格式（对齐 frontma
 2. relations 类型化：dict 格式、键 ∈ schema enum（禁止自创关系类型）、值为 wikilink 字符串数组
 3. wikilink 目标存在性：`source.note` / relations / 正文中的 `[[X]]` 目标必须在 vault 文件名索引内；不存在 → 降级为普通文本或加粗
 4. 校验失败的修正项记入步骤 6 处理报告；无文件索引可查时 ⚠ 标注「未执行写入前校验」
+5. domain 兜底校验（v1.14.0）：本次写入若命中 `default_domain`（如 general）→ 该笔记 `status` 必须为 `draft`，且报告含「⚠ 待分流」条目；违反 → 当场改 status 后落盘（write-validation-rules §7）
 
 ### 步骤 3 · 冲突检测与主动提醒（V2 关键）
 
@@ -277,6 +280,7 @@ source:                               # v1.9.3 · object 格式（对齐 frontma
 | 2 | `source` 为 object 格式 | list 格式 → 合并为 object（v1.9.3 口径） |
 | 3 | `tags` inline array + 对照 tags_vocabulary | block list / 词表外变体 → 转换/修正 |
 | 4 | v0.2 必填字段齐全 | 缺失 → 按规则补；不可推断 → `status: draft` |
+| 5 | domain 兜底落位（v1.14.0） | 落 default_domain 的笔记 `status ≠ draft` → 改 `draft` + 报告记「⚠ 待分流」 |
 
 - 修正项逐条记入步骤 6 报告「复验修正」段；**无修正也必须写「复验通过 0 修正」**（显式 0 计数 > 正向勾选，v1.10.1「清单存在但不跑」教训）
 - 死链不在此表——顶部写入硬约束已在落盘前拦截，复验只兜 schema/格式类漂移

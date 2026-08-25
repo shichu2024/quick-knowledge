@@ -1,8 +1,8 @@
 ---
-version: v1.11.0
-updated: 2026-08-19
-phase: v1.8 写入校验层 + v1.10.0 语言一致性 + v1.11.0 写入后复验
-applies_to: 所有写入型技能（ingest / capture / connect / daily / goal / project / import）落盘前的 frontmatter 与 wikilink 校验；§5 写入后复验（ingest）；§6 语言一致性适用于全部技能的生成内容与报告输出
+version: v1.14.0
+updated: 2026-08-25
+phase: v1.8 写入校验层 + v1.10.0 语言一致性 + v1.11.0 写入后复验 + v1.14.0 domain 判定链
+applies_to: 所有写入型技能（ingest / capture / connect / daily / goal / project / import）落盘前的 frontmatter 与 wikilink 校验；§5 写入后复验（ingest）；§6 语言一致性适用于全部技能的生成内容与报告输出；§7 domain/category 判定链适用于推断落位目录的入库技能（ingest / capture ai-article 快速入库）
 source_of_truth:
   - references/frontmatter-schema-v1.json
   - references/wikilink-conventions.md
@@ -79,8 +79,9 @@ source_of_truth:
 | 2 | `source` 为 object 格式 | list 格式 → 合并为 object（v1.9.3 口径） |
 | 3 | `tags` inline array + 对照 tags_vocabulary | block list / 词表外变体 → 转换/修正 |
 | 4 | v0.2 必填字段齐全 | 缺失 → 按规则补；不可推断 → `status: draft` |
+| 5 | domain 兜底落位（v1.14.0） | 落 default_domain（如 `02_areas/general/`）的笔记 `status ≠ draft` → 改 `draft` + 报告记「⚠ 待分流」（见 §7） |
 
-> **单一真相源声明**：本 core 集 4 项与 normalize `run` 检查项（步骤 2.1 行内注释剥离 / source list→object 迁移）及 `schema_check` 检查项 #1/#6/#7/#10 同源——定义以本文件为准，ingest §4.4 与 normalize 均复用，不另行维护副本。死链不在本集（§2 写入前已拦截）。
+> **单一真相源声明**：本 core 集与 normalize `run` 检查项（步骤 2.1 行内注释剥离 / source list→object 迁移）及 `schema_check` 检查项 #1/#6/#7/#10/#12 同源——定义以本文件为准，ingest §4.4 与 normalize 均复用，不另行维护副本。死链不在本集（§2 写入前已拦截）。
 
 ---
 
@@ -124,10 +125,41 @@ kb.config.yaml.language（显式库语言，最高）
 
 ---
 
-## 7. 版本历史
+## 7. domain/category 判定链（v1.14.0）
+
+> 入库技能（ingest / capture ai-article 快速入库）推断笔记落位目录时遵循本节。`domain`（02_areas concept 路径）与 `category`（01_resources resource 路径）共用同一条链——两者是同构的「目录推断」问题。背景：此前 spec 未规定低置信 domain 的处理，执行方静默读 `default_domain: general` 落兜底域，致 `02_areas/general/` 成为垃圾桶目录。
+
+### 7.1 判定优先级
+
+```
+① kb.config.yaml.domain_taxonomy 命中（tags/title 显式命中 key 或 key/sub）
+  → ② 02_areas/（或 01_resources/）已有目录名命中（含嵌套父目录）
+  → ③ tags/title 强推导（允许新建 domain：自动建目录 + <basename>-moc.md，先例见 ingest §6 降级表；
+     嵌套规则同 v1.4+——仅对用户显式输入的 domain 建中间层）
+  → ④ 低置信兜底：kb.config.yaml.default_domain（默认 general）
+     —— 落兜底域的笔记【强制 status: draft】，且处理报告必须含：
+        「⚠ 待分流：<slug> 落 default_domain（<domain>），建议后续 quick-kb-normalize action=triage_general」
+```
+
+### 7.2 边界
+
+- 「低置信」= tags 为空/全不在词表 且 title 无可推导领域词——**必须穷尽 ①②③ 后才允许进 ④**，严禁跳过推导直接读 default_domain（静默落 general 是本节要消灭的形态）
+- 兜底域不是垃圾桶：draft 标记 + ⚠ 报告 + normalize schema_check #12 巡检 + normalize `action=triage_general` 迁移，四层防线保证兜底笔记可追溯、可分流
+- 用户显式指定 domain 时本链不介入（用户输入优先于一切推断）
+
+### 7.3 自检
+
+- [ ] 目录推断已按 §7.1 顺序穷尽 ①②③，才使用 default_domain
+- [ ] 落兜底域的笔记 status 为 draft
+- [ ] 处理报告含「⚠ 待分流」条目
+
+---
+
+## 8. 版本历史
 
 | 版本 | 日期 | 变更 |
 |------|------|------|
 | v1.8.0 | 2026-08-14 | 初始版本：frontmatter 最小校验集 / wikilink 目标存在性 / 失败处理三段式 |
 | v1.10.0 | 2026-08-16 | 新增 §6 语言一致性：库语言判定优先级 / 适用与豁免对象 / slug 语言形态 |
 | v1.11.0 | 2026-08-19 | 新增 §5 写入后复验（core 检查集）：行内注释 / source list→object / tags 词表与格式 / 必填字段；与 normalize 检查项及 schema_check 同源 |
+| v1.14.0 | 2026-08-25 | 新增 §7 domain/category 判定链：四级优先级 + 兜底域强制 draft + ⚠ 待分流报告；§5 core 集扩第 5 项（domain 兜底落位），同源声明补 schema_check #12 |
